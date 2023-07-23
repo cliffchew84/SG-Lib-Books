@@ -1,0 +1,50 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<div class="container-fluid">
+        <div class="col col-sm-12 p-4"> 
+            <h2>Your Favourite SG Library Books</h2>
+            <p>Log in into your NLB Account to get a summary of your favourite
+            SG library books in one view.</p>
+        </div>
+        <div class="row justify-content-center" style="text-align: center;">
+        <div class="container col-md-6 m-5 p-8">
+            <form action="/" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id='username' name='username' required>
+                </div>
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id='password' name='password'>
+                <div class="mb-3">
+
+                </div>
+                <button type="submit" class="btn btn-secondary">Register</button>
+            </form>
+            {% if register_invalid %}
+            <p style="margin-top: 0.5em; color: red;">User is already registered.</p>
+            {% endif %}
+        </div>
+
+        <div class="container col-md-6 m-5 p-8">
+            <form action="/login" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id='username' name='username' required>
+                </div>
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id='password' name='password'>
+                <div class="mb-3">
+
+                </div>
+                <button type="submit" class="btn btn-secondary">Login</button>
+            </form>
+            {% if login_invalid %}
+            <p style="margin-top: 0.5em; color: red;">We are unable to find your
+            account. You either have the wrong username, password, or have not
+            registered with us.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% include 'footer.html' %}

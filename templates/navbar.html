@@ -1,0 +1,72 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" aria-controls="navbarNav" 
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if not username %}
+                <a class="navbar-brand" href="/{{username}}">SG Library Books</a>
+                {% endif %}
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                {% if username %}
+                <li class="nav-item">
+                    <a class="nav-link" 
+                        href="/{{username}}"><b>Hi {{username}}</b></a>
+                </li>
+                <li class="nav-item dropdown">
+
+                <a class="nav-link dropdown-toggle" 
+                    href="#" id="navbarDropdown" 
+                    role="button" data-bs-toggle="dropdown" 
+                    aria-expanded="false">{{ library|upper|default("All
+                    Libraries", true) }}</a>
+
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li>
+                        <a class="dropdown-item" 
+                            href="/{{username}}">All Libraries</a>
+                    </li>
+
+                    {% for lib in all_unique_lib %}
+                    <!-- Adding stuff --> 
+                    <li>
+                        <a class="dropdown-item" 
+                           href="/{{username}}/lib/{{lib|lower}}">{{lib}}</a>
+                    </li>
+                    {% endfor %}
+
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href='/{{username}}/yourbooks'>Your Books</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href='/{{username}}/search/'>Search NLB</a>
+            </li>
+
+            <li class="nav-item">
+
+                <form class="form-inline" action="/update_user_books/{{username}}" method="POST">
+                <button type="submit" class="btn btn-secondary">Update Avails</button>
+                </form>
+
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href='/logout'>Logout</a>
+            </li>
+            </ul>
+            <input class="form-control" id="myInput" type="text"
+            placeholder="Search through your books...">
+
+            {% else %}
+
+            {% endif %}
+        </div>
+    </div>
+</nav>

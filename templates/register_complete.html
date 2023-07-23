@@ -1,0 +1,21 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<style>
+    .container {
+        margin-top: 1em;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row justify-content-center" style="text-align: center;">
+        <div class="col col-sm-10" style="margin: 3.5em 3.5em;"> 
+        <div class="container">
+            <h1>Congrats!</h1>
+            <h2>Your account {{ username }}'s registeration is successful</h2>
+        </div>
+    </div>
+</div>
+{% include 'footer.html' %}

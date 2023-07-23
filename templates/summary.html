@@ -1,0 +1,54 @@
+<div class="container-fluid" style="padding-bottom: 60px;">
+    <div class="row justify-content-center" style="text-align: center;">
+        <div class="col col-sm-12" style="margin: 1.5em 1.5em;"> 
+
+            {%if all_unique_books|length == 0 %}
+            
+            <p>Have you updated your favourite NLB book list with us? Or have
+            you not bookmarked any books on your NLB account?</p>
+
+            {% else %}
+
+            <p class="col-md-12 px-md-5">
+                <b class='word'> 
+                    {{all_avail_books|length}} / {{all_unique_books|length}} of
+                    the books you saved are available.
+                </b>
+            </p> 
+
+            {% endif %}
+
+            <div class="row justify-content-center align-items-center col-md-12
+                mx-auto"> 
+                
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col col-sm-6" style="margin: 1.5em 0.5em 2.5em 0.5em;"> 
+                    <h4>Summary of Top 5 Libraries</h4>
+                    <table class="table table-hover" style="margin: auto; width: 80%;">
+                        <thead>
+                            <tr>
+                                <th>Library</th>
+                                <th>Available Books</th>
+                            </tr>
+                        </thead>
+
+                        {% for lib in lib_book_summary %}
+                        <tbody>
+                            <tr>
+                                <td>{{ lib['Library'] }}</td>
+                                <td>{{ lib['Count'] }}</td>
+                            </tr>
+                        </tbody>
+                        {% endfor %}
+                    </table>
+                </div>
+
+                {% if unique_library %}
+                <br>
+                <p> You selected: {{ unique_lib }} </p>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

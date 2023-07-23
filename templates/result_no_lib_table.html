@@ -1,0 +1,60 @@
+    <div class="container-fluid">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-md-12 mx-auto">
+                <div class="table-responsive">
+                <table class="table table-hover"> 
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Number</th>
+                            <th>Status [Due]</th>
+                            <th>UpdatedAt</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for data in api_data %}
+
+                        <tr>
+                        {% for a in data %}
+                           
+                            {% if a == "UpdateTime" %}
+
+                            {% elif a != "BranchName" %}
+
+                            {% if data[a]|int !=0 %}
+
+                            <td style="vertical-align: middle;">
+                                <form action="/update_book/{{data[a]}}" method="POST">
+                                    <button type="submit" class="btn
+                                        btn-secondary">{{ data['UpdateTime'] }}</button>
+                                </form>
+                            </td>
+                            
+                            {% elif a == "TitleName" %}
+                            {% set TitleName, BID = data[a].split(' | ') %}
+
+                            <td style="vertical-align: middle;">
+                                <a
+                                    href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                                    class="button" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer">{{ TitleName }}</a>
+
+                            {% else %}
+                            
+                            <td style="vertical-align: middle;">{{ data[a] }}</td>
+                            
+                            {% endif %}
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>    

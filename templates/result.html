@@ -1,0 +1,36 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+{% include 'summary.html' %}
+
+<div class="container-fluid">
+    <div class="row justify-content-center" style="text-align: center;">
+
+            {% if not library %} 
+                <h4>Your books in <b style="background-color:
+                        lightgrey; ">all SG libraries</b></h4>
+            
+                {% include 'result_table.html' %}
+
+            {% else %}
+                <h4>Your books in <b style="background-color:
+                        lightgrey; ">{{ library|title }}</b></h4> 
+
+                {% include 'result_no_lib_table.html' %}
+
+            {% endif %}            
+            
+        </div>
+    </div>
+
+    
+    <script>
+    $(document).ready(function(){
+      $("#myInput").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#myTable tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });
+    </script>
+        {% include 'footer.html' %}
