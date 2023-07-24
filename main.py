@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
 # This is the temp database
-import schemas, process, nlb_rest_api, m_db
+import process, nlb_rest_api, m_db
 
 # Set up user authentication flows
 from passlib.context import CryptContext
@@ -164,7 +164,7 @@ def login(request: Request,
 @app.get("/{username}/yourbooks")
 async def show_current_books(request: Request,
                              db = Depends(get_db),
-                             username: schemas.User = Depends(manager)):
+                             username = Depends(manager)):
 
     if username:
         # Get all the books linked to the user. This is the complicated query
@@ -258,7 +258,7 @@ def process_user_book_data(db, username: str):
 @app.get('/{username}')
 async def show_books_avail(request: Request,
                            db = Depends(get_db),
-                           username: schemas.User = Depends(manager)):
+                           username = Depends(manager)):
     
     if username:
         response = process_user_book_data(db=db, username=username.get("UserName"))
@@ -289,7 +289,7 @@ async def show_books_avail(request: Request,
 async def show_books_avail_by_lib(request: Request, 
                                   library: Optional[str],
                                   db = Depends(get_db),
-                                  username: schemas.User = Depends(manager)):
+                                  username = Depends(manager)):
 
     if username:
         response = process_user_book_data(db=db, username=username.get("UserName"))
@@ -358,7 +358,7 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
 async def update_book(request: Request, 
                       BID: str,
                       db = Depends(get_db),
-                      username: schemas.User = Depends(manager)):
+                      username = Depends(manager)):
 
     # delete records
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
@@ -390,7 +390,7 @@ def update_user_books(db, username):
 async def update_user_current_books(request: Request,
                                     background_tasks: BackgroundTasks,
                                     db = Depends(get_db), 
-                                    username: schemas.User = Depends(manager)
+                                    username = Depends(manager)
                                     ):
     background_tasks.add_task(update_user_books, db, username) 
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
@@ -401,7 +401,7 @@ async def api_book_ingest(request: Request,
                           BID: str,
                           book_search: Optional[str] = None,
                           db = Depends(get_db), 
-                          username: schemas.User = Depends(manager)):
+                          username = Depends(manager)):
 
     # Makes API to bk info and bk avail and ingest the data into DB
     m_db.mg_add_user_book(db=db, 
@@ -424,7 +424,7 @@ async def api_book_ingest(request: Request,
 async def delete_book(request: Request, 
                       BID: str,
                       db = Depends(get_db),
-                      username: schemas.User = Depends(manager)):
+                      username = Depends(manager)):
 
     # delete records
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
@@ -440,7 +440,7 @@ async def delete_book(request: Request,
 async def show_search_books(request: Request,
                             book_search: Optional[str] = None,
                             db = Depends(get_db),
-                            username: schemas.User = Depends(manager)): 
+                            username = Depends(manager)): 
 
     text_output = "Please search the title of the book that you are interested."
     final_response = list()
