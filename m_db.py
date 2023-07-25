@@ -1,14 +1,12 @@
 from pymongo import mongo_client
-from dotenv import load_dotenv
 from typing import Dict
 import os
 
 
 # Load environment variables
-load_dotenv()
 
 # MongoDB credentials
-MONGO_PASSWORD=os.getenv("MONGO_PW")
+MONGO_PASSWORD=os.environ["mong_pw"]
 database_url = f"mongodb+srv://cliffchew84:{MONGO_PASSWORD}@cliff-nlb.t0whddv.mongodb.net/?retryWrites=true&w=majority"
 
 
