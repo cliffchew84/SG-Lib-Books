@@ -2,13 +2,10 @@ import os
 import requests
 import pendulum
 from typing import Dict, List
-from dotenv import load_dotenv
 
-load_dotenv()
-
-APPLICATION_ID=os.getenv('NLB_REST_APP_ID')
-API_KEY=os.getenv('NLB_REST_API_KEY')
-
+# Add os.environ for authentication
+APPLICATION_ID=os.environ['nlb_rest_app_id']
+API_KEY=os.environ['nlb_rest_api_key']
 
 def authenticate_into_nlb_rest(app_id, api_key):
     return { 'X-App-Code': app_id, 'X-API-KEY': api_key }
