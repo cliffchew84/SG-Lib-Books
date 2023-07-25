@@ -3,5 +3,5 @@ fastapi_login==1.7.3
 passlib==1.7.4
 pendulum==2.1.2
 pymongo==4.4.1
-python-dotenv==1.0.0
 requests==2.27.1
+uvicorn==0.20.0
