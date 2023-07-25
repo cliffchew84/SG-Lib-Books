@@ -11,20 +11,17 @@ import process, nlb_rest_api, m_db
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
-from dotenv import load_dotenv
 from typing import Optional
 import urllib.parse
 import os
 
 
 # Load environment variables
-load_dotenv()
-
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.environ["mongo_secret_key"]
 ACCESS_TOKEN_EXPIRY = 360
 
-APPLICATION_ID=os.getenv('NLB_REST_APP_ID')
-API_KEY=os.getenv('NLB_REST_API_KEY')
+APPLICATION_ID=os.environ['nlb_rest_api_id']
+API_KEY=os.environ['nlb_rest_api_key']
 
 manager = LoginManager(SECRET_KEY, token_url="/login", use_cookie=True)
 manager.cookie_name = "auth"
