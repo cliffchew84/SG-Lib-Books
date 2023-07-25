@@ -20,7 +20,7 @@ import os
 SECRET_KEY = os.environ["mongo_secret_key"]
 ACCESS_TOKEN_EXPIRY = 360
 
-APPLICATION_ID=os.environ['nlb_rest_api_id']
+APPLICATION_ID=os.environ['nlb_rest_app_id']
 API_KEY=os.environ['nlb_rest_api_key']
 
 manager = LoginManager(SECRET_KEY, token_url="/login", use_cookie=True)
