@@ -6,7 +6,7 @@ import os
 # Load environment variables
 
 # MongoDB credentials
-MONGO_PASSWORD=os.environ["mong_pw"]
+MONGO_PASSWORD=os.environ["mongo_pw"]
 database_url = f"mongodb+srv://cliffchew84:{MONGO_PASSWORD}@cliff-nlb.t0whddv.mongodb.net/?retryWrites=true&w=majority"
 
 
