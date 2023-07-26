@@ -335,11 +335,14 @@ def bk_avail_api_call_n_db_ingest(db, bid_no):
     # Make API calls to available API and ingest into DB 
     # Availability is across libraries, so we loop through all libraries
 
+    # Get book availability via NLB API
     bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo/", input=bid_no)
-
+ 
     for book in nlb_rest_api.process_rest_all_lib_avail(bk):
         books_avail = nlb_rest_api.process_single_bk_avail(book)
         books_avail.update({"BID": str(bid_no)})
+
+        # Ingest the books accordingly
         m_db.mg_add_book_avail(db=db, books_avail=books_avail)
 
 
