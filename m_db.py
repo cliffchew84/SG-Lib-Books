@@ -13,7 +13,7 @@ database_url = f"mongodb+srv://cliffchew84:{MONGO_PASSWORD}@cliff-nlb.t0whddv.mo
 def connect_mdb():
     return mongo_client.MongoClient(database_url, serverSelectionTimeoutMS=5000)
 
-
+# Adds
 def mg_add_user(db, username: str, hashed_pw: str):
     return db['users'].insert_one({'UserName': username, 'HashedPassword': hashed_pw})
 
@@ -35,7 +35,27 @@ def mg_add_book_info(db, books_info_input: Dict):
     else:
         return db.books_info.insert_one(books_info_input)
 
+# Deletes
+def mg_delete_bk_avail_records(db, bid_no):
+    return db.books_avail.delete_many({'BID': bid_no})
 
+def mg_delete_bk_info_records(db, bid_no):
+    """ When multiple users use the app, I don't think I need / want to delete this.
+        This can be kept, but future inserts will need to account for such a variable.
+    """
+    return db.books_info.delete_one({'BID': bid_no})
+
+
+def mg_delete_bk_user_records(db, bid_no):
+    return db.user_books.delete_one({ 'BID': bid_no } )
+
+# Updates
+## These are the most tricky
+def mg_update_bk_avail_records(db, bid_no):
+
+    return None
+
+# Queries
 def mg_query_user_books_w_bid(db, username: str):
     """ To delete books at scale """
     output = []
@@ -111,16 +131,3 @@ def mg_query_user_books(db, username: str):
 
     return [i for i in user_books]
 
-
-def mg_delete_bk_avail_records(db, bid_no):
-    return db.books_avail.delete_many({'BID': bid_no})
-
-def mg_delete_bk_info_records(db, bid_no):
-    """ When multiple users use the app, I don't think I need / want to delete this.
-        This can be kept, but future inserts will need to account for such a variable.
-    """
-    return db.books_info.delete_one({'BID': bid_no})
-
-
-def mg_delete_bk_user_records(db, bid_no):
-    return db.user_books.delete_one({ 'BID': bid_no } )

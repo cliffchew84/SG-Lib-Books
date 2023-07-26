@@ -19,15 +19,20 @@ def process_all_avail_bks_by_lib(response):
     for book in response:
         if book['StatusDesc'] == "Available":
             all_avail_bks_by_lib.append(book)
+
+    unique_avail_bks_by_lib = list(
+            dictionary for index, dictionary in enumerate(all_avail_bks_by_lib)
+    if dictionary not in all_avail_bks_by_lib[index + 1:]
+            ) 
     
-    return all_avail_bks_by_lib
+    return unique_avail_bks_by_lib
 
 
 def process_lib_book_summary(all_unique_lib, all_avail_bks_by_lib):
     # Creating book summary
     lib_book_summary = []
     for lib in all_unique_lib:
-        lib_count = {"Library": lib}
+        lib_count = { "Library": lib }
         book_count = 0
         
         for book in all_avail_bks_by_lib:

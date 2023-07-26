@@ -304,9 +304,13 @@ async def show_books_avail_by_lib(request: Request,
             if library in book['BranchName'].lower():
                 output.append(book)
     
+        lib_avail = len(process.process_all_avail_books(output))
+        lib_all = len(process.process_all_unique_books(output))
+        
         unique_lib = None
         if len(set([i['BranchName'] for i in response])) == 1:
             unique_lib = output[0]['BranchName']
+            
 
         return templates.TemplateResponse("result.html", {
             "request": request,
@@ -318,7 +322,9 @@ async def show_books_avail_by_lib(request: Request,
             'all_unique_lib': all_unique_lib,
             'unique_lib': unique_lib,
             'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary
+            'lib_book_summary': lib_book_summary,
+            'lib_avail': lib_avail,
+            'lib_all': lib_all
             })
  
     else:
@@ -329,11 +335,14 @@ def bk_avail_api_call_n_db_ingest(db, bid_no):
     # Make API calls to available API and ingest into DB 
     # Availability is across libraries, so we loop through all libraries
 
+    # Get book availability via NLB API
     bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo/", input=bid_no)
-
+ 
     for book in nlb_rest_api.process_rest_all_lib_avail(bk):
         books_avail = nlb_rest_api.process_single_bk_avail(book)
         books_avail.update({"BID": str(bid_no)})
+
+        # Ingest the books accordingly
         m_db.mg_add_book_avail(db=db, books_avail=books_avail)
 
 
