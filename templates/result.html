@@ -6,14 +6,15 @@
     <div class="row justify-content-center" style="text-align: center;">
 
             {% if not library %} 
-                <h4>Your books in <b style="background-color:
-                        lightgrey; ">all SG libraries</b></h4>
+                <h4><b style="background-color:
+                        lightgrey; ">All Libraries</b></h4>
             
                 {% include 'result_table.html' %}
 
             {% else %}
-                <h4>Your books in <b style="background-color:
-                        lightgrey; ">{{ library|title }}</b></h4> 
+                <h4><b style="background-color: 
+                        lightgrey; ">{{ library|title }}</b> - [{{ lib_avail }} /
+                        {{ lib_all }}]</h4> 
 
                 {% include 'result_no_lib_table.html' %}
 
