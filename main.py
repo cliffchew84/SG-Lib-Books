@@ -388,7 +388,8 @@ async def update_book(request: Request,
     bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
 
     # WIP - Update book
-    mix_p.event_update_book(username.get("UserName"), BID)
+    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+    mix_p.event_update_book(username.get("UserName"), titlename)
 
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
@@ -441,7 +442,9 @@ async def api_book_ingest(request: Request,
     # WIP - Add Book
     mix_p.event_add_book(username.get("UserName"), BID)
     mix_p.user_change_book_count(username.get("UserName"), 1)
-    mix_p.user_book_list_add(username.get("UserName"), [BID])
+
+    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+    mix_p.user_book_list_add(username.get("UserName"), [titlename])
     
     if book_search:
         return RedirectResponse(f"/{username.get('UserName')}/search/{book_search}",
@@ -459,6 +462,8 @@ async def delete_book(request: Request,
                       username = Depends(manager)):
 
     # delete records
+    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
     m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
     m_db.mg_delete_bk_user_records(db=db, bid_no=BID)
@@ -466,7 +471,8 @@ async def delete_book(request: Request,
     # WIP - Delete book
     mix_p.event_delete_book(username.get("UserName"), BID)
     mix_p.user_change_book_count(username.get("UserName"), -1)
-    mix_p.user_book_list_remove(username.get("UserName"), BID)
+    
+    mix_p.user_book_list_remove(username.get("UserName"), titlename)
 
     return RedirectResponse(f"/{username.get('UserName')}/yourbooks", 
                             status_code=status.HTTP_302_FOUND)

@@ -51,9 +51,9 @@ def mg_delete_bk_user_records(db, bid_no):
 
 # Updates
 ## These are the most tricky
-def mg_update_bk_avail_records(db, bid_no):
+def mg_query_book_title_by_bid(db, bid_no):
 
-    return None
+    return db.books_info.find_one({"BID": str(bid_no)}).get("TitleName")
 
 # Queries
 def mg_query_user_books_w_bid(db, username: str):
