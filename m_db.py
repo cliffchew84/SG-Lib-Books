@@ -35,6 +35,17 @@ def mg_add_book_info(db, books_info_input: Dict):
     else:
         return db.books_info.insert_one(books_info_input)
 
+
+def mg_insert_status(db, username: str):
+    return db.user_status.insert_one({'UserName': username, "status": True})
+
+
+def mg_delete_status(db, username: str):
+    return db.user_status.delete_one({'UserName': username})
+
+def mg_query_status(db, username: str):
+    return db.user_status.find_one({"UserName": username})
+
 # Deletes
 def mg_delete_bk_avail_records(db, bid_no):
     return db.books_avail.delete_many({'BID': bid_no})
@@ -49,13 +60,11 @@ def mg_delete_bk_info_records(db, bid_no):
 def mg_delete_bk_user_records(db, bid_no):
     return db.user_books.delete_one({ 'BID': bid_no } )
 
-# Updates
-## These are the most tricky
+# Queries
 def mg_query_book_title_by_bid(db, bid_no):
 
     return db.books_info.find_one({"BID": str(bid_no)}).get("TitleName")
 
-# Queries
 def mg_query_user_books_w_bid(db, username: str):
     """ To delete books at scale """
     output = []

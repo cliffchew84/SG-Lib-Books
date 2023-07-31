@@ -282,6 +282,10 @@ async def show_books_avail(request: Request,
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
         lib_book_summary = process.process_lib_book_summary(all_unique_lib,
                                                     all_avail_bks_by_lib) 
+        
+        update_status = None
+        if m_db.mg_query_status(db=db, username=username.get("UserName")):
+            update_status = "Updating In Progress... Please refresh to update!"
 
         return templates.TemplateResponse("result.html", {
             "request": request,
@@ -291,7 +295,8 @@ async def show_books_avail(request: Request,
             'all_avail_books': all_avail_books,
             'all_unique_lib': all_unique_lib,
             'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary
+            'lib_book_summary': lib_book_summary,
+            'status': update_status
             })
     else:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
@@ -313,6 +318,10 @@ async def show_books_avail_by_lib(request: Request,
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
         lib_book_summary = process.process_lib_book_summary(all_unique_lib,
                                                     all_avail_bks_by_lib) 
+
+        update_status = None
+        if m_db.mg_query_status(db=db, username=username.get("UserName")):
+            update_status = "Updating In Progress... Please refresh to update!"
 
         output = []
         for book in response:
@@ -341,7 +350,8 @@ async def show_books_avail_by_lib(request: Request,
             'avail_books': all_avail_bks_by_lib,
             'lib_book_summary': lib_book_summary,
             'lib_avail': lib_avail,
-            'lib_all': lib_all
+            'lib_all': lib_all,
+            'status': update_status
             })
  
     else:
@@ -399,6 +409,8 @@ def update_user_books(db, username):
 
     user_bids = m_db.mg_query_user_books_w_bid(
             db=db, username=username.get("UserName"))
+    
+    m_db.mg_insert_status(db, username=username.get("UserName"))
 
     if user_bids:
         for ubid in user_bids:
@@ -409,6 +421,10 @@ def update_user_books(db, username):
             # Don't need to make book info API call. They should be in the db
             # Make API call to available and ingest data into database
             bk_avail_api_call_n_db_ingest(db=db, bid_no=ubid.get("BID"))
+ 
+    mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
+
+    m_db.mg_delete_status(db, username=username.get("UserName"))
 
     return {"message": "User's books updated!"}
 

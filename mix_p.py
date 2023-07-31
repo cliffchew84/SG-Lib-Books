@@ -59,6 +59,10 @@ def event_update_book(user_id, bid, mp=mp):
     mp.track(user_id, 'Update Book', { 'BID': bid,})
 
 
+def event_update_all_books(user_id, book_count, mp=mp):
+    mp.track(user_id, 'Update All Books', { 'Book Count': book_count,})
+
+
 def event_search_book(user_id, keyword, mp=mp):
     mp.track(user_id, 'Search Book', { 'Keyword': keyword })
 

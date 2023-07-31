@@ -4,17 +4,28 @@
 
             {% if all_unique_books|length == 0 %}
             
-            <p>Have you updated your favourite NLB book list with us? Or have
-            you not bookmarked any books on your NLB account?</p>
+            <p>You have not saved any books with us yet!? Go to the Search page
+            and add a few books to check their availability right now!</p>
 
             {% else %}
-
-            <p class="col-md-12 px-md-5">
-                <b class='word'> 
-                    {{all_avail_books|length}} / {{all_unique_books|length}}
-                    of all books are available.
-                </b>
-            </p> 
+            
+                {% if status %}
+                    <p class="col-md-12 px-md-5">
+                        <b class='word'> 
+                            {{all_avail_books|length}} / {{all_unique_books|length}}
+                            of all books are available.
+                        </b> 
+                    </p>
+                    <p class='word text-danger'>{{ status }} </p> 
+                {% else %}
+            
+                    <p class="col-md-12 px-md-5">
+                        <b class='word'> 
+                            {{all_avail_books|length}} / {{all_unique_books|length}}
+                            of all books are available.
+                        </b>
+                    </p> 
+                {% endif %}
 
             {% endif %}
 
