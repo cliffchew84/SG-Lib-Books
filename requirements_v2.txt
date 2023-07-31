@@ -6,7 +6,7 @@ charset-normalizer==2.0.12
 click==8.1.6
 exceptiongroup==1.1.2
 fastapi==0.89.1
-fastapi-login==1.8.3
+fastapi-login
 h11==0.14.0
 httpcore==0.17.3
 idna==3.4
