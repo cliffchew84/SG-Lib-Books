@@ -3,9 +3,10 @@
 
 <div class="container-fluid">
         <div class="col col-sm-12 p-4"> 
-            <h2>Your Favourite SG Library Books</h2>
-            <p>Create an account to save books that you want to borrow from
-            Singapore libraries!</p>
+            <h2>Your SG Library Books [Beta]</h2>
+            <p>Save and track the books you want to borrow from Singapore 
+            libraries! <b><i>Built with the latest NLB REST API!</i></b>
+            </p>
         </div>
         <div class="row justify-content-center" style="text-align: center;">
 
@@ -20,12 +21,12 @@
                 <div class="mb-3">
 
                 </div>
-                <button type="submit" class="btn btn-secondary">Login</button>
+                <button type="submit" class="btn btn-primary">Login</button>
             </form>
             {% if login_invalid %}
-            <p style="margin-top: 0.5em; color: red;">We are unable to find your
-            account. You either have the wrong username, password, or have not
-            registered with us.</p>
+            <p style="margin-top: 0.5em; color: red;">Account unavailable. 
+            You might have used the wrong username, password, or have not
+            registered with us yet.</p>
             {% endif %}
         </div>
 
@@ -40,10 +41,10 @@
                 <div class="mb-3">
 
                 </div>
-                <button type="submit" class="btn btn-secondary">Register</button>
+                <button type="submit" class="btn btn-danger">Register</button>
             </form>
             {% if register_invalid %}
-            <p style="margin-top: 0.5em; color: red;">User is already registered.</p>
+            <p style="margin-top: 0.5em; color: red;">Account already registered.</p>
             {% endif %}
         </div>
     </div>

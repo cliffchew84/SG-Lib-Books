@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
 # This is the temp database
-import process, nlb_rest_api, m_db
+import process, nlb_rest_api, m_db, mix_p
 
 # Set up user authentication flows
 from passlib.context import CryptContext
@@ -15,8 +15,13 @@ from typing import Optional
 import urllib.parse
 import os
 
+from mixpanel import Mixpanel
+# from ua_parser import user_agent_parser
 
 # Load environment variables
+project_id = os.environ["MP_PROJECT_ID"]
+mp = Mixpanel(project_id) 
+
 SECRET_KEY = os.environ["mongo_secret_key"]
 ACCESS_TOKEN_EXPIRY = 360
 
@@ -92,6 +97,10 @@ def logout(request: Request):
 # Register page
 @app.get("/register_complete/{username}", response_class=HTMLResponse)
 def get_register(request: Request, username: str):
+    # WIP - Register User Successfully
+    mix_p.user_register(username)
+    mix_p.event_register(username)
+
     return templates.TemplateResponse(
             "register_complete.html", 
             {"request": request, "username": username})
@@ -155,6 +164,9 @@ def login(request: Request,
 
     resp = RedirectResponse(f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
     manager.set_cookie(resp, access_token)
+    # WIP - Login user
+    mix_p.user_login(user.get("UserName"))
+    mix_p.event_login(user.get("UserName"))
     return resp
 
 
@@ -189,6 +201,9 @@ async def show_current_books(request: Request,
                     "BID": r.get("BID")
                     }) 
         
+        # WIP - Show current books
+        mix_p.event_select_current_saved_book(username.get("UserName"))
+
         return templates.TemplateResponse("yourbooks.html", {
             "request": request,
             "username": username.get("UserName"),
@@ -267,6 +282,10 @@ async def show_books_avail(request: Request,
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
         lib_book_summary = process.process_lib_book_summary(all_unique_lib,
                                                     all_avail_bks_by_lib) 
+        
+        update_status = None
+        if m_db.mg_query_status(db=db, username=username.get("UserName")):
+            update_status = "Updating In Progress... Please refresh to update!"
 
         return templates.TemplateResponse("result.html", {
             "request": request,
@@ -276,7 +295,8 @@ async def show_books_avail(request: Request,
             'all_avail_books': all_avail_books,
             'all_unique_lib': all_unique_lib,
             'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary
+            'lib_book_summary': lib_book_summary,
+            'status': update_status
             })
     else:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
@@ -299,6 +319,10 @@ async def show_books_avail_by_lib(request: Request,
         lib_book_summary = process.process_lib_book_summary(all_unique_lib,
                                                     all_avail_bks_by_lib) 
 
+        update_status = None
+        if m_db.mg_query_status(db=db, username=username.get("UserName")):
+            update_status = "Updating In Progress... Please refresh to update!"
+
         output = []
         for book in response:
             if library in book['BranchName'].lower():
@@ -311,7 +335,9 @@ async def show_books_avail_by_lib(request: Request,
         if len(set([i['BranchName'] for i in response])) == 1:
             unique_lib = output[0]['BranchName']
             
-
+            # WIP - Trigger select library event
+            mix_p.event_select_library(username.get("UserName"), library)
+        
         return templates.TemplateResponse("result.html", {
             "request": request,
             "username": username.get("UserName"),
@@ -324,7 +350,8 @@ async def show_books_avail_by_lib(request: Request,
             'avail_books': all_avail_bks_by_lib,
             'lib_book_summary': lib_book_summary,
             'lib_avail': lib_avail,
-            'lib_all': lib_all
+            'lib_all': lib_all,
+            'status': update_status
             })
  
     else:
@@ -370,6 +397,10 @@ async def update_book(request: Request,
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
     bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
 
+    # WIP - Update book
+    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+    mix_p.event_update_book(username.get("UserName"), titlename)
+
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
@@ -378,6 +409,8 @@ def update_user_books(db, username):
 
     user_bids = m_db.mg_query_user_books_w_bid(
             db=db, username=username.get("UserName"))
+    
+    m_db.mg_insert_status(db, username=username.get("UserName"))
 
     if user_bids:
         for ubid in user_bids:
@@ -388,6 +421,10 @@ def update_user_books(db, username):
             # Don't need to make book info API call. They should be in the db
             # Make API call to available and ingest data into database
             bk_avail_api_call_n_db_ingest(db=db, bid_no=ubid.get("BID"))
+ 
+    mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
+
+    m_db.mg_delete_status(db, username=username.get("UserName"))
 
     return {"message": "User's books updated!"}
 
@@ -402,6 +439,7 @@ async def update_user_current_books(request: Request,
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
+# Adds book into user account
 @app.post("/ingest_book/{BID}", response_class=HTMLResponse)
 async def api_book_ingest(request: Request,
                           BID: str,
@@ -416,6 +454,13 @@ async def api_book_ingest(request: Request,
 
     bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
     bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
+
+    # WIP - Add Book
+    mix_p.event_add_book(username.get("UserName"), BID)
+    mix_p.user_change_book_count(username.get("UserName"), 1)
+
+    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+    mix_p.user_book_list_add(username.get("UserName"), [titlename])
     
     if book_search:
         return RedirectResponse(f"/{username.get('UserName')}/search/{book_search}",
@@ -433,9 +478,17 @@ async def delete_book(request: Request,
                       username = Depends(manager)):
 
     # delete records
+    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
     m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
     m_db.mg_delete_bk_user_records(db=db, bid_no=BID)
+
+    # WIP - Delete book
+    mix_p.event_delete_book(username.get("UserName"), BID)
+    mix_p.user_change_book_count(username.get("UserName"), -1)
+    
+    mix_p.user_book_list_remove(username.get("UserName"), titlename)
 
     return RedirectResponse(f"/{username.get('UserName')}/yourbooks", 
                             status_code=status.HTTP_302_FOUND)
@@ -486,11 +539,13 @@ async def show_search_books(request: Request,
                 i['BID'] = disable + " | " + str(i["BID"])
                 final_response.append(i)
 
+            # WIP - Search Book
+            mix_p.event_search_book(username.get("UserName"), book_search)
+
     return templates.TemplateResponse("search.html", {
             "request": request,
             "keyword": book_search,
             "username": username.get("UserName"),
             "api_data": final_response,
             "text_output": text_output
-            })
-    
+            }) 
