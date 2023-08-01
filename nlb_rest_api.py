@@ -37,10 +37,10 @@ def process_rest_bk_search(nlb_input: Dict) -> List[Dict]:
     output = list()
     for bk_info in nlb_input.get("titles"):
         tmp = dict() 
-        tmp['BID'] = bk_info['brn']
-        tmp['TitleName'] = bk_info['title']
-        tmp['Author'] = bk_info['author']
-        tmp['PublishYear'] = bk_info['publishDate']
+        tmp['BID'] = bk_info.get('brn')
+        tmp['TitleName'] = bk_info.get('title')
+        tmp['Author'] = bk_info.get('author')
+        tmp['PublishYear'] = bk_info.get('publishDate')
         
         output.append(tmp)
     return output
@@ -48,8 +48,8 @@ def process_rest_bk_search(nlb_input: Dict) -> List[Dict]:
 def process_rest_single_lib_avail(nlb_input: Dict):
     """ Process a single book availability from NLB rest API """
     output = dict()
-    output['ItemNo'] = nlb_input['ItemNo']
-    output['CallNumber'] = nlb_input['callNumber']
+    output['ItemNo'] = nlb_input.get('ItemNo')
+    output['CallNumber'] = nlb_input.get('callNumber')
     output['BranchName'] = nlb_input.get('location').get("name")
     output['StatusDesc'] = nlb_input.get('transactionStatus').get("name")
     if output['StatusDesc'] == "On Loan":
@@ -66,10 +66,10 @@ def process_rest_all_lib_avail(nlb_input: List[Dict]):
 def process_rest_bk_info(nlb_input: Dict) -> Dict:
     """ Process book info output from NLB rest API """
     output = dict() 
-    output['BID'] = nlb_input['brn']
-    output['TitleName'] = nlb_input['title']
-    output['Author'] = nlb_input['author']
-    output['PublishYear'] = nlb_input['publishDate']
+    output['BID'] = nlb_input.get('brn')
+    output['TitleName'] = nlb_input.get('title')
+    output['Author'] = nlb_input.get('author')
+    output['PublishYear'] = nlb_input.get('publishDate')
     
     return output
 

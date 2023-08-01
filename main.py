@@ -513,8 +513,10 @@ async def show_search_books(request: Request,
         else:
             searched_books = books.get("titles")
             output_list = []
+
+            p_searched_books = [i for i in searched_books if i.get('title') is not None]
         
-            for book in searched_books:
+            for book in p_searched_books:
                 get_isbn = book.get("isbns")
                 if get_isbn:
                     if "electronic" not in get_isbn:
