@@ -506,15 +506,17 @@ async def show_search_books(request: Request,
 
     if book_search:
         books = nlb_rest_api.get_rest_nlb_api("SearchTitles/", book_search)
-        if books.get("totalRecords") == 0:
-            text_output = f"There are no records with the phase {book_search}"
+        if books.get("totalRecords") == 0 or books.get("statusCode") == 400:
+            text_output = f"There are no records with '{book_search}'"
             book_search = None
 
         else:
             searched_books = books.get("titles")
             output_list = []
+
+            p_searched_books = [i for i in searched_books if i.get('title') is not None]
         
-            for book in searched_books:
+            for book in p_searched_books:
                 get_isbn = book.get("isbns")
                 if get_isbn:
                     if "electronic" not in get_isbn:
