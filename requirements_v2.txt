@@ -30,3 +30,4 @@ typing_extensions==4.7.1
 ua-parser==0.18.0
 urllib3==1.26.16
 uvicorn==0.20.0
+zeep==4.2.1
