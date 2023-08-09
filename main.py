@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
 # This is the temp database
-import process, nlb_rest_api, m_db, mix_p
+import process, nlb_api, nlb_rest_api, m_db, mix_p
 
 # Set up user authentication flows
 from passlib.context import CryptContext
@@ -27,6 +27,9 @@ ACCESS_TOKEN_EXPIRY = 360
 
 APPLICATION_ID=os.environ['nlb_rest_app_id']
 API_KEY=os.environ['nlb_rest_api_key']
+
+# To use for SOAP and replace once SOAP is phased out
+API = os.getenv("nlb_api_keys")
 
 manager = LoginManager(SECRET_KEY, token_url="/login", use_cookie=True)
 manager.cookie_name = "auth"
@@ -174,6 +177,8 @@ def login(request: Request,
 async def show_current_books(request: Request,
                              db = Depends(get_db),
                              username = Depends(manager)):
+
+    output = []
 
     if username:
         # Get all the books linked to the user. This is the complicated query
@@ -363,11 +368,17 @@ def bk_avail_api_call_n_db_ingest(db, bid_no):
     # Availability is across libraries, so we loop through all libraries
 
     # Get book availability via NLB API
-    bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo/", input=bid_no)
+    # bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo/", input=bid_no)
  
-    for book in nlb_rest_api.process_rest_all_lib_avail(bk):
-        books_avail = nlb_rest_api.process_single_bk_avail(book)
-        books_avail.update({"BID": str(bid_no)})
+    # for book in nlb_rest_api.process_rest_all_lib_avail(bk):
+    #    books_avail = nlb_rest_api.process_single_bk_avail(book)
+    #    books_avail.update({"BID": str(bid_no)})
+
+    bk = nlb_api.call_nlb_bk_avail_api(API=API, bid_no=bid_no)
+
+    for book in nlb_api.get_bk_availability_info(bk):
+        books_avail = nlb_api.process_single_bk_avail(book)
+        books_avail.update({"BID": bid_no})
 
         # Ingest the books accordingly
         m_db.mg_add_book_avail(db=db, books_avail=books_avail)
@@ -376,13 +387,18 @@ def bk_avail_api_call_n_db_ingest(db, bid_no):
 def bk_info_api_call_n_db_ingest(db, bid_no):
     # Make API calls to book info and ingest into DB
 
-    book_title_rest_api = nlb_rest_api.get_rest_nlb_api(
-            "GetTitleDetails/", input=bid_no)
-    book_title = nlb_rest_api.process_rest_bk_info(book_title_rest_api)
-    book_title.update({"BID": str(bid_no)})
+    # book_title_rest_api = nlb_rest_api.get_rest_nlb_api(
+    #        "GetTitleDetails/", input=bid_no)
+    #book_title = nlb_rest_api.process_rest_bk_info(book_title_rest_api)
+    #book_title.update({"BID": str(bid_no)})
 
     # Consider keeping this so that I can show this as well
-    del book_title['PublishYear']
+    # del book_title['PublishYear']
+
+    book_title_api = nlb_api.call_nlb_bk_info_api(
+            API=API, bid_no=bid_no).get("TitleDetail")
+    
+    book_title = nlb_api.process_bk_info(book_title_api)
 
     m_db.mg_add_book_info(db=db, books_info_input=book_title)
 
@@ -505,26 +521,47 @@ async def show_search_books(request: Request,
     final_response = list()
 
     if book_search:
-        books = nlb_rest_api.get_rest_nlb_api("SearchTitles/", book_search)
-        if books.get("totalRecords") == 0 or books.get("statusCode") == 400:
+
+        # books = nlb_rest_api.get_rest_nlb_api("SearchTitles/", book_search)
+        books = nlb_api.search_book_by_title_keyword(API, book_search)
+        if books.get("Status") == "FAIL":
             text_output = f"There are no records with '{book_search}'"
             book_search = None
+        
+        # if books.get("totalRecords") == 0 or books.get("statusCode") == 400:
+            # text_output = f"There are no records with '{book_search}'"
+            # book_search = None
 
         else:
-            searched_books = books.get("titles")
-            output_list = []
-
-            p_searched_books = [i for i in searched_books if i.get('title') is not None]
-        
-            for book in p_searched_books:
-                get_isbn = book.get("isbns")
-                if get_isbn:
-                    if "electronic" not in get_isbn:
-                        output_list.append(book)
-                else:
-                    output_list.append(book)
+            # searched_books = books.get("titles")
+            searched_books = books.get("Titles").get("Title")
+            physical_bks_only = nlb_api.remove_book_by_property_name(
+                     searched_books, "ISBN", "electronic bk")
             
-            final_output = [nlb_rest_api.process_rest_bk_info(i) for i in output_list]
+            final_output = list()
+            for i in physical_bks_only:
+                final_output.append(dict(i))
+                final_output = [{k: v.split("/")[0].strip() for k, v in 
+                                 f.items() if k in [
+                                     "BID", 
+                                     "TitleName", 
+                                     "Author", 
+                                     "PublishYear"]} 
+                                for f in final_output]
+
+            # output_list = []
+
+            # p_searched_books = [i for i in searched_books if i.get('title') is not None]
+            
+            # for book in p_searched_books:
+            #    get_isbn = book.get("isbns")
+            #    if get_isbn:
+            #        if "electronic" not in get_isbn:
+            #            output_list.append(book)
+            #    else:
+            #        output_list.append(book)
+            
+            # final_output = [nlb_rest_api.process_rest_bk_info(i) for i in output_list]
 
             # Search all BIDs linked to user already. This is to ensure I can 
             # disable books that the user already bookmarked
