@@ -90,10 +90,13 @@ def remove_book_by_property_name(
     """ Filter away books with unwanted property values """
     output_list = []
     for book in book_dict_values:
-        if value in book.get(property):
+        try:
+            if value in book.get(property):
+                pass
+            else:
+                output_list.append(book)
+        except:
             pass
-        else:
-            output_list.append(book)
     
     return output_list
 

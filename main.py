@@ -540,13 +540,21 @@ async def show_search_books(request: Request,
             final_output = list()
             for i in physical_bks_only:
                 final_output.append(dict(i))
-                final_output = [{k: v.split("/")[0].strip() for k, v in 
-                                 f.items() if k in [
-                                     "BID", 
-                                     "TitleName", 
-                                     "Author", 
-                                     "PublishYear"]} 
-                                for f in final_output]
+                try:
+                    final_output = [{k: v.split("/")[0].strip() for k, v in 
+                                   f.items() if k in [
+                                         "BID", 
+                                         "TitleName", 
+                                         "Author", 
+                                         "PublishYear"]} 
+                                    for f in final_output]
+                except:
+                    final_output = [{k: v for k, v in f.items() if k in [
+                                         "BID", 
+                                         "TitleName", 
+                                         "Author", 
+                                         "PublishYear"]} 
+                                    for f in final_output]
 
             # output_list = []
 
