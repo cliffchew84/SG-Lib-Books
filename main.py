@@ -506,7 +506,7 @@ async def show_search_books(request: Request,
         print(books.get("statusCode"))
         print(books.get("totalRecords"))
         
-        if books.get("totalRecords") == 0 or books.get("statusCode") == 400:
+        if books.get("totalRecords") == 0 or books.get("statusCode") != 200:
             text_output = f"There are no records with '{book_search}'"
             book_search = None
 
