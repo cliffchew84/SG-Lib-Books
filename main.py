@@ -24,7 +24,7 @@ project_id = os.environ["MP_PROJECT_ID"]
 mp = Mixpanel(project_id) 
 
 SECRET_KEY = os.environ["mongo_secret_key"]
-ACCESS_TOKEN_EXPIRY = 360
+ACCESS_TOKEN_EXPIRY = 60
 
 APPLICATION_ID=os.environ['nlb_rest_app_id']
 API_KEY=os.environ['nlb_rest_api_key']
