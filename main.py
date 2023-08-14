@@ -503,10 +503,11 @@ async def show_search_books(request: Request,
         print(f"{book_search} is happening")
         books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
 
-        print(books.get("statusCode"))
-        print(books.get("totalRecords"))
+        print(books)
+        # print("statusCode: {}".format(books.get("statusCode")))
+        # print("totalRecords: {}".format(books.get("totalRecords")))
         
-        if books.get("totalRecords") == 0 or books.get("statusCode") != 200:
+        if books.get("totalRecords") == 0 or books.get("statusCode") in [400, 404, 500, 401, 405, 429]:
             text_output = f"There are no records with '{book_search}'"
             book_search = None
 
