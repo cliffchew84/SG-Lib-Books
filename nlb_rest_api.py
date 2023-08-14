@@ -21,7 +21,7 @@ def get_rest_nlb_api(extension_url: str,
     headers = authenticate_into_nlb_rest(app_id, api_key)
     final_url = "https://openweb.nlb.gov.sg/api/v1/Catalogue/" + extension_url
 
-    if extension_url == "SearchTitles/":
+    if extension_url == "SearchTitles":
         payload = {'Title': input, 'Limit': 100, "Format": "BK"}
         
     else:
