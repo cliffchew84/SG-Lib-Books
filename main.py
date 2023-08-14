@@ -13,6 +13,7 @@ from passlib.context import CryptContext
 from datetime import timedelta, datetime
 from typing import Optional
 import urllib.parse
+import pendulum
 import os
 
 from mixpanel import Mixpanel
@@ -240,7 +241,7 @@ def process_user_book_data(db, username: str):
             due_date = None
         
         update_time = datetime.fromtimestamp(
-                a.get("InsertTime")).strftime("%d %b %H:%M") 
+                a.get("InsertTime"), pendulum.timezone("Asia/Singapore")).strftime("%d %b %H:%M") 
 
         if "Not" in a.get("StatusDesc"):
             status = "Available"
