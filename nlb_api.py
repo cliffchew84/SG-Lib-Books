@@ -121,7 +121,7 @@ def process_single_bk_avail(lib_record: List[Dict]) -> List[Dict]:
         if items in ['ItemNo', 'BranchName', 'CallNumber', 'StatusDesc', 'DueDate']:
             output.update({items: lib_record[items]})
     
-    output.update({ "InsertTime": pendulum.now().int_timestamp})
+    output.update({ "InsertTime": pendulum.now('Asia/Singapore').int_timestamp})
 
     return output
 
