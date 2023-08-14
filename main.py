@@ -235,6 +235,7 @@ def process_user_book_data(db, username: str):
             except: 
                 input_date = datetime.strptime(tmp_date, "%d/%m/%Y")
             
+            input_date = input_date + timedelta(hours=8)
             due_date = input_date.strftime("%d %b")
         else:
             due_date = None
