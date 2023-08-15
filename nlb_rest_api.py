@@ -35,15 +35,20 @@ def process_rest_bk_search(nlb_input: Dict) -> List[Dict]:
     # To make my life easier, I am transform the new variable names to the old variable names
     
     output = list()
-    for bk_info in nlb_input.get("titles"):
-        tmp = dict() 
-        tmp['BID'] = bk_info.get('brn')
-        tmp['TitleName'] = bk_info.get('title')
-        tmp['Author'] = bk_info.get('author')
-        tmp['PublishYear'] = bk_info.get('publishDate')
+    nlb_info = nlb_input.get("titles")
+    
+    if nlb_info:
+        for bk_info in nlb_info.get("titles"):
+            tmp = dict() 
+            tmp['BID'] = bk_info.get('brn')
+            tmp['TitleName'] = bk_info.get('title')
+            tmp['Author'] = bk_info.get('author')
+            tmp['PublishYear'] = bk_info.get('publishDate')
         
-        output.append(tmp)
-    return output
+            output.append(tmp)
+        return output
+    else:
+        return output
 
 def process_rest_single_lib_avail(nlb_input: Dict):
     """ Process a single book availability from NLB rest API """
@@ -74,7 +79,7 @@ def process_rest_bk_info(nlb_input: Dict) -> Dict:
     return output
 
 
-def process_single_bk_avail(lib_record: List[Dict]) -> List[Dict]:
+def process_single_bk_avail(lib_record: List[Dict]) -> Dict:
     """ Process a single lib record to keep what I want"""
     output = dict()
     for items in lib_record:

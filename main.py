@@ -1,4 +1,4 @@
-from fastapi import FastAPI, background, status, Request, Form, Depends, Query, BackgroundTasks
+from fastapi import FastAPI, status, Request, Form, Depends, BackgroundTasks
 from fastapi.responses import RedirectResponse, HTMLResponse 
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
@@ -89,7 +89,7 @@ app.add_exception_handler(NotAuthenticationException,
 
 # Logout
 @app.get("/logout")
-def logout(request: Request):
+def logout():
     response = RedirectResponse("/")
     manager.set_cookie(response, None)
     return response
@@ -390,8 +390,7 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
 
 
 @app.post("/update_book/{BID}", response_class=HTMLResponse)
-async def update_book(request: Request, 
-                      BID: str,
+async def update_book(BID: str,
                       db = Depends(get_db),
                       username = Depends(manager)):
 
@@ -430,8 +429,7 @@ def update_user_books(db, username):
 
 # This updates the availability of user's current books
 @app.post("/update_user_books/{username}", response_class=HTMLResponse)
-async def update_user_current_books(request: Request,
-                                    background_tasks: BackgroundTasks,
+async def update_user_current_books(background_tasks: BackgroundTasks,
                                     db = Depends(get_db), 
                                     username = Depends(manager)
                                     ):
@@ -441,9 +439,7 @@ async def update_user_current_books(request: Request,
 
 # Adds book into user account
 @app.post("/ingest_book/{BID}", response_class=HTMLResponse)
-async def api_book_ingest(request: Request,
-                          BID: str,
-                          book_search: Optional[str] = None,
+async def api_book_ingest(BID: str,
                           db = Depends(get_db), 
                           username = Depends(manager)):
 
@@ -467,8 +463,7 @@ async def api_book_ingest(request: Request,
 
 
 @app.post("/delete_book/{BID}", response_class=HTMLResponse)
-async def delete_book(request: Request, 
-                      BID: str,
+async def delete_book(BID: str,
                       db = Depends(get_db),
                       username = Depends(manager)):
 
