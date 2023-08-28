@@ -1,7 +1,6 @@
 import os
 import pendulum
 from mixpanel import Mixpanel
-from ua_parser import user_agent_parser
 
 
 # Load environment variables
