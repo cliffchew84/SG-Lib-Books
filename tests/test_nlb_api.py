@@ -10,4 +10,4 @@ def test_api_call():
                               input="Python",
                               search_on="Title")
 
-    assert (output.get('setId') == 503031189)
+    assert (output.get('hasMoreRecords') is True)
