@@ -409,7 +409,7 @@ async def update_book(BID: str,
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
     bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
 
-    # WIP - Update book
+    # Insert Tracking into Mixpanel
     titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
     mix_p.event_update_book(username.get("UserName"), titlename)
 
@@ -417,28 +417,29 @@ async def update_book(BID: str,
 
 
 def update_user_books(db, username):
-    """ Update user books that are linked to user. No NLB password is needed """
+    """ Update user books that are linked to user.
+        No NLB password is needed
+    """
 
     user_bids = m_db.mg_query_user_books_w_bid(
         db=db, username=username.get("UserName"))
 
     m_db.mg_insert_status(db, username=username.get("UserName"))
 
+    # WIP - Check sequence to (1) API call (2) book delete (3) book ingest
     if user_bids:
         for ubid in user_bids:
-            # delete avail book records based on BID so I can inject new avail data
+            # delete avail book records by BID so I can inject new avail data
             m_db.mg_delete_bk_avail_records(db=db, bid_no=ubid.get("BID"))
 
         for ubid in user_bids:
-            # Don't need to make book info API call. They should be in the db
-            # Make API call to available and ingest data into database
+            # Don't need book info API call as they should be in db
+            # Make book available API call and ingest data into db
             bk_avail_api_call_n_db_ingest(db=db, bid_no=ubid.get("BID"))
 
     mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
     m_db.mg_delete_status(db, username=username.get("UserName"))
     return {"message": "User's books updated!"}
-
-# This updates the availability of user's current books
 
 
 @app.post("/update_user_books/{username}", response_class=HTMLResponse)
@@ -446,6 +447,7 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
                                     db=Depends(get_db),
                                     username=Depends(manager)
                                     ):
+    """ Updates the availability of user's current books """
     background_tasks.add_task(update_user_books, db, username)
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
@@ -483,9 +485,22 @@ async def delete_book(BID: str,
     # delete records
     titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
 
-    m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
-    m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
-    m_db.mg_delete_bk_user_records(db=db, bid_no=BID)
+    # Check BID is linked to more than 1 user
+    counter = db.user_books.aggregate([
+        {"$match": {"BID": BID}},
+        {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+        {"$project": {"_id": 0}}
+    ])
+    final_count = counter.next().get("BID")
+
+    # If only one user is linked to the book,
+    # delete book available and info records
+    if final_count == 1:
+        m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
+        m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
+
+    m_db.mg_delete_bk_user_records(
+        db=db, username=username.get("UserName"), bid_no=BID)
 
     # WIP - Delete book
     mix_p.event_delete_book(username.get("UserName"), BID)
