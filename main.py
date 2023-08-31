@@ -383,23 +383,28 @@ def update_bk_avail_in_mongo(db, bid_no):
     4. Ingest new book available records into MongoDB
 
     """
-    # Make API call on book availability
-    bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=bid_no)
+    try:
+        # Make API call on book availability
+        bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=bid_no)
 
-    # Process and combine records
-    all_books_avail = []
-    for book in nlb_rest_api.process_rest_all_lib_avail(bk):
-        books_avail = nlb_rest_api.process_single_bk_avail(book)
-        books_avail.update({"BID": str(bid_no)})
-        all_books_avail.append(books_avail)
+        # Process and combine records
+        all_books_avail = []
+        for book in nlb_rest_api.process_rest_all_lib_avail(bk):
+            books_avail = nlb_rest_api.process_single_bk_avail(book)
+            books_avail.update({"BID": str(bid_no)})
+            print(books_avail)
+            all_books_avail.append(books_avail)
 
-    # Delete existing MongoDB records
-    m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
+        # Delete existing MongoDB records
+        m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
 
-    # Add new records into MongoDB
-    m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
+        # Add new records into MongoDB
+        m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
-    return {"message": "Data is successfully updated in MongoDB"}
+        return {"API call": True}
+
+    except Exception:
+        return {"API call": False}
 
 
 def bk_info_api_call_n_db_ingest(db, bid_no):
@@ -421,13 +426,14 @@ async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    update_bk_avail_in_mongo(db, BID)
+    api_result = update_bk_avail_in_mongo(db, BID)
 
-    # Insert Tracking into Mixpanel
-    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
-    mix_p.event_update_book(username.get("UserName"), titlename)
+    if api_result.get("API call"):
+        # Insert Tracking into Mixpanel
+        titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
+        mix_p.event_update_book(username.get("UserName"), titlename)
 
-    return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
 def update_all_user_books(db, username):
@@ -441,7 +447,13 @@ def update_all_user_books(db, username):
     if user_bids:
         for ubid in user_bids:
             bid_no = ubid.get("BID")
-            update_bk_avail_in_mongo(db, bid_no)
+            api_result = update_bk_avail_in_mongo(db, bid_no)
+
+            if api_result.get("API call"):
+                # Insert Tracking into Mixpanel
+                titlename = m_db.mg_query_book_title_by_bid(
+                    db=db, bid_no=bid_no)
+                mix_p.event_update_book(username.get("UserName"), titlename)
 
     mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
     m_db.mg_delete_status(db, username=username.get("UserName"))
