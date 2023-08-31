@@ -2,19 +2,17 @@ from pymongo import mongo_client
 from typing import Dict, List
 import os
 
-
-# Load environment variables
-
 # MongoDB credentials
 MONGO_PASSWORD = os.environ["mongo_pw"]
-database_url = f"mongodb+srv://cliffchew84:{MONGO_PASSWORD}@cliff-nlb.t0whddv.mongodb.net/?retryWrites=true&w=majority"
+base_url = "mongodb+srv://cliffchew84:"
+end_url = "cliff-nlb.t0whddv.mongodb.net/?retryWrites=true&w=majority"
+mongo_url = f"{base_url}{MONGO_PASSWORD}@{end_url}"
 
 
 def connect_mdb():
-    return mongo_client.MongoClient(database_url,
-                                    serverSelectionTimeoutMS=5000)
+    return mongo_client.MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
 
-# Adds
+# Add Methods
 
 
 def mg_add_user(db, username: str, hashed_pw: str):
@@ -56,7 +54,7 @@ def mg_insert_status(db, username: str):
 
 
 def mg_delete_status(db, username: str):
-    return db.user_status.delete_one({'UserName': username})
+    return db.user_status.delete_many({'UserName': username})
 
 
 def mg_query_status(db, username: str):

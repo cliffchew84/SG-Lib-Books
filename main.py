@@ -385,7 +385,6 @@ def bk_avail_api_call_n_db_ingest(db, bid_no):
         books_avail = nlb_rest_api.process_single_bk_avail(book)
         books_avail.update({"BID": str(bid_no)})
         all_books_avail.append(books_avail)
-        # m_db.mg_add_book_avail(db=db, books_avail=books_avail)
 
     m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
@@ -409,7 +408,7 @@ async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    # Make API call to NLB on book availability
+    # Make API call on book availability
     bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=BID)
 
     # Process and combine records
@@ -432,10 +431,8 @@ async def update_book(BID: str,
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
-def update_user_books(db, username):
-    """ Update user books that are linked to user.
-        No NLB password is needed
-    """
+def update_all_user_books(db, username):
+    """ Update all books linked to user. No NLB password needed """
 
     user_bids = m_db.mg_query_user_books_w_bid(
         db=db, username=username.get("UserName"))
@@ -445,16 +442,26 @@ def update_user_books(db, username):
     # WIP - Check sequence to (1) API call (2) book delete (3) book ingest
     if user_bids:
         for ubid in user_bids:
-            # delete avail book records by BID so I can inject new avail data
-            m_db.mg_delete_bk_avail_records(db=db, bid_no=ubid.get("BID"))
+            bid_no = ubid.get("BID")
+            bk = nlb_rest_api.get_rest_nlb_api(
+                "GetAvailabilityInfo", input=bid_no)
 
-        for ubid in user_bids:
-            # Don't need book info API call as they should be in db
-            # Make book available API call and ingest data into db
-            bk_avail_api_call_n_db_ingest(db=db, bid_no=ubid.get("BID"))
+            # Process and combine records
+            all_books_avail = []
+            for book in nlb_rest_api.process_rest_all_lib_avail(bk):
+                books_avail = nlb_rest_api.process_single_bk_avail(book)
+                books_avail.update({"BID": str(bid_no)})
+                all_books_avail.append(books_avail)
+
+            # Delete existing MongoDB records
+            m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
+
+            # Add new records into MongoDB
+            m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
     mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
     m_db.mg_delete_status(db, username=username.get("UserName"))
+
     return {"message": "User's books updated!"}
 
 
@@ -464,7 +471,7 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
                                     username=Depends(manager)
                                     ):
     """ Updates the availability of user's current books """
-    background_tasks.add_task(update_user_books, db, username)
+    background_tasks.add_task(update_all_user_books, db, username)
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
