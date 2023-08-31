@@ -189,8 +189,8 @@ async def show_current_books(request: Request,
 
     if username:
         # Get all the books linked to the user. This is the complicated query
-        query = m_db.mg_query_user_bookmarked_books(db=db,
-                                                    username=username.get("UserName"))
+        query = m_db.mg_query_user_bookmarked_books(
+            db=db, username=username.get("UserName"))
 
         response = []
 
@@ -255,7 +255,7 @@ def process_user_book_data(db, username: str):
         else:
             status = a.get("StatusDesc")
 
-        if due_date == None:
+        if due_date is None:
             final_status = status
         else:
             final_status = status + ' [' + str(due_date) + ']'
@@ -294,8 +294,8 @@ async def show_books_avail(request: Request,
         all_avail_books = process.process_all_avail_books(response)
         all_unique_lib = process.process_all_unique_lib(response)
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(all_unique_lib,
-                                                            all_avail_bks_by_lib)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
 
         update_status = None
         if m_db.mg_query_status(db=db, username=username.get("UserName")):
@@ -380,10 +380,14 @@ def bk_avail_api_call_n_db_ingest(db, bid_no):
     # Get book availability via NLB API
     bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=bid_no)
 
+    all_books_avail = []
     for book in nlb_rest_api.process_rest_all_lib_avail(bk):
         books_avail = nlb_rest_api.process_single_bk_avail(book)
         books_avail.update({"BID": str(bid_no)})
-        m_db.mg_add_book_avail(db=db, books_avail=books_avail)
+        all_books_avail.append(books_avail)
+        # m_db.mg_add_book_avail(db=db, books_avail=books_avail)
+
+    m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
 
 def bk_info_api_call_n_db_ingest(db, bid_no):
@@ -405,9 +409,21 @@ async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    # delete records
+    # Make API call to NLB on book availability
+    bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=BID)
+
+    # Process and combine records
+    all_books_avail = []
+    for book in nlb_rest_api.process_rest_all_lib_avail(bk):
+        books_avail = nlb_rest_api.process_single_bk_avail(book)
+        books_avail.update({"BID": str(BID)})
+        all_books_avail.append(books_avail)
+
+    # Delete existing MongoDB records
     m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
-    bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
+
+    # Add new records into MongoDB
+    m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
     # Insert Tracking into Mixpanel
     titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
@@ -527,8 +543,6 @@ async def show_search_books(request: Request,
         books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
 
         print(books)
-        # print("statusCode: {}".format(books.get("statusCode")))
-        # print("totalRecords: {}".format(books.get("totalRecords")))
 
         if books.get("totalRecords") == 0 or books.get("statusCode") in [400, 404, 500, 401, 405, 429]:
             text_output = f"There are no records with '{book_search}'"
@@ -551,21 +565,25 @@ async def show_search_books(request: Request,
             final_output = [nlb_rest_api.process_rest_bk_info(
                 i) for i in output_list]
 
-            # Search all BIDs linked to user already. This is to ensure I can
-            # disable books that the user already bookmarked
+            # Search all BIDs linked to user, and disable add books
+            # for books linked already linked to to user
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
             user_books_bids = [i.get("BID") for i in user_books]
 
             for i in final_output:
+
                 i['TitleName'] = i['TitleName'].split(
                     "/")[0].strip() + " | " + str(i['BID'])
+
                 i['PublishYear'] = "Y" + i['PublishYear']
 
                 disable = "disabled" if str(
                     i['BID']) in user_books_bids else ""
+
                 i['BID'] = disable + " | " + str(i["BID"])
+
                 final_response.append(i)
 
             # Search Book

@@ -1,5 +1,5 @@
 from pymongo import mongo_client
-from typing import Dict
+from typing import Dict, List
 import os
 
 
@@ -33,6 +33,14 @@ def mg_add_book_avail(db, books_avail: Dict):
         return ("The record already exist")
     else:
         return db.books_avail.insert_one(books_avail)
+
+
+def mg_add_entire_book_avail(db, books_avail: List[Dict]):
+    db_books_avail = db.books_avail
+    if db_books_avail.find_one(books_avail):
+        return ("The record already exist")
+    else:
+        return db.books_avail.insert_many(books_avail)
 
 
 def mg_add_book_info(db, books_info_input: Dict):
