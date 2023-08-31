@@ -5,12 +5,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
-# This is the temp database
-import process
-import nlb_rest_api
-import m_db
-import mix_p
-
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
@@ -19,8 +13,15 @@ import urllib.parse
 import pendulum
 import os
 
+# Mixpanel for data tracking
 from mixpanel import Mixpanel
-# from ua_parser import user_agent_parser
+
+# My own packages
+import process
+import nlb_rest_api
+import m_db
+import mix_p
+
 
 # Load environment variables
 project_id = os.environ["MP_PROJECT_ID"]
@@ -124,22 +125,24 @@ def register_user(request: Request,
     hashed_password = get_hashed_password(password)
     invalid = False
 
-    if m_db.mg_query_user_by_username(db=db, username=username):
-        invalid = True
+    if username:
+        if m_db.mg_query_user_by_username(db=db, username=username):
+            invalid = True
 
-    if not invalid:
-        m_db.mg_add_user(db=db, username=username, hashed_pw=hashed_password)
+        if not invalid:
+            m_db.mg_add_user(db=db, username=username,
+                             hashed_pw=hashed_password)
 
-        return RedirectResponse("/register_complete/" +
-                                urllib.parse.quote(username),
-                                status_code=status.HTTP_302_FOUND)
+            return RedirectResponse("/register_complete/" +
+                                    urllib.parse.quote(username),
+                                    status_code=status.HTTP_302_FOUND)
 
-    else:
-        return templates.TemplateResponse(
-            "homepage.html",
-            {"request": request,
-             "register_invalid": True},
-            status_code=status.HTTP_400_BAD_REQUEST)
+        else:
+            return templates.TemplateResponse(
+                "homepage.html",
+                {"request": request,
+                 "register_invalid": True},
+                status_code=status.HTTP_400_BAD_REQUEST)
 
 
 # Base page
@@ -148,7 +151,7 @@ async def root(request: Request):
     return templates.TemplateResponse("homepage.html", {"request": request})
 
 
-# Login stolen from udemy course
+# Login
 @app.post("/login")
 def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(),
@@ -174,7 +177,8 @@ def login(request: Request,
     resp = RedirectResponse(
         f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
     manager.set_cookie(resp, access_token)
-    # WIP - Login user
+
+    # Track user login
     mix_p.user_login(user.get("UserName"))
     mix_p.event_login(user.get("UserName"))
     return resp
@@ -186,14 +190,12 @@ async def show_current_books(request: Request,
                              username=Depends(manager)):
 
     output = []
-
     if username:
         # Get all the books linked to the user. This is the complicated query
         query = m_db.mg_query_user_bookmarked_books(
             db=db, username=username.get("UserName"))
 
         response = []
-
         for a in query:
             response.append({
                 "TitleName": a.get('TitleName').strip(),
@@ -226,7 +228,7 @@ async def show_current_books(request: Request,
 
 
 def process_user_book_data(db, username: str):
-    # Process db result to fit it into frontpage
+    """ Process db result for frontpage """
 
     query = m_db.mg_query_user_bookmarked_books(db=db, username=username)
     response = []
@@ -238,7 +240,7 @@ def process_user_book_data(db, username: str):
             try:
                 input_date = datetime.strptime(tmp_date, "%Y-%m-%d")
 
-            except:
+            except Exception:
                 input_date = datetime.strptime(tmp_date, "%d/%m/%Y")
 
             due_date = input_date.strftime("%d %b")
@@ -331,8 +333,8 @@ async def show_books_avail_by_lib(request: Request,
         all_avail_books = process.process_all_avail_books(response)
         all_unique_lib = process.process_all_unique_lib(response)
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(all_unique_lib,
-                                                            all_avail_bks_by_lib)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
 
         update_status = None
         if m_db.mg_query_status(db=db, username=username.get("UserName")):
@@ -498,7 +500,7 @@ async def delete_book(BID: str,
     ])
     final_count = counter.next().get("BID")
 
-    # If only one user is linked to the book,
+    # If book is only linked to one user,
     # delete book available and info records
     if final_count == 1:
         m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
@@ -533,7 +535,9 @@ async def show_search_books(request: Request,
 
         print(books)
 
-        if books.get("totalRecords") == 0 or books.get("statusCode") in [400, 404, 500, 401, 405, 429]:
+        elist = [400, 404, 500, 401, 405, 429]
+
+        if books.get("totalRecords") == 0 or books.get("statusCode") in elist:
             text_output = f"There are no records with '{book_search}'"
             book_search = None
 
@@ -554,8 +558,8 @@ async def show_search_books(request: Request,
             final_output = [nlb_rest_api.process_rest_bk_info(
                 i) for i in output_list]
 
-            # Search all BIDs linked to user, and disable add books
-            # for books linked already linked to to user
+            # Search all user book BIDs and disable add books
+            # for books linked to user
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
