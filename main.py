@@ -5,12 +5,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
-# This is the temp database
-import process
-import nlb_rest_api
-import m_db
-import mix_p
-
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
@@ -19,8 +13,15 @@ import urllib.parse
 import pendulum
 import os
 
+# Mixpanel for data tracking
 from mixpanel import Mixpanel
-# from ua_parser import user_agent_parser
+
+# My own packages
+import process
+import nlb_rest_api
+import m_db
+import mix_p
+
 
 # Load environment variables
 project_id = os.environ["MP_PROJECT_ID"]
@@ -124,22 +125,24 @@ def register_user(request: Request,
     hashed_password = get_hashed_password(password)
     invalid = False
 
-    if m_db.mg_query_user_by_username(db=db, username=username):
-        invalid = True
+    if username:
+        if m_db.mg_query_user_by_username(db=db, username=username):
+            invalid = True
 
-    if not invalid:
-        m_db.mg_add_user(db=db, username=username, hashed_pw=hashed_password)
+        if not invalid:
+            m_db.mg_add_user(db=db, username=username,
+                             hashed_pw=hashed_password)
 
-        return RedirectResponse("/register_complete/" +
-                                urllib.parse.quote(username),
-                                status_code=status.HTTP_302_FOUND)
+            return RedirectResponse("/register_complete/" +
+                                    urllib.parse.quote(username),
+                                    status_code=status.HTTP_302_FOUND)
 
-    else:
-        return templates.TemplateResponse(
-            "homepage.html",
-            {"request": request,
-             "register_invalid": True},
-            status_code=status.HTTP_400_BAD_REQUEST)
+        else:
+            return templates.TemplateResponse(
+                "homepage.html",
+                {"request": request,
+                 "register_invalid": True},
+                status_code=status.HTTP_400_BAD_REQUEST)
 
 
 # Base page
@@ -148,7 +151,7 @@ async def root(request: Request):
     return templates.TemplateResponse("homepage.html", {"request": request})
 
 
-# Login stolen from udemy course
+# Login
 @app.post("/login")
 def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(),
@@ -174,7 +177,8 @@ def login(request: Request,
     resp = RedirectResponse(
         f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
     manager.set_cookie(resp, access_token)
-    # WIP - Login user
+
+    # Track user login
     mix_p.user_login(user.get("UserName"))
     mix_p.event_login(user.get("UserName"))
     return resp
@@ -186,14 +190,12 @@ async def show_current_books(request: Request,
                              username=Depends(manager)):
 
     output = []
-
     if username:
         # Get all the books linked to the user. This is the complicated query
-        query = m_db.mg_query_user_bookmarked_books(db=db,
-                                                    username=username.get("UserName"))
+        query = m_db.mg_query_user_bookmarked_books(
+            db=db, username=username.get("UserName"))
 
         response = []
-
         for a in query:
             response.append({
                 "TitleName": a.get('TitleName').strip(),
@@ -226,7 +228,7 @@ async def show_current_books(request: Request,
 
 
 def process_user_book_data(db, username: str):
-    # Process db result to fit it into frontpage
+    """ Process db result for frontpage """
 
     query = m_db.mg_query_user_bookmarked_books(db=db, username=username)
     response = []
@@ -238,7 +240,7 @@ def process_user_book_data(db, username: str):
             try:
                 input_date = datetime.strptime(tmp_date, "%Y-%m-%d")
 
-            except:
+            except Exception:
                 input_date = datetime.strptime(tmp_date, "%d/%m/%Y")
 
             due_date = input_date.strftime("%d %b")
@@ -255,7 +257,7 @@ def process_user_book_data(db, username: str):
         else:
             status = a.get("StatusDesc")
 
-        if due_date == None:
+        if due_date is None:
             final_status = status
         else:
             final_status = status + ' [' + str(due_date) + ']'
@@ -294,8 +296,8 @@ async def show_books_avail(request: Request,
         all_avail_books = process.process_all_avail_books(response)
         all_unique_lib = process.process_all_unique_lib(response)
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(all_unique_lib,
-                                                            all_avail_bks_by_lib)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
 
         update_status = None
         if m_db.mg_query_status(db=db, username=username.get("UserName")):
@@ -331,8 +333,8 @@ async def show_books_avail_by_lib(request: Request,
         all_avail_books = process.process_all_avail_books(response)
         all_unique_lib = process.process_all_unique_lib(response)
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(all_unique_lib,
-                                                            all_avail_bks_by_lib)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
 
         update_status = None
         if m_db.mg_query_status(db=db, username=username.get("UserName")):
@@ -373,17 +375,31 @@ async def show_books_avail_by_lib(request: Request,
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-def bk_avail_api_call_n_db_ingest(db, bid_no):
-    # Make API calls to available API and ingest into DB
-    # Availability is across libraries, so we loop through all libraries
+def update_bk_avail_in_mongo(db, bid_no):
+    """ This function does three things
+    1. Make API calls to NLB to get book availability
+    2. Process and combine the records into a single List[Dict]
+    3. Delete existing book available records in MongoDB
+    4. Ingest new book available records into MongoDB
 
-    # Get book availability via NLB API
+    """
+    # Make API call on book availability
     bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=bid_no)
 
+    # Process and combine records
+    all_books_avail = []
     for book in nlb_rest_api.process_rest_all_lib_avail(bk):
         books_avail = nlb_rest_api.process_single_bk_avail(book)
         books_avail.update({"BID": str(bid_no)})
-        m_db.mg_add_book_avail(db=db, books_avail=books_avail)
+        all_books_avail.append(books_avail)
+
+    # Delete existing MongoDB records
+    m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
+
+    # Add new records into MongoDB
+    m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
+
+    return {"message": "Data is successfully updated in MongoDB"}
 
 
 def bk_info_api_call_n_db_ingest(db, bid_no):
@@ -405,19 +421,17 @@ async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    # delete records
-    m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
-    bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
+    update_bk_avail_in_mongo(db, BID)
 
-    # WIP - Update book
+    # Insert Tracking into Mixpanel
     titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
     mix_p.event_update_book(username.get("UserName"), titlename)
 
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
-def update_user_books(db, username):
-    """ Update user books that are linked to user. No NLB password is needed """
+def update_all_user_books(db, username):
+    """ Update all books linked to user. No NLB password needed """
 
     user_bids = m_db.mg_query_user_books_w_bid(
         db=db, username=username.get("UserName"))
@@ -426,19 +440,13 @@ def update_user_books(db, username):
 
     if user_bids:
         for ubid in user_bids:
-            # delete avail book records based on BID so I can inject new avail data
-            m_db.mg_delete_bk_avail_records(db=db, bid_no=ubid.get("BID"))
-
-        for ubid in user_bids:
-            # Don't need to make book info API call. They should be in the db
-            # Make API call to available and ingest data into database
-            bk_avail_api_call_n_db_ingest(db=db, bid_no=ubid.get("BID"))
+            bid_no = ubid.get("BID")
+            update_bk_avail_in_mongo(db, bid_no)
 
     mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
     m_db.mg_delete_status(db, username=username.get("UserName"))
-    return {"message": "User's books updated!"}
 
-# This updates the availability of user's current books
+    return {"message": "All user books are updated!"}
 
 
 @app.post("/update_user_books/{username}", response_class=HTMLResponse)
@@ -446,7 +454,8 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
                                     db=Depends(get_db),
                                     username=Depends(manager)
                                     ):
-    background_tasks.add_task(update_user_books, db, username)
+    """ Updates availability of all user's saved books """
+    background_tasks.add_task(update_all_user_books, db, username)
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
@@ -462,9 +471,9 @@ async def api_book_ingest(BID: str,
                           bid_no=BID)
 
     bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
-    bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
+    update_bk_avail_in_mongo(db, BID)
 
-    # WIP - Add Book
+    # Track Adding book event into Mixpanel
     mix_p.event_add_book(username.get("UserName"), BID)
     mix_p.user_change_book_count(username.get("UserName"), 1)
 
@@ -483,9 +492,22 @@ async def delete_book(BID: str,
     # delete records
     titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
 
-    m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
-    m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
-    m_db.mg_delete_bk_user_records(db=db, bid_no=BID)
+    # Check BID is linked to more than 1 user
+    counter = db.user_books.aggregate([
+        {"$match": {"BID": BID}},
+        {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+        {"$project": {"_id": 0}}
+    ])
+    final_count = counter.next().get("BID")
+
+    # If book is only linked to one user,
+    # delete book available and info records
+    if final_count == 1:
+        m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
+        m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
+
+    m_db.mg_delete_bk_user_records(
+        db=db, username=username.get("UserName"), bid_no=BID)
 
     # WIP - Delete book
     mix_p.event_delete_book(username.get("UserName"), BID)
@@ -512,10 +534,10 @@ async def show_search_books(request: Request,
         books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
 
         print(books)
-        # print("statusCode: {}".format(books.get("statusCode")))
-        # print("totalRecords: {}".format(books.get("totalRecords")))
 
-        if books.get("totalRecords") == 0 or books.get("statusCode") in [400, 404, 500, 401, 405, 429]:
+        elist = [400, 404, 500, 401, 405, 429]
+
+        if books.get("totalRecords") == 0 or books.get("statusCode") in elist:
             text_output = f"There are no records with '{book_search}'"
             book_search = None
 
@@ -536,21 +558,25 @@ async def show_search_books(request: Request,
             final_output = [nlb_rest_api.process_rest_bk_info(
                 i) for i in output_list]
 
-            # Search all BIDs linked to user already. This is to ensure I can
-            # disable books that the user already bookmarked
+            # Search all user book BIDs and disable add books
+            # for books linked to user
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
             user_books_bids = [i.get("BID") for i in user_books]
 
             for i in final_output:
+
                 i['TitleName'] = i['TitleName'].split(
                     "/")[0].strip() + " | " + str(i['BID'])
+
                 i['PublishYear'] = "Y" + i['PublishYear']
 
                 disable = "disabled" if str(
                     i['BID']) in user_books_bids else ""
+
                 i['BID'] = disable + " | " + str(i["BID"])
+
                 final_response.append(i)
 
             # Search Book
