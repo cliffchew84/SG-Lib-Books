@@ -68,18 +68,28 @@ def process_rest_single_lib_avail(nlb_input: Dict):
     output = dict()
     output['ItemNo'] = nlb_input.get('ItemNo')
     output['CallNumber'] = nlb_input.get('callNumber')
-    output['BranchName'] = nlb_input.get('location').get("name")
-    output['StatusDesc'] = nlb_input.get('transactionStatus').get("name")
-    if output['StatusDesc'] == "On Loan":
-        output['DueDate'] = nlb_input.get('transactionStatus').get(
-            "date").split("T")[0]
+
+    location = nlb_input.get("location")
+    if location:
+        output['BranchName'] = location.get("name")
+
+    status = nlb_input.get("transactionStatus")
+    if status:
+        output['StatusDesc'] = status.get("name")
+        if output['StatusDesc'] == "On Loan":
+            output['DueDate'] = status.get("date").split("T")[0]
     else:
         output['DueDate'] = None
+
     return output
 
 
 def process_rest_all_lib_avail(nlb_input: Dict):
-    return [process_rest_single_lib_avail(i) for i in nlb_input.get("items")]
+    nlb_input_list = nlb_input.get("items")
+    if nlb_input_list:
+        return [process_rest_single_lib_avail(i) for i in nlb_input_list]
+    else:
+        return []
 
 
 def process_rest_bk_info(nlb_input: Dict) -> Dict:

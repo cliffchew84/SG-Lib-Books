@@ -373,20 +373,31 @@ async def show_books_avail_by_lib(request: Request,
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-def bk_avail_api_call_n_db_ingest(db, bid_no):
-    # Make API calls to available API and ingest into DB
-    # Availability is across libraries, so we loop through all libraries
+def update_bk_avail_in_mongo(db, bid_no):
+    """ This function does three things
+    1. Make API calls to NLB to get book availability
+    2. Process and combine the records into a single List[Dict]
+    3. Delete existing book available records in MongoDB
+    4. Ingest new book available records into MongoDB
 
-    # Get book availability via NLB API
+    """
+    # Make API call on book availability
     bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=bid_no)
 
+    # Process and combine records
     all_books_avail = []
     for book in nlb_rest_api.process_rest_all_lib_avail(bk):
         books_avail = nlb_rest_api.process_single_bk_avail(book)
         books_avail.update({"BID": str(bid_no)})
         all_books_avail.append(books_avail)
 
+    # Delete existing MongoDB records
+    m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
+
+    # Add new records into MongoDB
     m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
+
+    return {"message": "Data is successfully updated in MongoDB"}
 
 
 def bk_info_api_call_n_db_ingest(db, bid_no):
@@ -408,21 +419,7 @@ async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    # Make API call on book availability
-    bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=BID)
-
-    # Process and combine records
-    all_books_avail = []
-    for book in nlb_rest_api.process_rest_all_lib_avail(bk):
-        books_avail = nlb_rest_api.process_single_bk_avail(book)
-        books_avail.update({"BID": str(BID)})
-        all_books_avail.append(books_avail)
-
-    # Delete existing MongoDB records
-    m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
-
-    # Add new records into MongoDB
-    m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
+    update_bk_avail_in_mongo(db, BID)
 
     # Insert Tracking into Mixpanel
     titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
@@ -439,30 +436,15 @@ def update_all_user_books(db, username):
 
     m_db.mg_insert_status(db, username=username.get("UserName"))
 
-    # WIP - Check sequence to (1) API call (2) book delete (3) book ingest
     if user_bids:
         for ubid in user_bids:
             bid_no = ubid.get("BID")
-            bk = nlb_rest_api.get_rest_nlb_api(
-                "GetAvailabilityInfo", input=bid_no)
-
-            # Process and combine records
-            all_books_avail = []
-            for book in nlb_rest_api.process_rest_all_lib_avail(bk):
-                books_avail = nlb_rest_api.process_single_bk_avail(book)
-                books_avail.update({"BID": str(bid_no)})
-                all_books_avail.append(books_avail)
-
-            # Delete existing MongoDB records
-            m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
-
-            # Add new records into MongoDB
-            m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
+            update_bk_avail_in_mongo(db, bid_no)
 
     mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
     m_db.mg_delete_status(db, username=username.get("UserName"))
 
-    return {"message": "User's books updated!"}
+    return {"message": "All user books are updated!"}
 
 
 @app.post("/update_user_books/{username}", response_class=HTMLResponse)
@@ -470,7 +452,7 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
                                     db=Depends(get_db),
                                     username=Depends(manager)
                                     ):
-    """ Updates the availability of user's current books """
+    """ Updates availability of all user's saved books """
     background_tasks.add_task(update_all_user_books, db, username)
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
@@ -487,9 +469,9 @@ async def api_book_ingest(BID: str,
                           bid_no=BID)
 
     bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
-    bk_avail_api_call_n_db_ingest(db=db, bid_no=BID)
+    update_bk_avail_in_mongo(db, BID)
 
-    # WIP - Add Book
+    # Track Adding book event into Mixpanel
     mix_p.event_add_book(username.get("UserName"), BID)
     mix_p.user_change_book_count(username.get("UserName"), 1)
 
