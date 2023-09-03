@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, Request, Form, Depends, BackgroundTasks
+from fastapi import FastAPI, status, Request, Form, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
@@ -28,7 +28,7 @@ project_id = os.environ["MP_PROJECT_ID"]
 mp = Mixpanel(project_id)
 
 SECRET_KEY = os.environ["mongo_secret_key"]
-ACCESS_TOKEN_EXPIRY = 60
+ACCESS_TOKEN_EXPIRY = 30
 
 APPLICATION_ID = os.environ['nlb_rest_app_id']
 API_KEY = os.environ['nlb_rest_api_key']
@@ -94,6 +94,18 @@ templates = Jinja2Templates(directory='templates')
 manager.not_authenticated_exception = NotAuthenticationException
 app.add_exception_handler(NotAuthenticationException,
                           not_authenticated_exception_handler)
+
+
+# Define an error handler to render the error page
+@app.exception_handler(HTTPException)
+async def handle_http_exception(request: Request, exc: HTTPException):
+    return templates.TemplateResponse("error.html", {"request": request})
+
+
+# Example route that triggers an internal server error
+@app.get("/trigger-error")
+def trigger_error():
+    raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 # Logout

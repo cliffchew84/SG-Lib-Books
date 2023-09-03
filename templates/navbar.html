@@ -1,72 +1,113 @@
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-            data-bs-target="#navbarNav" aria-controls="navbarNav" 
-            aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<header class="mx-auto md:pt-4 md:pb-10 pb-4 bg-sky-500">
+    {% if not username %}
 
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                {% if not username %}
-                <a class="navbar-brand" href="/{{username}}">SG Library Books</a>
-                {% endif %}
-
-                <div class="collapse navbar-collapse" id="navbarNav">
-                {% if username %}
-                <li class="nav-item">
-                    <a class="nav-link" 
-                        href="/{{username}}"><b>Hi {{username}}</b></a>
-                </li>
-                <li class="nav-item dropdown">
-
-                <a class="nav-link dropdown-toggle" 
-                    href="#" id="navbarDropdown" 
-                    role="button" data-bs-toggle="dropdown" 
-                    aria-expanded="false">{{ library|upper|default("All
-                    Libraries", true) }}</a>
-
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li>
-                        <a class="dropdown-item" 
-                            href="/{{username}}">All Libraries</a>
-                    </li>
-
-                    {% for lib in all_unique_lib %}
-                    <!-- Adding stuff --> 
-                    <li>
-                        <a class="dropdown-item" 
-                           href="/{{username}}/lib/{{lib|lower}}">{{lib}}</a>
-                    </li>
-                    {% endfor %}
-
-                </ul>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href='/{{username}}/yourbooks'>Your Books</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href='/{{username}}/search/'>Search NLB</a>
-            </li>
-
-            <li class="nav-item">
-
-                <form class="form-inline" action="/update_user_books/{{username}}" method="POST">
-                <button type="submit" class="btn btn-secondary">Update Avails</button>
-                </form>
-
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link" href='/logout'>Logout</a>
-            </li>
-            </ul>
-            <input class="form-control" id="myInput" type="text"
-            placeholder="Search through your books...">
-
-            {% else %}
-
-            {% endif %}
-        </div>
+    <div class="mx-auto xl:pl-32 md:pl-14 xs:pl-10 pl-5 flex-1">
+        <a class="text-white text-2xl">
+            SG Libraries [Beta]
+        </a>
     </div>
-</nav>
+
+    {% else %}
+    <div class="flex justify-between h-2 mx-auto">
+        <ul class="menu menu-horizontal mx-1 items-center md:hidden">
+            <div class="dropdown">
+                <label tabindex="0" class="btn btn-ghost md:hidden hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                </label>
+                <ul tabindex="0"
+                    class="bg-sky-500 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
+                    <li>
+                        <details>
+                            <summary class="text-white hover:text-white">SG
+                                Libraries
+                            </summary>
+                            <ul class="bg-sky-500 text-white">
+                                <li>
+                                    <a class="hover:text-white hover:bg-sky-300 text-sm" href="/{{username}}">
+                                        All Libraries
+                                    </a>
+                                </li>
+
+                                {% for lib in all_unique_lib %}
+                                <li>
+                                    <a class="hover:text-white hover:bg-sky-300 text-sm"
+                                        href="/{{username}}/lib/{{lib|lower}}">
+                                        {{lib}}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                    </li>
+                    <li><a class="hover:text-white hover:bg-sky-300 " href='/{{username}}/yourbooks'>Your Books</a></li>
+                    <li><a class="hover:text-white hover:bg-sky-300 " href='/{{username}}/search/'>Search NLB</a></li>
+
+                    <li class="">
+                        <form class="form-inline hover:text-white hover:bg-sky-300 "
+                            action="/update_user_books/{{username}}" method="POST">
+                            <button type="submit" class="hover:text-white text-white hover:bg-sky-300 ">Update
+                                Avails</button>
+                        </form>
+                    </li>
+
+                    <li><a class="hover:text-white text-white hover:bg-sky-300 " href='/logout'>Logout</a>
+                    </li>
+                </ul>
+            </div>
+            <li>
+                <a class="hover:text-white text-white hover:bg-sky-300 " href="/{{username}}">Hi
+                    {{username}}
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="flex justify-between h-8 mx-auto">
+        <nav class="w-screen flex items-center justify-between py-4">
+            <ul
+                class="menu menu-horizontal mx-auto z-50 lg:text-lg md:text-base text-white items-center hidden md:flex">
+                <li>
+                    <a class="text-white hover:text-white hover:bg-sky-300" href="/{{username}}">Hi {{username}}
+                    </a>
+                </li>
+                <li>
+                    <details>
+                        <summary class="hover:text-white hover:bg-sky-300">SG Libraries</summary>
+                        <ul class="bg-sky-500 text-sm text-white">
+                            <li>
+                                <a class="hover:text-white hover:bg-sky-300" href="/{{username}}">
+                                    All Libraries
+                                </a>
+                            </li>
+
+                            {% for lib in all_unique_lib %}
+                            <li>
+                                <a class="hover:text-white hover:bg-sky-300" href="/{{username}}/lib/{{lib|lower}}">
+                                    {{lib}}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                </li>
+
+                <li><a class="hover:text-white hover:bg-sky-300" href='/{{username}}/yourbooks'>Your Books</a></li>
+                <li><a class="hover:text-white hover:bg-sky-300" href='/{{username}}/search/'>Search NLB</a></li>
+
+                <li>
+                    <form class="form-inline hover:text-white hover:bg-sky-300" action="/update_user_books/{{username}}"
+                        method="POST">
+                        <button type="submit">Update Avails</button>
+                    </form>
+                </li>
+
+                <li><a class="hover:text-white hover:bg-sky-300" href='/logout'>Logout</a></li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</header>

@@ -1,60 +1,57 @@
-    <div class="container-fluid">
-        <div class="row d-flex justify-content-center align-items-center">
-            <div class="col-md-12 mx-auto">
-                <div class="table-responsive">
-                <table class="table table-hover"> 
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Number</th>
-                            <th>Status [Due]</th>
-                            <th>UpdatedAt</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myTable">
-                        {% for data in api_data %}
+<div class="w-full overflow-x-auto my-3">
 
-                        <tr>
-                        {% for a in data %}
-                           
-                            {% if a == "UpdateTime" %}
+    <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
+        type="text" placeholder="Search books by keyword in their title or status!">
 
-                            {% elif a != "BranchName" %}
+    <table class="mx-auto table-auto border-collapse table-xs md:table-md md:p-10 divide-y divide-gray-800">
+        <thead class="bg-gray-300 rounded-lg">
+            <tr class='text-sm rounded-lg bg-blue-100'>
+                <th class='py-2 w-1/2'>Title</th>
+                <th>Number</th>
+                <th>Status[Due]</th>
+                <th>UpdatedAt</th>
+            </tr>
+        </thead>
+        <tbody id="myTable">
+            {% for data in api_data %}
 
-                            {% if data[a]|int !=0 %}
+            <tr class='text-sm rounded-lg'>
+                {% for a in data %}
 
-                            <td style="vertical-align: middle;">
-                                <form action="/update_book/{{data[a]}}" method="POST">
-                                    <button type="submit" class="btn
-                                        btn-secondary">{{ data['UpdateTime'] }}</button>
-                                </form>
-                            </td>
-                            
-                            {% elif a == "TitleName" %}
-                            {% set TitleName, BID = data[a].split(' | ') %}
+                {% if a == "UpdateTime" %}
 
-                            <td style="vertical-align: middle;">
-                                <a
-                                    href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                                    class="button" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer">{{ TitleName }}</a>
+                {% elif a != "BranchName" %}
 
-                            {% else %}
-                            
-                            <td style="vertical-align: middle;">{{ data[a] }}</td>
-                            
-                            {% endif %}
+                {% if data[a]|int !=0 %}
 
-                            {% endif %}
+                <td class="px-1 w-1/12">
+                    <form action="/update_book/{{data[a]}}" method="POST">
+                        <button type="submit" class="bg-sky-500 px-3 my-1 py-1 rounded-lg 
+                            hover:text-white hover:bg-sky-300 text-white">
+                            {{ data['UpdateTime'] }}</button>
+                    </form>
+                </td>
 
-                        {% endfor %}
+                {% elif a == "TitleName" %}
+                {% set TitleName, BID = data[a].split(' | ') %}
 
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        </div>
-    </div>    
+                <td class="pl-5 py-3 w-1/2">
+                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                        class="text-indigo-600 hover:font-semibold" target="_blank" rel="noopener noreferrer">{{
+                        TitleName }}</a>
+
+                    {% else %}
+
+                <td class="w-1/12">{{ data[a] }}</td>
+
+                {% endif %}
+
+                {% endif %}
+
+                {% endfor %}
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,50 +1,66 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div class="container-fluid">
-        <div class="col col-sm-12 p-4"> 
-            <h2>Your SG Library Books [Beta]</h2>
-            <p>Save and track your Singapore library books here!
-            <b><i>Using the latest official NLB REST API (as of 14-08-2023)</i></b>
+<div class="pt-4 mt-2 pb-3 px-10 sm:px-20 xl:px-40">
+    <div class="text-gray-700">
+        <p class="text-xl">A library-centric view of your favourite Singapore library books!</p>
+        <div class='md:flex text-base py-3 space-x-1'>
+            <p>Want an easier way to view all the NLB books that you saved, so
+                that you can quickly see all available books at the library that
+                you are at? This was what sparked the creation of this side project.
             </p>
         </div>
-        <div class="row justify-content-center" style="text-align: center;">
-
-        <div class="container col-md-6 m-5 p-8">
+        <p class="font-bold italic text-sm pb-3">
+            Using the latest NLB REST API (as of 14-08-2023)
+        </p>
+    </div>
+    <div class="flex flex-col md:flex-row justify-center md:space-x-16">
+        <div class="md:w-3/5 lg:w-1/2 md:pb-2 md:pt-2 py-4 px-6 border border-4 rounded-lg">
             <form action="/login" method="POST">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id='username' name='username' required>
+                    <input type="text" class="border border-3 border-black form-control" id='username' name='username'
+                        required>
                 </div>
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id='password' name='password'>
+                <input type="password" class="border border-3 border-black form-control" id='password' name='password'
+                    required>
                 <div class="mb-3">
 
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="bg-sky-500 text-white border-white rounded-lg py-1.5 px-3">Login</button>
             </form>
+
             {% if login_invalid %}
-            <p style="margin-top: 0.5em; color: red;">Account unavailable. 
-            You might have used the wrong username, password, or have not
-            registered with us yet.</p>
+            <p class="text-red-500 bg-gray-200 mt-2 p-3 rounded-lg font-semibold">
+                Login failed. You might have used the wrong username,
+                password, or have not registered an account.
+            </p>
             {% endif %}
         </div>
 
-        <div class="container col-md-6 m-5 p-8">
+        <div class="md:w-3/5 lg:w-1/2 py-4 px-6 border border-4 rounded-lg">
             <form action="/" method="POST">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id='username' name='username' required>
+                    <input type="text" class="border border-3 border-black form-control" id='username' name='username'
+                        required>
                 </div>
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id='password' name='password'>
+                <input type="password" class="border border-3 border-black form-control" id='password' name='password'
+                    required>
                 <div class="mb-3">
 
                 </div>
-                <button type="submit" class="btn btn-danger">Register</button>
+                <button type="submit"
+                    class="bg-red-400 text-white border-white rounded-lg py-1.5 px-3">Register</button>
             </form>
             {% if register_invalid %}
-            <p style="margin-top: 0.5em; color: red;">Account already registered.</p>
+
+            <p class="text-red-500 bg-gray-200 mt-2 p-3 rounded-lg font-semibold">
+                Account already registered. Please login or contact us if you
+                have forgotten your password.
+            </p>
             {% endif %}
         </div>
     </div>

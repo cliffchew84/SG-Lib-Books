@@ -1,67 +1,67 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div class="container-fluid">
-    <div class="row justify-content-center" style="text-align: center;">
-        <div class="col col-sm-20" style="margin: 1.5em 0.5em;"> 
-            <h3>Saved NLB Books</h3>
+<div class="w-full overflow-x-auto my-3">
+    <div class="mx-auto max-w-screen-lg px-4">
+        <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border" id="myInput"
+            type="text" placeholder="Search your saved books by keywords in their title!">
+        <!-- <table class="table md:table-md table-xs divide-y divide-gray-800"> -->
+        <table class="mx-auto table-auto border-collapse table-xs md:table-md md:p-10 divide-y divide-gray-800">
+            <thead class="bg-gray-300 rounded-lg">
+                <tr class='text-sm rounded-lg bg-blue-100'>
+                    <th>B</th>
+                    <th>Lib No.</th>
+                    <th>Your Books</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="myTable">
 
-             <table class="table table-hover">
-                 <thead> 
-                    <tr>
-                        <th>No</th>
-                        <th>Call Number</th>
-                        <th>Title</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody id="myTable"> 
-                        
-                    {% for data in api_data %}
+                {% for data in api_data %}
 
-                    <tr> 
-                        {% for a in data %}
-                            {% if data[a]|int !=0 %}
+                <tr>
+                    {% for a in data %}
+                    {% if data[a]|int !=0 %}
 
-                            <td style="vertical-align: middle;"> 
-                            <form action="/delete_book/{{data[a]}}" method="POST">
-                                <button type="submit" 
-                                    class="btn btn-secondary">Delete
-                                </button> 
-                            </form> 
-                            </td>
-                            
-                            {% elif a == "TitleName" %}
-                            {% set TitleName, BID = data[a].split(' | ') %}
-                            <td style="vertical-align: middle;"> <a
-                                href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                                class="button" target="_blank" rel="noopener
-                            noreferrer">{{ TitleName }}</a> 
+                    <td>
+                        <form action="/delete_book/{{data[a]}}" method="POST">
+                            <button type="submit" class="bg-sky-500 px-3 py-1 rounded-lg 
+                            hover:text-white hover:bg-sky-300 text-white">Delete
+                            </button>
+                        </form>
+                    </td>
 
-                            {% else %}
-                            
-                            <td style="vertical-align: middle;">{{ data[a] }}</td>
-                            
-                            {% endif %}
+                    {% elif a == "TitleName" %}
+                    {% set TitleName, BID = data[a].split(' | ') %}
+                    <td>
+                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                            class="button text-indigo-600 hover:font-semibold" target="_blank" rel="noopener
+                            noreferrer">{{ TitleName }}
+                        </a>
 
-                        {% endfor %}
-                    </tr> 
-                    {% endfor %} 
-                </tbody>
-            </table>
-        </div>
+                        {% else %}
+
+                    <td>{{ data[a] }}</td>
+
+                    {% endif %}
+
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
-    <script>
-    $(document).ready(function(){
-      $("#myInput").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("#myTable tr").filter(function() {
-          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
         });
-      });
     });
-    </script>
+</script>
 
 {% include 'footer.html' %}

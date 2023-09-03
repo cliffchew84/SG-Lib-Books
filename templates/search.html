@@ -2,23 +2,18 @@
 {% include 'navbar.html' %}
 
 <div class="container-fluid">
-    <div class="row justify-content-center"
-         style="margin-top: 20px; text-align: center;">
-        <form class="form-inline" action="/{{username}}/search/" 
-            method="GET">
+    <div class="row justify-content-center" style="margin-top: 20px; text-align: center;">
+        <form class="form-inline" action="/{{username}}/search/" method="GET">
             <div class="row justify-content-center align-items-center">
                 <div class="col-md-9 col-ms-9">
-                    <input type="search" 
-                           class="form-control" 
-                           id="book_search" 
-                           placeholder="Search for this book title" 
-                           name="book_search"
-                           required
-                           >
+                    <input type="search" class="form-control" id="book_search" placeholder="Search for this book title"
+                        name="book_search" required>
                 </div>
                 <div class="col-sm-3 col-md-3">
-                    <button type="submit" 
-                            class="btn btn-secondary">Search</button>
+                    <button type="submit" class="bg-sky-500 px-3 my-1 py-1 rounded-lg 
+                            hover:text-white hover:bg-sky-300 text-white">
+                        Search
+                    </button>
                 </div>
             </div>
 
@@ -33,50 +28,51 @@
 
             <h3>NLB Search Results on {{keyword}}</h3>
 
-             <table class="table table-hover">
-                 <thead> 
+            <table class="table table-hover">
+                <thead>
                     <tr>
                         <th>Add</th>
-                        <th>Title - <i>Links go to book NLB page</i></th>
+                        <th>Title <i>[Goes to book's NLB page]</i></th>
                         <th>Author</th>
                         <th>Pub Year</th>
                     </tr>
                 </thead>
-                <tbody id="myTable"> 
-                        
+                <tbody id="myTable">
+
                     {% for data in api_data %}
 
-                    <tr> 
+                    <tr>
                         {% for a in data %}
 
-                            {% if a == "BID" %}
-                            {% set disable, BID = data[a].split(' | ') %}
-                            
-                            <td style="vertical-align: middle;"> 
-                            <form action="/ingest_book/{{BID}}" method="POST">
-                                <button type="submit" 
-                                    class="btn btn-secondary" {{ disable }}>Add
-                                </button> 
-                            </form> 
-                            </td>
-                            
-                            {% elif a == "TitleName" %}
-                            {% set TitleName, BID = data[a].split(' | ') %}
+                        {% if a == "BID" %}
+                        {% set disable, BID = data[a].split(' | ') %}
 
-                            <td style="vertical-align: middle;"> <a
+                        <td style="vertical-align: middle;">
+                            <form action="/ingest_book/{{BID}}" method="POST">
+                                <button type="submit" class="bg-sky-500 px-3 my-1 py-1 rounded-lg 
+                                    hover:text-white hover:bg-sky-300 text-white" {{ disable}}>
+                                    Add
+                                </button>
+                            </form>
+                        </td>
+
+                        {% elif a == "TitleName" %}
+                        {% set TitleName, BID = data[a].split(' | ') %}
+
+                        <td style="vertical-align: middle;"> <a
                                 href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                                class="button" target="_blank" rel="noopener
-                            noreferrer">{{ TitleName }}</a> 
+                                class="button text-indigo-600" target="_blank" rel="noopener
+                            noreferrer">{{ TitleName }}</a>
 
                             {% else %}
-                            
-                            <td style="vertical-align: middle;">{{ data[a] }}</td>
-                            
-                            {% endif %}
+
+                        <td style="vertical-align: middle;">{{ data[a] }}</td>
+
+                        {% endif %}
 
                         {% endfor %}
-                    </tr> 
-                    {% endfor %} 
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             {% else %}
@@ -86,15 +82,15 @@
     </div>
 </div>
 
-    <script>
-    $(document).ready(function(){
-      $("#myInput").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("#myTable tr").filter(function() {
-          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
         });
-      });
     });
-    </script>
+</script>
 
 {% include 'footer.html' %}
