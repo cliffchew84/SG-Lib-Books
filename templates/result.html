@@ -2,36 +2,34 @@
 {% include 'navbar.html' %}
 {% include 'summary.html' %}
 
-<div class="container-fluid">
-    <div class="row justify-content-center" style="text-align: center;">
+<div class="px-5 md:px-1 flex flex-col justify-center items-center text-center">
 
-            {% if not library %} 
-                <h4><b style="background-color:
-                        lightgrey; ">All Libraries</b></h4>
-            
-                {% include 'result_table.html' %}
+    {% if not library %}
+    <h4 class="w-80 rounded-lg bg-gray-300 p-3 font-bold">
+        All Libraries - {{all_avail_books|length}} / {{all_unique_books|length}} of all books available</h4>
 
-            {% else %}
-                <h4><b style="background-color: 
-                        lightgrey; ">{{ library|title }}</b> - [{{ lib_avail }} /
-                        {{ lib_all }}]</h4> 
+    {% include 'result_table.html' %}
 
-                {% include 'result_no_lib_table.html' %}
+    {% else %}
+    <h4 class="w-80 rounded-lg bg-gray-300 p-3 font-bold">
+        {{ library|title }} - {{ lib_avail }} / {{ lib_all }} unique books
+        available</h4>
 
-            {% endif %}            
-            
-        </div>
-    </div>
+    {% include 'result_no_lib_table.html' %}
 
-    
-    <script>
-    $(document).ready(function(){
-      $("#myInput").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("#myTable tr").filter(function() {
-          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    {% endif %}
+
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
         });
-      });
     });
-    </script>
-        {% include 'footer.html' %}
+</script>
+{% include 'footer.html' %}
