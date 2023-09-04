@@ -28,7 +28,7 @@ project_id = os.environ["MP_PROJECT_ID"]
 mp = Mixpanel(project_id)
 
 SECRET_KEY = os.environ["mongo_secret_key"]
-ACCESS_TOKEN_EXPIRY = 30
+ACCESS_TOKEN_EXPIRY = 60
 
 APPLICATION_ID = os.environ['nlb_rest_app_id']
 API_KEY = os.environ['nlb_rest_api_key']
@@ -201,6 +201,17 @@ async def show_current_books(request: Request,
                              db=Depends(get_db),
                              username=Depends(manager)):
 
+    response = process_user_book_data(
+        db=db, username=username.get("UserName"))
+
+    # Processing necessary statistics
+    all_unique_books = process.process_all_unique_books(response)
+    all_avail_books = process.process_all_avail_books(response)
+    all_unique_lib = process.process_all_unique_lib(response)
+    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+    lib_book_summary = process.process_lib_book_summary(
+        all_unique_lib, all_avail_bks_by_lib)
+
     output = []
     if username:
         # Get all the books linked to the user. This is the complicated query
@@ -233,7 +244,12 @@ async def show_current_books(request: Request,
         return templates.TemplateResponse("yourbooks.html", {
             "request": request,
             "username": username.get("UserName"),
-            "api_data": output
+            "api_data": output,
+            'all_unique_books': all_unique_books,
+            'all_avail_books': all_avail_books,
+            'all_unique_lib': all_unique_lib,
+            'avail_books': all_avail_bks_by_lib,
+            'lib_book_summary': lib_book_summary,
         })
     else:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
@@ -550,6 +566,17 @@ async def show_search_books(request: Request,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
+    response = process_user_book_data(
+        db=db, username=username.get("UserName"))
+
+    # Processing necessary statistics
+    all_unique_books = process.process_all_unique_books(response)
+    all_avail_books = process.process_all_avail_books(response)
+    all_unique_lib = process.process_all_unique_lib(response)
+    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+    lib_book_summary = process.process_lib_book_summary(
+        all_unique_lib, all_avail_bks_by_lib)
+
     text_output = "Please search for your book title"
     final_response = list()
 
@@ -611,5 +638,10 @@ async def show_search_books(request: Request,
         "keyword": book_search,
         "username": username.get("UserName"),
         "api_data": final_response,
-        "text_output": text_output
+        "text_output": text_output,
+        'all_unique_books': all_unique_books,
+        'all_avail_books': all_avail_books,
+        'all_unique_lib': all_unique_lib,
+        'avail_books': all_avail_bks_by_lib,
+        'lib_book_summary': lib_book_summary,
     })

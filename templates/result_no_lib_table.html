@@ -1,4 +1,4 @@
-<div class="w-full overflow-x-auto my-3">
+<div class="w-full overflow-x-auto">
 
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
         type="text" placeholder="Search books by keyword in their title or status!">
@@ -6,7 +6,7 @@
     <table class="mx-auto table-auto border-collapse table-xs md:table-md md:p-10 divide-y divide-gray-800">
         <thead class="bg-gray-300 rounded-lg">
             <tr class='text-sm rounded-lg bg-blue-100'>
-                <th class='py-2 w-1/2'>Title</th>
+                <th>Title</th>
                 <th>Number</th>
                 <th>Status[Due]</th>
                 <th>UpdatedAt</th>
@@ -20,13 +20,15 @@
 
                 {% if a == "UpdateTime" %}
 
+                <!-- Skip to do nothing -->
+
                 {% elif a != "BranchName" %}
 
                 {% if data[a]|int !=0 %}
 
                 <td class="px-1 w-1/12">
                     <form action="/update_book/{{data[a]}}" method="POST">
-                        <button type="submit" class="bg-sky-500 px-3 my-1 py-1 rounded-lg 
+                        <button type="submit" class="bg-sky-500 px-3 py-1 rounded-lg 
                             hover:text-white hover:bg-sky-300 text-white">
                             {{ data['UpdateTime'] }}</button>
                     </form>
@@ -35,12 +37,31 @@
                 {% elif a == "TitleName" %}
                 {% set TitleName, BID = data[a].split(' | ') %}
 
-                <td class="pl-5 py-3 w-1/2">
+                <td class="w-1/2">
                     <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
                         class="text-indigo-600 hover:font-semibold" target="_blank" rel="noopener noreferrer">{{
                         TitleName }}</a>
 
-                    {% else %}
+                    {% elif a == "StatusDesc" %}
+
+                    {% if data[a] == "Available" %}
+
+                <td class="w-1/12 px-3 py-1 text-xs">
+                    <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-sm">
+                        {{ data[a] }} </span>
+                </td>
+
+                {% else %}
+
+                <td class="w-1/12 px-3 py-1 text-xs">
+                    <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-lg"> {{ data[a]
+                        }}
+                    </span>
+                </td>
+
+                {% endif %}
+
+                {% else %}
 
                 <td class="w-1/12">{{ data[a] }}</td>
 

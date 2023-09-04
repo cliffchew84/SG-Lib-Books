@@ -32,19 +32,14 @@ def process_lib_book_summary(all_unique_lib, all_avail_bks_by_lib):
     # Creating book summary
     lib_book_summary = []
     for lib in all_unique_lib:
-        lib_count = {"Library": lib}
         book_count = 0
 
         for book in all_avail_bks_by_lib:
             if lib == book["BranchName"]:
                 book_count = book_count + 1
 
-        lib_count["Count"] = book_count
+        lib_book_summary.append({lib: book_count})
 
-        if lib_count['Count'] >= 1:
-            lib_book_summary.append(lib_count)
-
-    # Sorting to top 5 libraries (Need more data to check on this...)
     lib_book_summary = sorted(
-        lib_book_summary, key=lambda d: d['Count'], reverse=True)
-    return lib_book_summary[:5]
+        lib_book_summary, key=lambda x: list(x.values())[0], reverse=True)
+    return lib_book_summary

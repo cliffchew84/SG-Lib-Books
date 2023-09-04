@@ -1,17 +1,21 @@
-<header class="mx-auto md:pt-4 md:pb-10 pb-4 bg-sky-500">
+<header class="mx-auto pt-4 pb-10 bg-sky-500">
     {% if not username %}
 
-    <div class="mx-auto xl:pl-32 md:pl-14 xs:pl-10 pl-5 flex-1">
+    <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1">
         <a class="text-white text-2xl">
             SG Libraries [Beta]
         </a>
+
+        <a class="ml-auto hover:text-white text-white hover:bg-sky-300 mr-1 mt-1.5" target="_blank"
+            href='https://www.notion.so/cliffchew/SG-Libraries-App-Changelog-c9842dba13684212b6df1567688cffc8'>Changelog</a>
+
     </div>
 
     {% else %}
     <div class="flex justify-between h-2 mx-auto">
         <ul class="menu menu-horizontal mx-1 items-center md:hidden">
             <div class="dropdown">
-                <label tabindex="0" class="btn btn-ghost md:hidden hover:text-white">
+                <label tabindex="0" class="btn btn-ghost md:hidden text-white hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -22,21 +26,20 @@
                     class="bg-sky-500 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
                     <li>
                         <details>
-                            <summary class="text-white hover:text-white">SG
-                                Libraries
-                            </summary>
-                            <ul class="bg-sky-500 text-white">
+                            <summary class="hover:text-white hover:bg-sky-300">SG Libraries</summary>
+                            <ul class="bg-sky-500 text-sm text-white">
                                 <li>
-                                    <a class="hover:text-white hover:bg-sky-300 text-sm" href="/{{username}}">
-                                        All Libraries
+                                    <a class="hover:text-white hover:bg-sky-300" href="/{{username}}">
+                                        All Libraries - {{all_avail_books|length}} / {{all_unique_books|length}}
                                     </a>
                                 </li>
 
-                                {% for lib in all_unique_lib %}
+                                {% for lib in lib_book_summary %}
                                 <li>
-                                    <a class="hover:text-white hover:bg-sky-300 text-sm"
-                                        href="/{{username}}/lib/{{lib|lower}}">
-                                        {{lib}}
+                                    <a class="hover:text-white hover:bg-sky-300"
+                                        href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
+                                        {{lib.keys()|list|first}} -
+                                        {{lib.values()|list|first}}
                                     </a>
                                 </li>
                                 {% endfor %}
@@ -59,7 +62,7 @@
                 </ul>
             </div>
             <li>
-                <a class="hover:text-white text-white hover:bg-sky-300 " href="/{{username}}">Hi
+                <a class="hover:text-white text-white hover:bg-sky-300 uppercase" href="/{{username}}">Hi
                     {{username}}
                 </a>
             </li>
@@ -68,10 +71,10 @@
 
     <div class="flex justify-between h-8 mx-auto">
         <nav class="w-screen flex items-center justify-between py-4">
-            <ul
-                class="menu menu-horizontal mx-auto z-50 lg:text-lg md:text-base text-white items-center hidden md:flex">
+            <ul class="menu menu-horizontal mx-auto z-50 lg:text-lg md:text-sm text-white items-center hidden md:flex">
                 <li>
-                    <a class="text-white hover:text-white hover:bg-sky-300" href="/{{username}}">Hi {{username}}
+                    <a class="text-white hover:text-white hover:bg-sky-300 uppercase" href="/{{username}}">Hi
+                        {{username}}
                     </a>
                 </li>
                 <li>
@@ -80,14 +83,16 @@
                         <ul class="bg-sky-500 text-sm text-white">
                             <li>
                                 <a class="hover:text-white hover:bg-sky-300" href="/{{username}}">
-                                    All Libraries
+                                    All Libraries - {{all_avail_books|length}} / {{all_unique_books|length}}
                                 </a>
                             </li>
 
-                            {% for lib in all_unique_lib %}
+                            {% for lib in lib_book_summary %}
                             <li>
-                                <a class="hover:text-white hover:bg-sky-300" href="/{{username}}/lib/{{lib|lower}}">
-                                    {{lib}}
+                                <a class="hover:text-white hover:bg-sky-300"
+                                    href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
+                                    {{lib.keys()|list|first}} -
+                                    {{lib.values()|list|first}}
                                 </a>
                             </li>
                             {% endfor %}
