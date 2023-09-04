@@ -14,21 +14,34 @@
             Using the latest NLB REST API (as of 14-08-2023)
         </p>
     </div>
-    <div class="flex flex-col md:flex-row justify-center md:space-x-16">
-        <div class="md:w-3/5 lg:w-1/2 md:pb-2 md:pt-2 py-4 px-6 border border-4 rounded-lg">
+    <div class="flex flex-col md:flex-row items-center justify-center md:space-x-16">
+        <div class="w-full md:w-5/6 lg:w-1/2 md:pb-2 md:pt-2 py-4 px-6 border-4 rounded-lg">
             <form action="/login" method="POST">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="border border-3 border-black form-control" id='username' name='username'
-                        required>
+                <div class="mb-3 items-center justify-center">
+                    <label for="username" class="mx-3 form-label">Username</label>
+                    <input type="text"
+                        class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control rounded-lg border-2 border-blue-800"
+                        id='username' name='username' required>
                 </div>
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="border border-3 border-black form-control" id='password' name='password'
-                    required>
-                <div class="mb-3">
+                <label for="password" class="mx-3 form-label">Password</label>
 
+                <div class="relative w-full">
+
+                    <!-- Password show and hide button -->
+                    <div class="absolute inset-y-0 right-0 flex items-center px-4 xs:px-4 sm:px-4 xl:px-8">
+                        <input class="hidden js-password-toggle" id="login-toggle" type="checkbox" />
+                        <label class="bg-gray-300 hover:bg-gray-400 rounded-lg px-2 py-1 
+                            text-xs text-gray-600 font-semibold cursor-pointer js-password-label"
+                            for="login-toggle">show</label>
+                    </div>
+                    <!-- Password show and hide button -->
+
+                    <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
+                        rounded-lg border-2 border-blue-800 js-password" id='password' name='password' required />
                 </div>
-                <button type="submit" class="bg-sky-500 text-white border-white rounded-lg py-1.5 px-3">Login</button>
+
+                <button type="submit"
+                    class="bg-sky-500 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Login</button>
             </form>
 
             {% if login_invalid %}
@@ -39,21 +52,32 @@
             {% endif %}
         </div>
 
-        <div class="md:w-3/5 lg:w-1/2 py-4 px-6 border border-4 rounded-lg">
+        <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border-4 rounded-lg">
             <form action="/" method="POST">
                 <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="border border-3 border-black form-control" id='username' name='username'
-                        required>
+                    <label for="username" class="form-label mx-3">Username</label>
+                    <input type="text"
+                        class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control rounded-lg border-2 border-blue-800"
+                        id='username' name='username' required>
                 </div>
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="border border-3 border-black form-control" id='password' name='password'
-                    required>
-                <div class="mb-3">
+                <label for="password" class="form-label mx-3">Password</label>
 
+                <div class="relative w-full">
+
+                    <!-- Adding password hide and show button -->
+                    <div class="absolute inset-y-0 right-0 flex items-center px-4 xs:px-4 sm:px-4 xl:px-8">
+                        <input class="hidden js-password-toggle_2" id="register-toggle" type="checkbox" />
+                        <label class="bg-gray-300 hover:bg-gray-400 rounded-lg py-1 px-2 
+                            text-xs font-semibold text-gray-600 cursor-pointer js-password-label_2"
+                            for="register-toggle">show</label>
+                    </div>
+                    <!-- Adding password hide and show button -->
+
+                    <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
+                        rounded-lg border-2 border-blue-800 js-password_2" id='password' name='password' required>
                 </div>
                 <button type="submit"
-                    class="bg-red-400 text-white border-white rounded-lg py-1.5 px-3">Register</button>
+                    class="bg-red-400 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Register</button>
             </form>
             {% if register_invalid %}
 
@@ -65,4 +89,41 @@
         </div>
     </div>
 </div>
+
+<script>
+    const passwordToggle = document.querySelector('.js-password-toggle')
+
+    passwordToggle.addEventListener('change', function () {
+        const password = document.querySelector('.js-password'),
+            passwordLabel = document.querySelector('.js-password-label')
+
+        if (password.type === 'password') {
+            password.type = 'text'
+            passwordLabel.innerHTML = 'hide'
+        } else {
+            password.type = 'password'
+            passwordLabel.innerHTML = 'show'
+        }
+
+        password.focus()
+    })
+
+    const passwordToggle2 = document.querySelector('.js-password-toggle_2')
+
+    passwordToggle2.addEventListener('change', function () {
+        const password = document.querySelector('.js-password_2'),
+            passwordLabel = document.querySelector('.js-password-label_2')
+
+        if (password.type === 'password') {
+            password.type = 'text'
+            passwordLabel.innerHTML = 'hide'
+        } else {
+            password.type = 'password'
+            passwordLabel.innerHTML = 'show'
+        }
+
+        password.focus()
+    })
+</script>
+
 {% include 'footer.html' %}

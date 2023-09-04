@@ -3,13 +3,14 @@
 
 <div class="w-full overflow-x-auto my-3">
     <div class="mx-auto max-w-screen-lg px-4">
-        <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border" id="myInput"
-            type="text" placeholder="Search your saved books by keywords in their title!">
-        <!-- <table class="table md:table-md table-xs divide-y divide-gray-800"> -->
+
+        <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-blue-800"
+            id="myInput" type="text" placeholder="Search your saved books by keywords in their title!">
+
         <table class="mx-auto table-auto border-collapse table-xs md:table-md md:p-10 divide-y divide-gray-800">
             <thead class="bg-gray-300 rounded-lg">
                 <tr class='text-sm rounded-lg bg-blue-100'>
-                    <th>B</th>
+                    <th></th>
                     <th>Lib No.</th>
                     <th>Your Books</th>
                     <th></th>
@@ -35,7 +36,7 @@
                     {% set TitleName, BID = data[a].split(' | ') %}
                     <td>
                         <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                            class="button text-indigo-600 hover:font-semibold" target="_blank" rel="noopener
+                            class="button text-indigo-600 hover:font-semibold -my-2" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}
                         </a>
 
