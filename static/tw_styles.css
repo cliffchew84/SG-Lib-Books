@@ -7974,6 +7974,11 @@ details.collapse summary::-webkit-details-marker {
   margin-bottom: 1.25rem;
 }
 
+.mx-12 {
+  margin-left: 3rem;
+  margin-right: 3rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -8138,6 +8143,10 @@ details.collapse summary::-webkit-details-marker {
   height: 5rem;
 }
 
+.min-h-screen {
+  min-height: 100vh;
+}
+
 .w-1\/12 {
   width: 8.333333%;
 }
@@ -8196,6 +8205,10 @@ details.collapse summary::-webkit-details-marker {
 
 .w-56 {
   width: 14rem;
+}
+
+.w-3\/5 {
+  width: 60%;
 }
 
 .max-w-screen-lg {
@@ -10325,6 +10338,16 @@ details.collapse summary::-webkit-details-marker {
 }
 
 @media (min-width: 1024px) {
+  .lg\:mx-12 {
+    margin-left: 3rem;
+    margin-right: 3rem;
+  }
+
+  .lg\:my-12 {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+
   .lg\:ml-16 {
     margin-left: 4rem;
   }
