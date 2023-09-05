@@ -1,20 +1,52 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<style>
-    .container {
-        margin-top: 1em;
-        max-width: 500px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
-<div class="container-fluid">
-    <div class="row justify-content-center" style="text-align: center;">
-        <div class="col col-sm-10" style="margin: 3.5em 3.5em;"> 
-        <div class="container">
-            <h1>Congrats!</h1>
-            <h2>Your account {{ username }}'s registeration is successful</h2>
+<div class="flex flex-col mx-5 md:mx-20 my-20 p-4 items-center justify-center
+    rounded-lg border-3 border-blue-400 text-blue-700">
+    <div class="pt-2 py-2 text-3xl font-semibold">
+        🎉 Thanks for signing up 🎉
+    </div>
+
+    <div class="flex lg:flex-row flex-col space-x-0 lg:space-x-24 justify-center">
+        <div class="flex flex-col lg:w-2/5">
+            <div class="py-2">
+                Your account <span class="font-semibold">| {{ username }} |</span> has been created.
+            </div>
+
+            <a class="py-2 rounded-lg" href="https://imgbox.com/wx4HlVJC" target="_blank">
+                <img src="https://images2.imgbox.com/22/14/wx4HlVJC_o.jpg" alt="image host" width='250' height='450' />
+            </a>
+            <div class="py-2 italic">
+                They say cat photos are good for engagement.
+            </div>
+        </div>
+        <div class="flex flex-col lg:px-2 py-2 px-0 lg:w-2/5">
+            <div class="flex font-semibold">
+                So now what?
+            </div>
+            <p class="flex pb-2">Now that you have signed up for an account, you can
+                start to search, save and identify where your favourite SG library
+                books are in a way that is more intuitive!</p>
+            <div>
+                <ol class="pl-6 list-decimal">
+                    <li>Start by searching and saving some books from <span class="font-semibold capitalize">Search
+                            NLB</span>.</li>
+                    <li>You can go to <span class="font-semibold capitalize">Your Books</span> to view all the
+                        books that you have saved.
+                    </li>
+                    <li>Go to the <span class="font-semibold capitalize">SG Libraries</span> to find
+                        the availability of your saved books at a library level.
+                    </li>
+                    <li>You can update all books' availability by clicking on <span
+                            class="font-semibold capitalize">Update
+                            Avails</span>, or update the books individually.
+                    </li>
+                    <li>Book titles also link to the book's NLB page for more information about them.
+                    </li>
+                    <li>I will add more features to this app, so do keep a lookout! Feel free to reach out to me
+                        if there are things you want to see here!</li>
+                </ol>
+            </div>
         </div>
     </div>
 </div>

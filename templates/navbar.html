@@ -27,17 +27,17 @@
                     <li>
                         <details>
                             <summary class="hover:text-white hover:bg-sky-300">SG Libraries</summary>
-                            <ul class="bg-sky-500 text-sm text-white">
+                            <ul class="bg-sky-500 text-sm text-white w-56">
                                 <li>
-                                    <a class="hover:text-white hover:bg-sky-300" href="/{{username}}">
-                                        All Libraries - {{all_avail_books|length}} / {{all_unique_books|length}}
+                                    <a class="p-0.5 hover:text-white hover:bg-sky-300" href="/{{username}}">
+                                        All Libraries - {{all_avail_books|length}}
                                     </a>
                                 </li>
 
                                 {% for lib in lib_book_summary %}
                                 <li>
-                                    <a class="hover:text-white hover:bg-sky-300"
-                                        href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
+                                    <a class="p-0.5 hover:text-white hover:bg-sky-300
+                                        py-1" href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
                                         {{lib.keys()|list|first}} -
                                         {{lib.values()|list|first}}
                                     </a>
@@ -80,16 +80,16 @@
                 <li>
                     <details>
                         <summary class="hover:text-white hover:bg-sky-300">SG Libraries</summary>
-                        <ul class="bg-sky-500 text-sm text-white">
+                        <ul class="bg-sky-500 text-sm text-white w-56">
                             <li>
-                                <a class="hover:text-white hover:bg-sky-300" href="/{{username}}">
-                                    All Libraries - {{all_avail_books|length}} / {{all_unique_books|length}}
+                                <a class="py-0.5 hover:text-white hover:bg-sky-300" href="/{{username}}">
+                                    All Libraries - {{all_avail_books|length}}
                                 </a>
                             </li>
 
                             {% for lib in lib_book_summary %}
                             <li>
-                                <a class="hover:text-white hover:bg-sky-300"
+                                <a class="py-0.5 hover:text-white hover:bg-sky-300"
                                     href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
                                     {{lib.keys()|list|first}} -
                                     {{lib.values()|list|first}}
