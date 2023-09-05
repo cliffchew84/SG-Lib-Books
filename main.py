@@ -204,6 +204,10 @@ async def show_current_books(request: Request,
     response = process_user_book_data(
         db=db, username=username.get("UserName"))
 
+    update_status = None
+    if m_db.mg_query_status(db=db, username=username.get("UserName")):
+        update_status = "Updating In Progress... Please refresh to update!"
+
     # Processing necessary statistics
     all_unique_books = process.process_all_unique_books(response)
     all_avail_books = process.process_all_avail_books(response)
@@ -250,6 +254,7 @@ async def show_current_books(request: Request,
             'all_unique_lib': all_unique_lib,
             'avail_books': all_avail_bks_by_lib,
             'lib_book_summary': lib_book_summary,
+            "status": update_status
         })
     else:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
@@ -569,6 +574,10 @@ async def show_search_books(request: Request,
     response = process_user_book_data(
         db=db, username=username.get("UserName"))
 
+    update_status = None
+    if m_db.mg_query_status(db=db, username=username.get("UserName")):
+        update_status = "Updating In Progress... Please refresh to update!"
+
     # Processing necessary statistics
     all_unique_books = process.process_all_unique_books(response)
     all_avail_books = process.process_all_avail_books(response)
@@ -644,4 +653,5 @@ async def show_search_books(request: Request,
         'all_unique_lib': all_unique_lib,
         'avail_books': all_avail_bks_by_lib,
         'lib_book_summary': lib_book_summary,
+        "status": update_status
     })
