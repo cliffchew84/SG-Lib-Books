@@ -201,63 +201,68 @@ async def show_current_books(request: Request,
                              db=Depends(get_db),
                              username=Depends(manager)):
 
-    response = process_user_book_data(
-        db=db, username=username.get("UserName"))
-
-    update_status = None
-    if m_db.mg_query_status(db=db, username=username.get("UserName")):
-        update_status = "Updating In Progress... Please refresh to update!"
-
-    # Processing necessary statistics
-    all_unique_books = process.process_all_unique_books(response)
-    all_avail_books = process.process_all_avail_books(response)
-    all_unique_lib = process.process_all_unique_lib(response)
-    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-    lib_book_summary = process.process_lib_book_summary(
-        all_unique_lib, all_avail_bks_by_lib)
-
-    output = []
-    if username:
-        # Get all the books linked to the user. This is the complicated query
-        query = m_db.mg_query_user_bookmarked_books(
+    try:
+        response = process_user_book_data(
             db=db, username=username.get("UserName"))
 
-        response = []
-        for a in query:
-            response.append({
-                "TitleName": a.get('TitleName').strip(),
-                "BID": a.get("BID"),
-                "CallNumber": a.get("CallNumber").split(" -")[0].strip()})
+        update_status = None
+        if m_db.mg_query_status(db=db, username=username.get("UserName")):
+            update_status = "Updating In Progress... Please refresh to update!"
 
-            result = list({d['TitleName']: d for d in response}.values())
+        # Processing necessary statistics
+        all_unique_books = process.process_all_unique_books(response)
+        all_avail_books = process.process_all_avail_books(response)
+        all_unique_lib = process.process_all_unique_lib(response)
+        all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
 
-            i = 0
-            output = []
-            for r in result:
-                i += 1
-                output.append({
-                    "No": "B" + str(i),
-                    "CallNumber": r.get('CallNumber'),
-                    "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
-                    "BID": r.get("BID")
-                })
+        output = []
+        if username:
+            # Get all the books linked to the user.
+            # This is the complicated query
+            query = m_db.mg_query_user_bookmarked_books(
+                db=db, username=username.get("UserName"))
 
-        # WIP - Show current books
-        mix_p.event_select_current_saved_book(username.get("UserName"))
+            response = []
+            for a in query:
+                response.append({
+                    "TitleName": a.get('TitleName').strip(),
+                    "BID": a.get("BID"),
+                    "CallNumber": a.get("CallNumber").split(" -")[0].strip()})
 
-        return templates.TemplateResponse("yourbooks.html", {
-            "request": request,
-            "username": username.get("UserName"),
-            "api_data": output,
-            'all_unique_books': all_unique_books,
-            'all_avail_books': all_avail_books,
-            'all_unique_lib': all_unique_lib,
-            'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary,
-            "status": update_status
-        })
-    else:
-        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+                result = list({d['TitleName']: d for d in response}.values())
+
+                i = 0
+                output = []
+                for r in result:
+                    i += 1
+                    output.append({
+                        "No": "B" + str(i),
+                        "CallNumber": r.get('CallNumber'),
+                        "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
+                        "BID": r.get("BID")
+                    })
+
+            # WIP - Show current books
+            mix_p.event_select_current_saved_book(username.get("UserName"))
+
+            return templates.TemplateResponse("yourbooks.html", {
+                "request": request,
+                "username": username.get("UserName"),
+                "api_data": output,
+                'all_unique_books': all_unique_books,
+                'all_avail_books': all_avail_books,
+                'all_unique_lib': all_unique_lib,
+                'avail_books': all_avail_bks_by_lib,
+                'lib_book_summary': lib_book_summary,
+                "status": update_status
+            })
+        else:
+            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 def process_user_book_data(db, username: str):
@@ -320,35 +325,40 @@ async def show_books_avail(request: Request,
                            db=Depends(get_db),
                            username=Depends(manager)):
 
-    if username:
-        response = process_user_book_data(
-            db=db, username=username.get("UserName"))
+    try:
+        if username:
+            response = process_user_book_data(
+                db=db, username=username.get("UserName"))
 
-        # Processing necessary statistics
-        all_unique_books = process.process_all_unique_books(response)
-        all_avail_books = process.process_all_avail_books(response)
-        all_unique_lib = process.process_all_unique_lib(response)
-        all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(
-            all_unique_lib, all_avail_bks_by_lib)
+            # Processing necessary statistics
+            all_unique_books = process.process_all_unique_books(response)
+            all_avail_books = process.process_all_avail_books(response)
+            all_unique_lib = process.process_all_unique_lib(response)
+            all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(
+                response)
+            lib_book_summary = process.process_lib_book_summary(
+                all_unique_lib, all_avail_bks_by_lib)
 
-        update_status = None
-        if m_db.mg_query_status(db=db, username=username.get("UserName")):
-            update_status = "Updating In Progress... Please refresh to update!"
+            update_status = None
+            if m_db.mg_query_status(db=db, username=username.get("UserName")):
+                update_status = "Updating In Progress!"
 
-        return templates.TemplateResponse("result.html", {
-            "request": request,
-            "username": username.get("UserName"),
-            "api_data": response,
-            'all_unique_books': all_unique_books,
-            'all_avail_books': all_avail_books,
-            'all_unique_lib': all_unique_lib,
-            'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary,
-            'status': update_status
-        })
-    else:
-        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+            return templates.TemplateResponse("result.html", {
+                "request": request,
+                "username": username.get("UserName"),
+                "api_data": response,
+                'all_unique_books': all_unique_books,
+                'all_avail_books': all_avail_books,
+                'all_unique_lib': all_unique_lib,
+                'avail_books': all_avail_bks_by_lib,
+                'lib_book_summary': lib_book_summary,
+                'status': update_status
+            })
+        else:
+            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
@@ -357,55 +367,60 @@ async def show_books_avail_by_lib(request: Request,
                                   db=Depends(get_db),
                                   username=Depends(manager)):
 
-    if username:
-        response = process_user_book_data(
-            db=db, username=username.get("UserName"))
+    try:
+        if username:
+            response = process_user_book_data(
+                db=db, username=username.get("UserName"))
 
-        # Processing necessary statistics
-        all_unique_books = process.process_all_unique_books(response)
-        all_avail_books = process.process_all_avail_books(response)
-        all_unique_lib = process.process_all_unique_lib(response)
-        all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(
-            all_unique_lib, all_avail_bks_by_lib)
+            # Processing necessary statistics
+            all_unique_books = process.process_all_unique_books(response)
+            all_avail_books = process.process_all_avail_books(response)
+            all_unique_lib = process.process_all_unique_lib(response)
+            all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(
+                response)
+            lib_book_summary = process.process_lib_book_summary(
+                all_unique_lib, all_avail_bks_by_lib)
 
-        update_status = None
-        if m_db.mg_query_status(db=db, username=username.get("UserName")):
-            update_status = "Updating In Progress... Please refresh to update!"
+            update_status = None
+            if m_db.mg_query_status(db=db, username=username.get("UserName")):
+                update_status = "Updating In Progress!"
 
-        output = []
-        for book in response:
-            if library in book['BranchName'].lower():
-                output.append(book)
+            output = []
+            for book in response:
+                if library in book['BranchName'].lower():
+                    output.append(book)
 
-        lib_avail = len(process.process_all_avail_books(output))
-        lib_all = len(process.process_all_unique_books(output))
+            lib_avail = len(process.process_all_avail_books(output))
+            lib_all = len(process.process_all_unique_books(output))
 
-        unique_lib = None
-        if len(set([i['BranchName'] for i in response])) == 1:
-            unique_lib = output[0]['BranchName']
+            unique_lib = None
+            if len(set([i['BranchName'] for i in response])) == 1:
+                unique_lib = output[0]['BranchName']
 
-            # WIP - Trigger select library event
-            mix_p.event_select_library(username.get("UserName"), library)
+                # WIP - Trigger select library event
+                mix_p.event_select_library(username.get("UserName"), library)
 
-        return templates.TemplateResponse("result.html", {
-            "request": request,
-            "username": username.get("UserName"),
-            "api_data": output,
-            'library': library,
-            'all_unique_books': all_unique_books,
-            'all_avail_books': all_avail_books,
-            'all_unique_lib': all_unique_lib,
-            'unique_lib': unique_lib,
-            'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary,
-            'lib_avail': lib_avail,
-            'lib_all': lib_all,
-            'status': update_status
-        })
+            return templates.TemplateResponse("result.html", {
+                "request": request,
+                "username": username.get("UserName"),
+                "api_data": output,
+                'library': library,
+                'all_unique_books': all_unique_books,
+                'all_avail_books': all_avail_books,
+                'all_unique_lib': all_unique_lib,
+                'unique_lib': unique_lib,
+                'avail_books': all_avail_bks_by_lib,
+                'lib_book_summary': lib_book_summary,
+                'lib_avail': lib_avail,
+                'lib_all': lib_all,
+                'status': update_status
+            })
 
-    else:
-        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+        else:
+            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 def update_bk_avail_in_mongo(db, bid_no):
@@ -571,87 +586,91 @@ async def show_search_books(request: Request,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
-    response = process_user_book_data(
-        db=db, username=username.get("UserName"))
+    try:
+        response = process_user_book_data(
+            db=db, username=username.get("UserName"))
 
-    update_status = None
-    if m_db.mg_query_status(db=db, username=username.get("UserName")):
-        update_status = "Updating In Progress... Please refresh to update!"
+        update_status = None
+        if m_db.mg_query_status(db=db, username=username.get("UserName")):
+            update_status = "Updating In Progress!"
 
-    # Processing necessary statistics
-    all_unique_books = process.process_all_unique_books(response)
-    all_avail_books = process.process_all_avail_books(response)
-    all_unique_lib = process.process_all_unique_lib(response)
-    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-    lib_book_summary = process.process_lib_book_summary(
-        all_unique_lib, all_avail_bks_by_lib)
+        # Processing necessary statistics
+        all_unique_books = process.process_all_unique_books(response)
+        all_avail_books = process.process_all_avail_books(response)
+        all_unique_lib = process.process_all_unique_lib(response)
+        all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
 
-    text_output = "Please search for your book title"
-    final_response = list()
+        text_output = "Please search for your book title"
+        final_response = list()
 
-    if book_search:
-        print(f"{book_search} is happening")
-        books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
+        if book_search:
+            print(f"{book_search} is happening")
+            books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
 
-        print(books)
+            print(books)
 
-        elist = [400, 404, 500, 401, 405, 429]
+            elist = [400, 404, 500, 401, 405, 429]
 
-        if books.get("totalRecords") == 0 or books.get("statusCode") in elist:
-            text_output = f"There are no records with '{book_search}'"
-            book_search = None
+            if books.get("totalRecords") == 0 or books.get("statusCode") in elist:
+                text_output = f"There are no records with '{book_search}'"
+                book_search = None
 
-        else:
-            searched_books = books.get("titles")
-            output_list = []
-            p_searched_books = [
-                i for i in searched_books if i.get('title') is not None]
+            else:
+                searched_books = books.get("titles")
+                output_list = []
+                p_searched_books = [
+                    i for i in searched_books if i.get('title') is not None]
 
-            for book in p_searched_books:
-                get_isbn = book.get("isbns")
-                if get_isbn:
-                    if "electronic" not in get_isbn:
+                for book in p_searched_books:
+                    get_isbn = book.get("isbns")
+                    if get_isbn:
+                        if "electronic" not in get_isbn:
+                            output_list.append(book)
+                    else:
                         output_list.append(book)
-                else:
-                    output_list.append(book)
 
-            final_output = [nlb_rest_api.process_rest_bk_info(
-                i) for i in output_list]
+                final_output = [nlb_rest_api.process_rest_bk_info(
+                    i) for i in output_list]
 
-            # Search all user book BIDs and disable add books
-            # for books linked to user
-            user_books = m_db.mg_query_user_bookmarked_books(
-                db=db, username=username.get("UserName"))
+                # Search all user book BIDs and disable add books
+                # for books linked to user
+                user_books = m_db.mg_query_user_bookmarked_books(
+                    db=db, username=username.get("UserName"))
 
-            user_books_bids = [i.get("BID") for i in user_books]
+                user_books_bids = [i.get("BID") for i in user_books]
 
-            for i in final_output:
+                for i in final_output:
 
-                i['TitleName'] = i['TitleName'].split(
-                    "/")[0].strip() + " | " + str(i['BID'])
+                    i['TitleName'] = i['TitleName'].split(
+                        "/")[0].strip() + " | " + str(i['BID'])
 
-                i['PublishYear'] = "Y" + i['PublishYear']
+                    i['PublishYear'] = "Y" + i['PublishYear']
 
-                disable = "disabled" if str(
-                    i['BID']) in user_books_bids else ""
+                    disable = "disabled" if str(
+                        i['BID']) in user_books_bids else ""
 
-                i['BID'] = disable + " | " + str(i["BID"])
+                    i['BID'] = disable + " | " + str(i["BID"])
 
-                final_response.append(i)
+                    final_response.append(i)
 
-            # Search Book
-            mix_p.event_search_book(username.get("UserName"), book_search)
+                # Search Book
+                mix_p.event_search_book(username.get("UserName"), book_search)
 
-    return templates.TemplateResponse("search.html", {
-        "request": request,
-        "keyword": book_search,
-        "username": username.get("UserName"),
-        "api_data": final_response,
-        "text_output": text_output,
-        'all_unique_books': all_unique_books,
-        'all_avail_books': all_avail_books,
-        'all_unique_lib': all_unique_lib,
-        'avail_books': all_avail_bks_by_lib,
-        'lib_book_summary': lib_book_summary,
-        "status": update_status
-    })
+        return templates.TemplateResponse("search.html", {
+            "request": request,
+            "keyword": book_search,
+            "username": username.get("UserName"),
+            "api_data": final_response,
+            "text_output": text_output,
+            'all_unique_books': all_unique_books,
+            'all_avail_books': all_avail_books,
+            'all_unique_lib': all_unique_lib,
+            'avail_books': all_avail_bks_by_lib,
+            'lib_book_summary': lib_book_summary,
+            "status": update_status
+        })
+
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
