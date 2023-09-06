@@ -5,7 +5,7 @@ from mixpanel import Mixpanel
 
 # Load environment variables
 project_id = os.environ["MP_PROJECT_ID"]
-mp = Mixpanel(project_id) 
+mp = Mixpanel(project_id)
 
 
 def get_sg_now_time():
@@ -13,9 +13,12 @@ def get_sg_now_time():
     return pendulum.now(tz='Asia/Singapore') - pendulum.Duration(hours=8)
 
 # User Profile functions
+
+
 def user_register(user_id, mp=mp):
     register_time = get_sg_now_time()
-    return mp.people_set(user_id, {"$name": user_id, "Registered Time": register_time})
+    return mp.people_set(user_id, {"$name": user_id,
+                                   "Registered Time": register_time})
 
 
 def user_login(user_id, mp=mp):
@@ -51,23 +54,23 @@ def event_login(user_id, mp=mp):
 def event_select_library(user_id, library, mp=mp):
     mp.track(user_id, 'Select Library', {
         'BranchName': library
-        })
+    })
 
 
 def event_update_book(user_id, bid, mp=mp):
-    mp.track(user_id, 'Update Book', { 'BID': bid,})
+    mp.track(user_id, 'Update Book', {'BID': bid, })
 
 
 def event_update_all_books(user_id, book_count, mp=mp):
-    mp.track(user_id, 'Update All Books', { 'Book Count': book_count,})
+    mp.track(user_id, 'Update All Books', {'Book Count': book_count, })
 
 
 def event_search_book(user_id, keyword, mp=mp):
-    mp.track(user_id, 'Search Book', { 'Keyword': keyword })
+    mp.track(user_id, 'Search Book', {'Keyword': keyword})
 
 
 def event_add_book(user_id, bid, mp=mp):
-    mp.track(user_id, 'Add Book', { 'BID': bid })
+    mp.track(user_id, 'Add Book', {'BID': bid})
 
 
 def event_select_current_saved_book(user_id, mp=mp):
@@ -75,4 +78,4 @@ def event_select_current_saved_book(user_id, mp=mp):
 
 
 def event_delete_book(user_id, bid, mp=mp):
-    mp.track(user_id, 'Delete Book', { 'BID': bid })
+    mp.track(user_id, 'Delete Book', {'BID': bid})
