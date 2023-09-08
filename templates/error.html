@@ -1,11 +1,20 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div class="container">
-    <p>
-        There is an error in the App. This could be due to an issue with the NLB
-        API, or some logic on my App. Please give me some time to look into it.
-    </p>
+<div class="flex flex-col mx-auto pt-10 text-blue-800 items-center justify-start">
+    <div class="text-3xl font-semibold pt-10 pb-4 px-10">404 - Oops, we hit an error!</div>
+    <div class="flex flex-row mb-2 w-3/4 text-xl rounded-lg justify-center">
+        <a class="py-2 rounded items-center justify-center" href="https://imgbox.com/wx4HlVJC" target="_blank">
+            <img src="https://images2.imgbox.com/22/14/wx4HlVJC_o.jpg" alt="image host" width='250' height='450' />
+        </a>
+        <p class="pb-2 pl-4 w-3/4">Thanks for using this web app. Unfortunately, you
+            seeing this means a few things might have caused the web app to
+            face some issues. Head back to the previous page, or directly back to the
+            <button>
+                <a class="hover:text-white hover:bg-sky-300 underline" href='/'>homepage</a>
+            </button>.
+        </p>
+    </div>
 </div>
 
 
