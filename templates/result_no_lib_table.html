@@ -7,15 +7,19 @@
     {% endif %}
 
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
-        type="text" placeholder="Search books by keyword in their title or status!">
+        type="text" placeholder="Search books by their title keywords!">
 
     <table
         class="table table-pin-rows mx-auto table-auto border-collapse w-full table-sm md:p-10 divide-y divide-gray-800">
         <thead class="bg-gray-300 rounded-lg">
             <tr class='text-sm rounded-lg bg-blue-100'>
-                <th>{{ library|title }} - {{ lib_avail }} / {{ lib_all }}</th>
+                <th class="flex items-top">{{ library|title }} - {{ lib_avail }} / {{ lib_all }}</th>
                 <th>Number</th>
-                <th>Status[Due]</th>
+                <th class="flex items-center gap-1">Status[Due]
+                    <input class="checkbox checkbox-xs checkbox-info border-blue-700 border-2 hover:bg-blue-800"
+                        type="checkbox" id="availableCheckbox">
+
+                </th>
                 <th>UpdatedAt</th>
             </tr>
         </thead>
