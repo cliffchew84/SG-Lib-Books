@@ -12,6 +12,7 @@ from typing import Optional
 import urllib.parse
 import pendulum
 import os
+import re
 
 # Mixpanel for data tracking
 from mixpanel import Mixpanel
@@ -606,6 +607,7 @@ async def show_search_books(request: Request,
         final_response = list()
 
         if book_search:
+            book_search = re.sub('\W+', ' ', book_search)
             print(f"{book_search} is happening")
             books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
 
