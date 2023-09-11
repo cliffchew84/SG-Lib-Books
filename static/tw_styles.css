@@ -10084,6 +10084,16 @@ details.collapse summary::-webkit-details-marker {
   text-align: center;
 }
 
+.disabled\:bg-gray-400:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity));
+}
+
+.disabled\:hover\:bg-gray-400:hover:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity));
+}
+
 @media (min-width: 640px) {
   .sm\:px-20 {
     padding-left: 5rem;
