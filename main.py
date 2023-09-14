@@ -609,15 +609,27 @@ async def show_search_books(request: Request,
         if book_search:
             book_search = re.sub('\W+', ' ', book_search)
             print(f"{book_search} is happening")
-            books = nlb_rest_api.get_rest_nlb_api("SearchTitles", book_search)
+
+            if book_search.isdigit() and len(book_search) in [10, 13]:
+                print("ISBN")
+                book_search = str(book_search)
+                books = nlb_rest_api.get_rest_nlb_api(
+                    "SearchTitles", book_search, "ISBN")
+
+            else:
+                print("title")
+                books = nlb_rest_api.get_rest_nlb_api(
+                    "SearchTitles", book_search)
 
             print(books)
 
             elist = [400, 404, 500, 401, 405, 429]
 
-            if books.get("totalRecords") == 0 or books.get("statusCode") in elist:
+            if books.get("totalRecords") == 0:
                 text_output = f"There are no records with '{book_search}'"
-                book_search = None
+
+            elif books.get("statusCode") in elist:
+                text_output = f"There are no records with '{book_search}'"
 
             else:
                 searched_books = books.get("titles")
@@ -636,8 +648,8 @@ async def show_search_books(request: Request,
                 final_output = [nlb_rest_api.process_rest_bk_info(
                     i) for i in output_list]
 
-                # Search all user book BIDs and disable add books
-                # for books linked to user
+                # Search user book BIDs and
+                # disable add books for books already saved by user
                 user_books = m_db.mg_query_user_bookmarked_books(
                     db=db, username=username.get("UserName"))
 
