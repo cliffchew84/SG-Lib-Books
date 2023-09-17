@@ -1,11 +1,11 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div>
+<div class='items-center justify-center'>
     <form class="form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
 
         <input class="flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-blue-800"
-            placeholder="Search for books in NLB" type="search" id="book_search" name="book_search" />
+            placeholder="Search NLB books by their title or ISBN" type="search" id="book_search" name="book_search" />
 
         <!--Search button-->
         <button type="submit"
@@ -13,6 +13,10 @@
             Search
         </button>
     </form>
+    <p class='items-center mx-auto flex justify-center text-sm italic pt-1 w-3/4'>
+        *Due to performance issues, we will only show the top 50 results from
+        the NLB API. Consider using ISBN to get the exact book.
+    </p>
 </div>
 
 <div class="mx-auto max-w-screen-lg px-4 mt-3">
@@ -28,7 +32,7 @@
         <thead class="bg-gray-300 rounded-lg">
             <tr class='text-sm rounded-lg bg-blue-100'>
                 <th></th>
-                <th>Titles from searching <-{{keyword}}-> </th>
+                <th>Title / ISBN Search <-{{keyword}}-> </th>
                 <th>Author</th>
                 <th>Year</th>
             </tr>
