@@ -12,9 +12,8 @@ mongo_url = f"{base_url}{MONGO_PASSWORD}@{end_url}"
 def connect_mdb():
     return mongo_client.MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
 
+
 # Add Methods
-
-
 def mg_add_user(db, username: str, hashed_pw: str):
     return db['users'].insert_one({
         'UserName': username,
@@ -60,9 +59,8 @@ def mg_delete_status(db, username: str):
 def mg_query_status(db, username: str):
     return db.user_status.find_one({"UserName": username})
 
+
 # Deletes
-
-
 def mg_delete_bk_avail_records(db, bid_no):
     return db.books_avail.delete_many({'BID': bid_no})
 
@@ -79,9 +77,8 @@ def mg_delete_bk_info_records(db, bid_no):
 def mg_delete_bk_user_records(db, bid_no, username):
     return db.user_books.delete_many({'UserName': username, 'BID': bid_no})
 
+
 # Queries
-
-
 def mg_query_book_title_by_bid(db, bid_no):
 
     return db.books_info.find_one({"BID": str(bid_no)}).get("TitleName")
