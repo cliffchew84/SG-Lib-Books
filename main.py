@@ -444,13 +444,18 @@ def update_bk_avail_in_mongo(db, bid_no):
             print(books_avail)
             all_books_avail.append(books_avail)
 
-        # Delete existing MongoDB records
-        m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
+        if len(all_books_avail) > 0:
+            # Delete existing MongoDB records
+            m_db.mg_delete_bk_avail_records(db=db, bid_no=bid_no)
 
-        # Add new records into MongoDB
-        m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
+            # Add new records into MongoDB
+            m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
-        return {"API call": True}
+            return {"API call": True}
+
+        else:
+            # Something wrong with the NLB API and nothing is updated...
+            return {"API call": False}
 
     except Exception:
         return {"API call": False}
