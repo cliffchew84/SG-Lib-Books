@@ -9411,6 +9411,10 @@ details.collapse summary::-webkit-details-marker {
   padding-left: 1.5rem;
 }
 
+.pt-1 {
+  padding-top: 0.25rem;
+}
+
 .pt-10 {
   padding-top: 2.5rem;
 }
