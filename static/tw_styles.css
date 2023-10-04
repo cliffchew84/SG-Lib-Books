@@ -7905,11 +7905,6 @@ details.collapse summary::-webkit-details-marker {
   clear: none;
 }
 
-.-my-2 {
-  margin-top: -0.5rem;
-  margin-bottom: -0.5rem;
-}
-
 .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -10073,10 +10068,6 @@ details.collapse summary::-webkit-details-marker {
 
 .hover\:font-bold:hover {
   font-weight: 700;
-}
-
-.hover\:font-semibold:hover {
-  font-weight: 600;
 }
 
 .hover\:text-white:hover {
