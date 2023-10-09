@@ -1,4 +1,5 @@
-from fastapi import FastAPI, status, Request, Form, Depends, BackgroundTasks, HTTPException
+from fastapi import (FastAPI, status, Request, Form, Depends, BackgroundTasks,
+                     HTTPException)
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
@@ -14,20 +15,13 @@ import pendulum
 import os
 import re
 
-# Mixpanel for data tracking
-from mixpanel import Mixpanel
-
 # My own packages
 import process
 import nlb_rest_api
 import m_db
-import mix_p
 
 
 # Load environment variables
-project_id = os.environ["MP_PROJECT_ID"]
-mp = Mixpanel(project_id)
-
 SECRET_KEY = os.environ["mongo_secret_key"]
 ACCESS_TOKEN_EXPIRY = 60
 
@@ -121,8 +115,6 @@ def logout():
 @app.get("/register_complete/{username}", response_class=HTMLResponse)
 def get_register(request: Request, username: str):
     # WIP - Register User Successfully
-    mix_p.user_register(username)
-    mix_p.event_register(username)
 
     return templates.TemplateResponse(
         "register_complete.html",
@@ -192,8 +184,6 @@ def login(request: Request,
     manager.set_cookie(resp, access_token)
 
     # Track user login
-    mix_p.user_login(user.get("UserName"))
-    mix_p.event_login(user.get("UserName"))
     return resp
 
 
@@ -244,9 +234,6 @@ async def show_current_books(request: Request,
                         "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
                         "BID": r.get("BID")
                     })
-
-            # WIP - Show current books
-            mix_p.event_select_current_saved_book(username.get("UserName"))
 
             return templates.TemplateResponse("yourbooks.html", {
                 "request": request,
@@ -398,9 +385,6 @@ async def show_books_avail_by_lib(request: Request,
             if len(set([i['BranchName'] for i in response])) == 1:
                 unique_lib = output[0]['BranchName']
 
-                # WIP - Trigger select library event
-                mix_p.event_select_library(username.get("UserName"), library)
-
             return templates.TemplateResponse("result.html", {
                 "request": request,
                 "username": username.get("UserName"),
@@ -441,7 +425,6 @@ def update_bk_avail_in_mongo(db, bid_no):
         for book in nlb_rest_api.process_rest_all_lib_avail(bk):
             books_avail = nlb_rest_api.process_single_bk_avail(book)
             books_avail.update({"BID": str(bid_no)})
-            print(books_avail)
             all_books_avail.append(books_avail)
 
         if len(all_books_avail) > 0:
@@ -483,10 +466,6 @@ async def update_book(BID: str,
     api_result = update_bk_avail_in_mongo(db, BID)
 
     if api_result.get("API call"):
-        # Insert Tracking into Mixpanel
-        titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
-        mix_p.event_update_book(username.get("UserName"), titlename)
-
         return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
@@ -501,15 +480,8 @@ def update_all_user_books(db, username):
     if user_bids:
         for ubid in user_bids:
             bid_no = ubid.get("BID")
-            api_result = update_bk_avail_in_mongo(db, bid_no)
+            update_bk_avail_in_mongo(db, bid_no)
 
-            if api_result.get("API call"):
-                # Insert Tracking into Mixpanel
-                titlename = m_db.mg_query_book_title_by_bid(
-                    db=db, bid_no=bid_no)
-                mix_p.event_update_book(username.get("UserName"), titlename)
-
-    mix_p.event_update_all_books(username.get("UserName"), len(user_bids))
     m_db.mg_delete_status(db, username=username.get("UserName"))
 
     return {"message": "All user books are updated!"}
@@ -539,13 +511,6 @@ async def api_book_ingest(BID: str,
     bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
     update_bk_avail_in_mongo(db, BID)
 
-    # Track Adding book event into Mixpanel
-    mix_p.event_add_book(username.get("UserName"), BID)
-    mix_p.user_change_book_count(username.get("UserName"), 1)
-
-    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
-    mix_p.user_book_list_add(username.get("UserName"), [titlename])
-
     return RedirectResponse(f"/{username.get('UserName')}/search",
                             status_code=status.HTTP_302_FOUND)
 
@@ -554,9 +519,6 @@ async def api_book_ingest(BID: str,
 async def delete_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
-
-    # delete records
-    titlename = m_db.mg_query_book_title_by_bid(db=db, bid_no=BID)
 
     # Check BID is linked to more than 1 user
     counter = db.user_books.aggregate([
@@ -574,12 +536,6 @@ async def delete_book(BID: str,
 
     m_db.mg_delete_bk_user_records(
         db=db, username=username.get("UserName"), bid_no=BID)
-
-    # WIP - Delete book
-    mix_p.event_delete_book(username.get("UserName"), BID)
-    mix_p.user_change_book_count(username.get("UserName"), -1)
-
-    mix_p.user_book_list_remove(username.get("UserName"), titlename)
 
     return RedirectResponse(f"/{username.get('UserName')}/yourbooks",
                             status_code=status.HTTP_302_FOUND)
@@ -625,8 +581,6 @@ async def show_search_books(request: Request,
                 print("title")
                 books = nlb_rest_api.get_rest_nlb_api(
                     "SearchTitles", book_search)
-
-            # print(books)
 
             elist = [400, 404, 500, 401, 405, 429]
 
@@ -677,7 +631,6 @@ async def show_search_books(request: Request,
                 p_searched_books = [
                     i for i in refined_search if i.get('title') is not None]
 
-                print(p_searched_books)
                 # Start processing all the called books
                 output_list = []
                 for book in p_searched_books:
@@ -711,9 +664,6 @@ async def show_search_books(request: Request,
                     i['BID'] = disable + " | " + str(i["BID"])
 
                     final_response.append(i)
-
-                # Search Book
-                mix_p.event_search_book(username.get("UserName"), book_search)
 
         return templates.TemplateResponse("search.html", {
             "request": request,
