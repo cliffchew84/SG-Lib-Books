@@ -77,6 +77,7 @@ def process_rest_single_lib_avail(nlb_input: Dict):
     if status:
         output['StatusDesc'] = status.get("name")
         if output['StatusDesc'] == "On Loan":
+            output['StatusDesc'] = 'Loan'
             output['DueDate'] = status.get("date").split("T")[0]
     else:
         output['DueDate'] = None

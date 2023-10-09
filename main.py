@@ -626,7 +626,7 @@ async def show_search_books(request: Request,
                 books = nlb_rest_api.get_rest_nlb_api(
                     "SearchTitles", book_search)
 
-            print(books)
+            # print(books)
 
             elist = [400, 404, 500, 401, 405, 429]
 
@@ -637,11 +637,49 @@ async def show_search_books(request: Request,
                 text_output = f"There are no records with '{book_search}'"
 
             else:
-                searched_books = books.get("titles")
-                output_list = []
-                p_searched_books = [
-                    i for i in searched_books if i.get('title') is not None]
+                # Get main list of books
+                searched_books = []
+                searched_books.append(books.get("titles"))
 
+                # Check for pagination
+                has_more_records = books.get("hasMoreRecords")
+                counter = 0
+                while has_more_records:
+                    counter += 1
+                    set_id = books.get("setId")
+                    last_irn = books.get("lastIrn")
+                    books = nlb_rest_api.get_rest_nlb_api(
+                        "SearchTitles",
+                        input=book_search,
+                        search_on='Title',
+                        setid=set_id,
+                        lastirn=last_irn)
+
+                    searched_books.append(books.get('titles'))
+                    has_more_records = books.get("hasMoreRecords")
+
+                if counter > 0:
+                    searched_books = [i for sl in searched_books for i in sl]
+
+                # Search only for books with the correct keywords
+                refined_search = []
+                book_check = book_search.lower().split(" ")
+
+                for i in searched_books:
+                    try:
+                        to_check = i.get('title').lower().split(" ")
+
+                        if any(x in to_check for x in book_check):
+                            refined_search.append(i)
+                    except Exception:
+                        pass
+
+                p_searched_books = [
+                    i for i in refined_search if i.get('title') is not None]
+
+                print(p_searched_books)
+                # Start processing all the called books
+                output_list = []
                 for book in p_searched_books:
                     get_isbn = book.get("isbns")
                     if get_isbn:
