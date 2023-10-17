@@ -616,20 +616,20 @@ async def show_search_books(request: Request,
                     searched_books = [i for sl in searched_books for i in sl]
 
                 # Search only for books with the correct keywords
-                refined_search = []
-                book_check = book_search.lower().split(" ")
+                # refined_search = []
+                # book_check = book_search.lower().split(" ")
 
-                for i in searched_books:
-                    try:
-                        to_check = i.get('title').lower().split(" ")
+                # for i in searched_books:
+                #    try:
+                #        to_check = i.get('title').lower().split(" ")
 
-                        if any(x in to_check for x in book_check):
-                            refined_search.append(i)
-                    except Exception:
-                        pass
+                #        if any(x in to_check for x in book_check):
+                #            refined_search.append(i)
+                #    except Exception:
+                #        pass
 
                 p_searched_books = [
-                    i for i in refined_search if i.get('title') is not None]
+                    i for i in searched_books if i.get('title') is not None]
 
                 # Start processing all the called books
                 output_list = []
