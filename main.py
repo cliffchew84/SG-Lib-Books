@@ -613,7 +613,9 @@ async def show_search_books(request: Request,
                     has_more_records = books.get("hasMoreRecords")
 
                 if counter > 0:
-                    searched_books = [i for sl in searched_books for i in sl]
+                    p_searched_books = [i for sl in searched_books for i in sl]
+                else:
+                    p_searched_books = searched_books[0]
 
                 # Search only for books with the correct keywords
                 # refined_search = []
@@ -628,8 +630,8 @@ async def show_search_books(request: Request,
                 #    except Exception:
                 #        pass
 
-                p_searched_books = [
-                    i for i in searched_books if i.get('title') is not None]
+                # p_searched_books = [
+                #    i for i in searched_books if i.get('title') is not None]
 
                 # Start processing all the called books
                 output_list = []
@@ -652,18 +654,20 @@ async def show_search_books(request: Request,
                 user_books_bids = [i.get("BID") for i in user_books]
 
                 for i in final_output:
+                    try:
+                        i['TitleName'] = i['TitleName'].split(
+                            "/")[0].strip() + " | " + str(i['BID'])
 
-                    i['TitleName'] = i['TitleName'].split(
-                        "/")[0].strip() + " | " + str(i['BID'])
+                        i['PublishYear'] = "Y" + i['PublishYear']
 
-                    i['PublishYear'] = "Y" + i['PublishYear']
+                        disable = "disabled" if str(
+                            i['BID']) in user_books_bids else ""
 
-                    disable = "disabled" if str(
-                        i['BID']) in user_books_bids else ""
+                        i['BID'] = disable + " | " + str(i["BID"])
 
-                    i['BID'] = disable + " | " + str(i["BID"])
-
-                    final_response.append(i)
+                        final_response.append(i)
+                    except Exception:
+                        pass
 
         return templates.TemplateResponse("search.html", {
             "request": request,
