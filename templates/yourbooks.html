@@ -9,12 +9,12 @@
     {% endif %}
     <div class="mx-auto max-w-screen-lg px-4">
 
-        <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-blue-800"
+        <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
             id="myInput" type="text" placeholder="Search your saved books by keywords in their title!">
 
-        <table class="mx-auto table-auto border-collapse table-sm md:p-10 divide-y divide-gray-800">
-            <thead class="bg-gray-300 rounded-lg">
-                <tr class='text-sm rounded-lg bg-blue-100'>
+        <table class="mx-auto table-auto border-collapse rounded-lg table-sm w-full divide-y divide-gray-800">
+            <thead class='rounded-lg'>
+                <tr class='bg-sky-700 text-white rounded-lg'>
                     <th></th>
                     <th>Lib No.</th>
                     <th>Your Books</th>
@@ -31,8 +31,9 @@
 
                     <td>
                         <form action="/delete_book/{{data[a]}}" method="POST">
-                            <button type="submit" class="bg-sky-500 px-3 py-1 rounded-lg 
-                            hover:text-white hover:bg-sky-300 text-white">Delete
+                            <button type="submit" class="bg-red-700 px-2 py-1 rounded-lg 
+                            hover:text-white hover:bg-red-400 text-white">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
                             </button>
                         </form>
                     </td>
@@ -41,7 +42,7 @@
                     {% set TitleName, BID = data[a].split(' | ') %}
                     <td>
                         <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                            class="button text-indigo-600 my-2" target="_blank" rel="noopener
+                            class="button text-blue-800 font-semibold my-2 underline" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}
                         </a>
 
