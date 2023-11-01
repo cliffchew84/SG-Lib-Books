@@ -1,12 +1,12 @@
-<header class="mx-auto pt-4 pb-10 bg-sky-500">
+<header class="mx-auto pt-2 pb-8 bg-sky-700">
     {% if not username %}
 
-    <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1">
+    <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
         <a class="text-white text-2xl">
             SGLibReads [Beta]
         </a>
 
-        <a class="ml-auto text-white hover:bg-sky-300 mr-1 mt-1.5" target="_blank"
+        <a class="ml-auto text-white hover:bg-sky-700 mr-1 mt-1.5" target="_blank"
             href='https://www.notion.so/cliffchew/SG-Libraries-App-Changelog-c9842dba13684212b6df1567688cffc8'>Changelog</a>
 
     </div>
@@ -23,20 +23,22 @@
                     </svg>
                 </label>
                 <ul tabindex="0"
-                    class="bg-sky-500 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
+                    class="bg-sky-700 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
                     <li>
                         <details>
-                            <summary class="hover:text-white hover:bg-sky-300">SG Libraries</summary>
-                            <ul class="bg-sky-500 text-sm text-white w-56">
+                            <summary class="hover:text-white hover:bg-sky-500">
+                                <i class="fas fa-city"></i>
+                            </summary>
+                            <ul class="bg-sky-700 text-sm text-white w-56">
                                 <li>
-                                    <a class="p-0.5 hover:text-white hover:bg-sky-300" href="/{{username}}">
+                                    <a class="p-0.5 hover:text-white hover:bg-sky-500" href="/{{username}}">
                                         All Libraries - {{all_avail_books|length}}
                                     </a>
                                 </li>
 
                                 {% for lib in lib_book_summary %}
                                 <li>
-                                    <a class="p-0.5 hover:text-white hover:bg-sky-300
+                                    <a class="p-0.5 hover:text-white hover:bg-sky-500
                                         py-1" href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
                                         {{lib.keys()|list|first}} -
                                         {{lib.values()|list|first}}
@@ -46,23 +48,28 @@
                             </ul>
                         </details>
                     </li>
-                    <li><a class="hover:text-white hover:bg-sky-300 " href='/{{username}}/yourbooks'>Your Books</a></li>
-                    <li><a class="hover:text-white hover:bg-sky-300 " href='/{{username}}/search/'>Search NLB</a></li>
+                    <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/yourbooks'>
+                            <i class="fas fa-book"></i>
+                        </a></li>
+                    <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/search/'>
+                            <i class="fas fa-search"></i>NLB</a></li>
 
                     <li class="">
-                        <form class="form-inline hover:text-white hover:bg-sky-300 "
+                        <form class="form-inline hover:text-white hover:bg-sky-500 "
                             action="/update_user_books/{{username}}" method="POST">
-                            <button type="submit" class="hover:text-white text-white hover:bg-sky-300 ">Update
+                            <button type="submit" class="hover:text-white text-white hover:bg-sky-500 ">Update
                                 Avails</button>
                         </form>
                     </li>
 
-                    <li><a class="hover:text-white text-white hover:bg-sky-300 " href='/logout'>Logout</a>
+                    <li><a class="hover:text-white text-white hover:bg-sky-500 " href='/logout'>
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
                     </li>
                 </ul>
             </div>
             <li>
-                <a class="hover:text-white text-white hover:bg-sky-300 uppercase text-lg font-semibold"
+                <a class="hover:text-white text-white hover:bg-sky-500 uppercase text-lg font-semibold"
                     href="/{{username}}">Hi
                     {{username}}
                 </a>
@@ -74,23 +81,25 @@
         <nav class="w-screen flex items-center justify-between py-4">
             <ul class="menu menu-horizontal mx-auto z-50 lg:text-lg text-white items-center hidden md:flex">
                 <li>
-                    <a class="text-white hover:text-white hover:bg-sky-300 uppercase" href="/{{username}}">Hi
+                    <a class="text-white hover:text-white hover:bg-sky-500 uppercase" href="/{{username}}">Hi
                         {{username}}
                     </a>
                 </li>
                 <li>
                     <details>
-                        <summary class="hover:text-white hover:bg-sky-300">SG Libraries</summary>
-                        <ul class="bg-sky-500 text-sm text-white w-56">
+                        <summary class="hover:text-white hover:bg-sky-500">
+                            <i class="fas fa-building"></i>
+                        </summary>
+                        <ul class="bg-sky-700 text-sm text-white w-56">
                             <li>
-                                <a class="py-0.5 hover:text-white hover:bg-sky-300" href="/{{username}}">
+                                <a class="py-0.5 hover:text-white hover:bg-sky-500" href="/{{username}}">
                                     All Libraries - {{all_avail_books|length}}
                                 </a>
                             </li>
 
                             {% for lib in lib_book_summary %}
                             <li>
-                                <a class="py-0.5 hover:text-white hover:bg-sky-300"
+                                <a class="py-0.5 hover:text-white hover:bg-sky-500"
                                     href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
                                     {{lib.keys()|list|first}} -
                                     {{lib.values()|list|first}}
@@ -101,17 +110,25 @@
                     </details>
                 </li>
 
-                <li><a class="hover:text-white hover:bg-sky-300" href='/{{username}}/yourbooks'>Your Books</a></li>
-                <li><a class="hover:text-white hover:bg-sky-300" href='/{{username}}/search/'>Search NLB</a></li>
+                <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/yourbooks'>
+                        <i class="fas fa-book"></i>
+                    </a></li>
+                <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/search/'>
+                        <i class="fas fa-search"></i>NLB</a></li>
 
                 <li>
-                    <form class="form-inline hover:text-white hover:bg-sky-300" action="/update_user_books/{{username}}"
+                    <form class="form-inline hover:text-white hover:bg-sky-500" action="/update_user_books/{{username}}"
                         method="POST">
-                        <button type="submit">Update Avails</button>
+                        <button type="submit">
+                            <i class="fas fa-sync"></i>
+                            Avails</button>
                     </form>
                 </li>
 
-                <li><a class="hover:text-white hover:bg-sky-300" href='/logout'>Logout</a></li>
+                <li><a class="hover:text-white text-white hover:bg-sky-500 " href='/logout'>
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>

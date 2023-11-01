@@ -3,20 +3,18 @@
 
 <div class='items-center justify-center'>
     <form class="form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
-
-        <input class="flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-blue-800"
-            placeholder="Search NLB books by their title or ISBN" type="search" id="book_search" name="book_search" />
+        <input class="flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+            placeholder="Search NLB books by title or ISBN" type="search" id="book_search" name="book_search" />
 
         <!--Search button-->
         <button type="submit"
-            class="flex items-center bg-sky-500 mt-4 px-3 py-2 pb-2.5 rounded-lg hover:text-white hover:bg-sky-300 text-white">
-            Search
+            class="flex items-center bg-sky-700 mt-4 px-3 py-2 pb-2.5 rounded-lg hover:text-white hover:bg-sky-500 text-white">
+            <i class="fas fa-search"></i>
         </button>
     </form>
-    <p class='items-center mx-auto flex justify-center text-sm italic pt-1 w-1/2'>
-        *Filtering is done to only show titles with the keyword searched.
-        Search may take awhile for generic keywords like "Python".
-        Consider using ISBN to get the exact book, or typing out the full book title.
+    <p class='items-center mx-auto flex justify-center text-sm italic pt-1 w-3/4'>
+        *Search may take awhile for generic keywords like "Python". Consider searching with ISBN
+        to get the exact book, or type out the full book title.
     </p>
 </div>
 
@@ -29,11 +27,12 @@
 
     {% if keyword %}
 
-    <table class="mx-auto table-auto border-collapse table-sm md:p-10 divide-y divide-gray-800">
-        <thead class="bg-gray-300 rounded-lg">
-            <tr class='text-sm rounded-lg bg-blue-100'>
+    <table class="mx-auto table-auto border-collapse w-full table-sm divide-y divide-gray-800">
+        <thead class='rounded-lg'>
+            <tr class='bg-sky-700 text-white rounded-lg'>
                 <th></th>
-                <th>Title / ISBN Search <-{{keyword}}-> </th>
+                <th>Results from <i>'{{keyword}}'</i>
+                </th>
                 <th>Author</th>
                 <th>Year</th>
             </tr>
@@ -50,10 +49,10 @@
 
                 <td>
                     <form action="/ingest_book/{{BID}}" method="POST">
-                        <button type="submit" class="bg-sky-500 px-3 my-1 py-1 rounded-lg 
-                                    hover:text-white hover:bg-sky-300 text-white disabled:bg-gray-400 
+                        <button type="submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
+                                    hover:text-white hover:bg-sky-500 text-white disabled:bg-gray-400 
                                     disabled:hover:bg-gray-400" {{ disable }}>
-                            Add
+                            <i class="fas fa-plus"></i>
                         </button>
                     </form>
                 </td>
@@ -62,7 +61,7 @@
                 {% set TitleName, BID = data[a].split(' | ') %}
 
                 <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                        class="button text-indigo-600" target="_blank" rel="noopener
+                        class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}</a>
 
                     {% else %}

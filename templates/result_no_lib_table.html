@@ -9,10 +9,10 @@
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
         type="text" placeholder="Search books by their title keywords!">
 
-    <table class="table-auto border-collapse w-full table-sm md:p-10 divide-y divide-black">
-        <thead class="bg-gray-300 rounded-lg">
-            <tr class='text-sm rounded-lg bg-blue-100'>
-                <th class="flex items-top">{{ library|title }} - {{ lib_avail }} / {{ lib_all }}</th>
+    <table class="border-collapse w-full table-sm md:p-10 divide-y divide-black">
+        <thead class='rounded-lg'>
+            <tr class='bg-sky-700 text-white rounded-lg'>
+                <th>{{ library|title }} - {{ lib_avail }} / {{ lib_all }}</th>
                 <th>Number</th>
                 <th class="flex items-center gap-1">Status[Due]
                     <input class="checkbox checkbox-xs checkbox-info border-blue-700 border-2 hover:bg-blue-800"
@@ -38,8 +38,8 @@
 
                 <td class="px-1">
                     <form action="/update_book/{{data[a]}}" method="POST">
-                        <button type="submit" class="bg-sky-500 px-3 py-1 rounded-lg 
-                            hover:text-white hover:bg-sky-300 text-white">
+                        <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
+                            hover:text-white hover:bg-sky-500 text-white">
                             {{ data['UpdateTime'] }}</button>
                     </form>
                 </td>
@@ -49,7 +49,7 @@
 
                 <td>
                     <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                        class="text-indigo-600" target="_blank" rel="noopener noreferrer">{{
+                        class="text-blue-800 font-semibold underline" target="_blank" rel="noopener noreferrer">{{
                         TitleName }}</a>
 
                     {% elif a == "StatusDesc" %}
