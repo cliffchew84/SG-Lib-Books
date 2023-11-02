@@ -26,7 +26,7 @@
             const checked = availableCheckbox.is(":checked");
             const searchValue = searchInput.val().toLowerCase();
             rows.each(function () {
-                const status = $(this).find('td:nth-last-child(2)').text().toLowerCase();
+                const status = $(this).find('td:nth-last-child(3)').text().toLowerCase();
                 const rowText = $(this).text().toLowerCase();
                 if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && rowText.indexOf(searchValue) === -1)) {
                     $(this).hide();
@@ -42,7 +42,7 @@
             const searchValue = searchInput.val().toLowerCase();
             rows.each(function () {
                 const rowText = $(this).text().toLowerCase();
-                const status = $(this).find('td:nth-last-child(2)').text().toLowerCase();
+                const status = $(this).find('td:nth-last-child(3)').text().toLowerCase();
                 if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && rowText.indexOf(searchValue) === -1)) {
                     $(this).hide();
                 } else {

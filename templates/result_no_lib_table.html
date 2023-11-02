@@ -10,7 +10,6 @@
         type="text" placeholder="Search books by their title keywords!">
 
     <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg">{{ library|title }}<h3>
-
             <table class="border-collapse w-full table-sm divide-y divide-black">
                 <thead class='rounded-lg'>
                     <tr class='bg-sky-700 text-white rounded-lg'>
@@ -20,7 +19,7 @@
                             <input class="checkbox checkbox-xs checkbox-info border-white border-2" type="checkbox"
                                 id="availableCheckbox">
                         </th>
-                        <th>UpdatedAt</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="myTable">
@@ -37,11 +36,20 @@
 
                         {% if data[a]|int !=0 %}
 
-                        <td class="px-1">
+                        <td class="px-1 hidden md:block">
                             <form action="/update_book/{{data[a]}}" method="POST">
                                 <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
                             hover:text-white hover:bg-sky-500 text-white">
                                     {{ data['UpdateTime'] }}</button>
+                            </form>
+                        </td>
+
+                        <td class="px-1 block md:hidden">
+                            <form action="/update_book/{{data[a]}}" method="POST">
+                                <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
+                            hover:text-white hover:bg-sky-500 text-white">
+                                    <i class="fas fa-sync"></i>
+                                </button>
                             </form>
                         </td>
 
@@ -50,9 +58,14 @@
 
                         <td>
                             <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                                class="text-blue-800 font-semibold underline" target="_blank"
+                                class="hidden md:block text-blue-800 font-semibold underline" target="_blank"
                                 rel="noopener noreferrer">{{
                                 TitleName }}</a>
+
+                            <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                                class="block md:hidden text-blue-800 font-semibold underline" target="_blank"
+                                rel="noopener noreferrer">{{
+                                TitleName.split(" : ")[0] }}</a>
 
                             {% elif a == "StatusDesc" %}
 
