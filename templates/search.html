@@ -2,13 +2,14 @@
 {% include 'navbar.html' %}
 
 <div class='items-center justify-center'>
-    <form class="form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
-        <input class="flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+    <form class="join form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
+        <input
+            class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
             placeholder="Search NLB books by title or ISBN" type="search" id="book_search" name="book_search" />
 
         <!--Search button-->
-        <button type="submit"
-            class="flex items-center bg-sky-700 mt-4 px-3 py-2 pb-2.5 rounded-lg hover:text-white hover:bg-sky-500 text-white">
+        <button type="submit" class="join-item flex items-center bg-sky-700 mt-4 px-3 py-2 rounded-lg 
+                    hover:text-white hover:bg-sky-500 text-white">
             <i class="fas fa-search"></i>
         </button>
     </form>
