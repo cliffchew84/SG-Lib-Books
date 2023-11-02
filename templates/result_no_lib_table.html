@@ -9,82 +9,85 @@
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
         type="text" placeholder="Search books by their title keywords!">
 
-    <table class="border-collapse w-full table-sm md:p-10 divide-y divide-black">
-        <thead class='rounded-lg'>
-            <tr class='bg-sky-700 text-white rounded-lg'>
-                <th>{{ library|title }} - {{ lib_avail }} / {{ lib_all }}</th>
-                <th>Number</th>
-                <th class="flex items-center gap-1">Status[Due]
-                    <input class="checkbox checkbox-xs checkbox-info border-blue-700 border-2 hover:bg-blue-800"
-                        type="checkbox" id="availableCheckbox">
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg">{{ library|title }}<h3>
 
-                </th>
-                <th>UpdatedAt</th>
-            </tr>
-        </thead>
-        <tbody id="myTable">
-            {% for data in api_data %}
+            <table class="border-collapse w-full table-sm divide-y divide-black">
+                <thead class='rounded-lg'>
+                    <tr class='bg-sky-700 text-white rounded-lg'>
+                        <th>{{ lib_avail }} / {{ lib_all }}</th>
+                        <th>Number</th>
+                        <th class="flex items-center justify-center gap-1">Status
+                            <input class="checkbox checkbox-xs checkbox-info border-white border-2" type="checkbox"
+                                id="availableCheckbox">
+                        </th>
+                        <th>UpdatedAt</th>
+                    </tr>
+                </thead>
+                <tbody id="myTable">
+                    {% for data in api_data %}
 
-            <tr class='text-sm rounded-lg'>
-                {% for a in data %}
+                    <tr class='text-sm rounded-lg'>
+                        {% for a in data %}
 
-                {% if a == "UpdateTime" %}
+                        {% if a == "UpdateTime" %}
 
-                <!-- Skip to do nothing -->
+                        <!-- Skip to do nothing -->
 
-                {% elif a != "BranchName" %}
+                        {% elif a != "BranchName" %}
 
-                {% if data[a]|int !=0 %}
+                        {% if data[a]|int !=0 %}
 
-                <td class="px-1">
-                    <form action="/update_book/{{data[a]}}" method="POST">
-                        <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
+                        <td class="px-1">
+                            <form action="/update_book/{{data[a]}}" method="POST">
+                                <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
                             hover:text-white hover:bg-sky-500 text-white">
-                            {{ data['UpdateTime'] }}</button>
-                    </form>
-                </td>
+                                    {{ data['UpdateTime'] }}</button>
+                            </form>
+                        </td>
 
-                {% elif a == "TitleName" %}
-                {% set TitleName, BID = data[a].split(' | ') %}
+                        {% elif a == "TitleName" %}
+                        {% set TitleName, BID = data[a].split(' | ') %}
 
-                <td>
-                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                        class="text-blue-800 font-semibold underline" target="_blank" rel="noopener noreferrer">{{
-                        TitleName }}</a>
+                        <td>
+                            <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                                class="text-blue-800 font-semibold underline" target="_blank"
+                                rel="noopener noreferrer">{{
+                                TitleName }}</a>
 
-                    {% elif a == "StatusDesc" %}
+                            {% elif a == "StatusDesc" %}
 
-                    {% if data[a] == "Available" %}
+                            {% if data[a] == "Available" %}
 
-                <td class="px-3 py-1 text-xs">
-                    <span
-                        class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-lg text-center">
-                        {{ data[a] }}
-                    </span>
-                </td>
+                        <td class="px-3 py-1 text-xs">
+                            <span
+                                class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-lg text-center">
+                                {{ data[a] }}
+                            </span>
+                        </td>
 
-                {% else %}
+                        {% else %}
 
-                <td class="px-3 py-1 text-xs">
-                    <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-lg text-center">
-                        {{ data[a] }}
-                    </span>
-                </td>
+                        <td class="px-3 py-1 text-xs">
+                            <span
+                                class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-lg text-center">
+                                {{ data[a] }}
+                            </span>
+                        </td>
 
-                {% endif %}
+                        {% endif %}
 
-                {% else %}
+                        {% else %}
 
-                <td>{{ data[a] }}</td>
+                        <td>{{ data[a] }}</td>
 
-                {% endif %}
+                        {% endif %}
 
-                {% endif %}
+                        {% endif %}
 
-                {% endfor %}
+                        {% endfor %}
 
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 </div>
