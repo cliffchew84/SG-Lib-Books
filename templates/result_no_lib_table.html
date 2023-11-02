@@ -9,6 +9,8 @@
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
         type="text" placeholder="Search books by their title keywords!">
 
+    <p class="py-2 text-xs italic">Best view on Desktop, by libary, or landscape on mobile.
+    <p>
     <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg">{{ library|title }}<h3>
             <table class="border-collapse w-full table-sm divide-y divide-black">
                 <thead class='rounded-lg'>
@@ -36,7 +38,7 @@
 
                         {% if data[a]|int !=0 %}
 
-                        <td class="px-1 hidden md:block">
+                        <td class="px-1 items-center justify-center hidden md:block">
                             <form action="/update_book/{{data[a]}}" method="POST">
                                 <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
                             hover:text-white hover:bg-sky-500 text-white">
@@ -44,7 +46,7 @@
                             </form>
                         </td>
 
-                        <td class="px-1 block md:hidden">
+                        <td class="px-1 items-center justify-center block md:hidden">
                             <form action="/update_book/{{data[a]}}" method="POST">
                                 <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
                             hover:text-white hover:bg-sky-500 text-white">
