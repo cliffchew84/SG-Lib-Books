@@ -7914,6 +7914,10 @@ details.collapse summary::-webkit-details-marker {
   clear: none;
 }
 
+.-m-2 {
+  margin: -0.5rem;
+}
+
 .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -10178,9 +10182,21 @@ details.collapse summary::-webkit-details-marker {
 }
 
 @media (min-width: 768px) {
+  .md\:visible {
+    visibility: visible;
+  }
+
+  .md\:invisible {
+    visibility: hidden;
+  }
+
   .md\:mx-20 {
     margin-left: 5rem;
     margin-right: 5rem;
+  }
+
+  .md\:block {
+    display: block;
   }
 
   .md\:flex {
