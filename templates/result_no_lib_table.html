@@ -12,7 +12,7 @@
     <p class="py-2 text-xs italic">Best view on Desktop, by libary, or landscape on mobile.
     <p>
     <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building"></i> {{ library|title }}<h3>
-            <table class="table border-collapse w-full table-sm divide-y divide-black">
+            <table class="border-collapse w-full table-sm text-sm">
                 <thead class='rounded-lg'>
                     <tr class='bg-sky-700 text-white rounded-lg'>
                         <th>{{ lib_avail }} / {{ lib_all }}</th>
@@ -27,7 +27,7 @@
                 <tbody id="myTable">
                     {% for data in api_data %}
 
-                    <tr class='hover text-sm rounded-lg'>
+                    <tr class='rounded-lg'>
                         {% for a in data %}
 
                         {% if a == "UpdateTime" %}
@@ -38,20 +38,18 @@
 
                         {% if data[a]|int !=0 %}
 
-                        <td class="px-1 items-center justify-center hidden md:block">
+                        <td class="px-1">
                             <form action="/update_book/{{data[a]}}" method="POST">
-                                <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
-                            hover:text-white hover:bg-sky-500 text-white">
-                                    {{ data['UpdateTime'] }}</button>
-                            </form>
-                        </td>
 
-                        <td class="px-1 items-center justify-center block md:hidden">
-                            <form action="/update_book/{{data[a]}}" method="POST">
-                                <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg 
-                            hover:text-white hover:bg-sky-500 text-white">
+                                <button type="submit" class="hidden md:block 
+                                bg-sky-700 px-3 py-1 rounded-lg hover:text-white hover:bg-sky-500 text-white">
+                                    {{ data['UpdateTime'] }}</button>
+
+                                <button type="submit" class="block md:hidden 
+                                bg-sky-700 px-3 py-1 rounded-lg  hover:text-white hover:bg-sky-500 text-white">
                                     <i class="fas fa-sync items-center justify-center"></i>
                                 </button>
+
                             </form>
                         </td>
 
