@@ -114,7 +114,6 @@ def logout():
 # Register page
 @app.get("/register_complete/{username}", response_class=HTMLResponse)
 def get_register(request: Request, username: str):
-    # WIP - Register User Successfully
 
     return templates.TemplateResponse(
         "register_complete.html",
@@ -137,6 +136,8 @@ def register_user(request: Request,
         if not invalid:
             m_db.mg_add_user(db=db, username=username,
                              hashed_pw=hashed_password)
+
+            m_db.mg_event_tracking(db, 'users', username, "registered_time")
 
             return RedirectResponse("/register_complete/" +
                                     urllib.parse.quote(username),
@@ -184,6 +185,7 @@ def login(request: Request,
     manager.set_cookie(resp, access_token)
 
     # Track user login
+    m_db.mg_event_tracking(db, 'users', user.get("UserName"), 'latest_login')
     return resp
 
 
@@ -617,23 +619,6 @@ async def show_search_books(request: Request,
                 else:
                     p_searched_books = searched_books[0]
 
-                # Search only for books with the correct keywords
-                # refined_search = []
-                # book_check = book_search.lower().split(" ")
-
-                # for i in searched_books:
-                #    try:
-                #        to_check = i.get('title').lower().split(" ")
-
-                #        if any(x in to_check for x in book_check):
-                #            refined_search.append(i)
-                #    except Exception:
-                #        pass
-
-                # p_searched_books = [
-                #    i for i in searched_books if i.get('title') is not None]
-
-                # Start processing all the called books
                 output_list = []
                 for book in p_searched_books:
                     get_isbn = book.get("isbns")
