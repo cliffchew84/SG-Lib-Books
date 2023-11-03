@@ -1,5 +1,7 @@
 from pymongo import mongo_client
 from typing import Dict, List
+from datetime import datetime
+import time
 import os
 
 # MongoDB credentials
@@ -159,3 +161,14 @@ def mg_query_user_books(db, username: str):
     ])
 
     return [i for i in user_books]
+
+
+# EventTracking
+def mg_event_tracking(db, table, username: str, event_name: str):
+    """ Tracks the timestamp of an event"""
+    login_time = time.mktime(datetime.now().timetuple())
+    newvalues = {"$set": {"UserName": username,
+                          event_name: login_time}}
+
+    db[table].update_one({"UserName": username}, newvalues)
+    return f"Tracked {event_name} in {table} for {username}"
