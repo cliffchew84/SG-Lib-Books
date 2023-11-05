@@ -139,16 +139,32 @@ def register_user(request: Request,
 
             m_db.mg_event_tracking(db, 'users', username, "registered_time")
 
-            return RedirectResponse("/register_complete/" +
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRY)
+            access_token = manager.create_access_token(
+                data={"sub": username},
+                expires=access_token_expires)
+
+            # resp = RedirectResponse(
+            #     f"/{username}", status_code=status.HTTP_302_FOUND)
+            # manager.set_cookie(resp, access_token)
+
+            resp = RedirectResponse("/register_complete/" +
                                     urllib.parse.quote(username),
                                     status_code=status.HTTP_302_FOUND)
 
-        else:
-            return templates.TemplateResponse(
-                "homepage.html",
-                {"request": request,
-                 "register_invalid": True},
-                status_code=status.HTTP_400_BAD_REQUEST)
+            manager.set_cookie(resp, access_token)
+            return resp
+
+            # return RedirectResponse("/register_complete/" +
+            #                        urllib.parse.quote(username),
+            #                        status_code=status.HTTP_302_FOUND)
+
+    else:
+        return templates.TemplateResponse(
+            "homepage.html",
+            {"request": request,
+             "register_invalid": True},
+            status_code=status.HTTP_400_BAD_REQUEST)
 
 
 # Base page
