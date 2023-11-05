@@ -137,27 +137,20 @@ def register_user(request: Request,
             m_db.mg_add_user(db=db, username=username,
                              hashed_pw=hashed_password)
 
-            m_db.mg_event_tracking(db, 'users', username, "registered_time")
-
             access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRY)
             access_token = manager.create_access_token(
                 data={"sub": username},
                 expires=access_token_expires)
 
-            # resp = RedirectResponse(
-            #     f"/{username}", status_code=status.HTTP_302_FOUND)
-            # manager.set_cookie(resp, access_token)
-
             resp = RedirectResponse("/register_complete/" +
                                     urllib.parse.quote(username),
                                     status_code=status.HTTP_302_FOUND)
 
+            m_db.mg_event_tracking(db, 'users', username, "registered_time")
+            m_db.mg_event_tracking(db, 'users', username, 'latest_login')
+
             manager.set_cookie(resp, access_token)
             return resp
-
-            # return RedirectResponse("/register_complete/" +
-            #                        urllib.parse.quote(username),
-            #                        status_code=status.HTTP_302_FOUND)
 
     else:
         return templates.TemplateResponse(
