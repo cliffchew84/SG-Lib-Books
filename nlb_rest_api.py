@@ -15,6 +15,7 @@ def authenticate_into_nlb_rest(app_id, api_key):
 def get_rest_nlb_api(extension_url: str,
                      input: str,
                      search_on='Title',
+                     author=None,
                      setid=None,
                      lastirn=None,
                      app_id: str = APPLICATION_ID,
@@ -34,6 +35,8 @@ def get_rest_nlb_api(extension_url: str,
                    "Format": "BK",
                    "setID": setid,
                    "lastIrn": lastirn}
+        if author:
+            payload.update({"Author": author})
 
     else:
         payload = {'BRN': input}

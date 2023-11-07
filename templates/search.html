@@ -1,21 +1,41 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div class='items-center justify-center h-full'>
+<div class='items-center justify-center h-full px-2'>
     <form class="join form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
+        {% if keyword %}
         <input
             class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-            placeholder="Search NLB books by title or ISBN" type="search" id="book_search" name="book_search" />
+            placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search" value={{keyword}} />
+
+        {% else %}
+
+        <input
+            class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+            placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search" />
+        {% endif %}
+
+        {% if author %}
+        <input
+            class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+            placeholder="Author (Optional)" type="search" id="author" name="author" value={{author}} />
+
+        {% else %}
+
+        <input
+            class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+            placeholder="Author (Optional)" type="search" id="author" name="author" />
+
+        {% endif %}
 
         <!--Search button-->
-        <button type="submit" class="join-item flex items-center bg-sky-700 mt-4 px-3 py-2 rounded-lg 
-                    hover:text-white hover:bg-sky-500 text-white">
+        <button type="submit" class="join-item flex items-center bg-sky-700 mt-4 px-2 py-2 rounded-lg 
+            hover:text-white hover:bg-sky-500 text-white">
             <i class="fas fa-search"></i>
         </button>
     </form>
-    <p class='items-center mx-auto flex justify-center text-sm italic pt-1 w-3/4'>
-        *Search may take awhile for generic keywords like "Python". Consider searching with ISBN
-        to get the exact book, or type out the full book title.
+    <p class='items-center mx-auto flex justify-center text-sm italic pt-2 px-2'>
+        *Search with ISBN OR the book title with author for better results
     </p>
 </div>
 
@@ -32,7 +52,7 @@
         <thead class='rounded-lg'>
             <tr class='bg-sky-700 text-white rounded-lg'>
                 <th></th>
-                <th>Results from <i>'{{keyword}}'</i>
+                <th>Results from <i>'{{keyword}} by {{author}}'</i>
                 </th>
                 <th>Author</th>
                 <th>Year</th>

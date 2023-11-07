@@ -212,7 +212,6 @@ async def show_current_books(request: Request,
             update_status = "Updating In Progress... Please refresh to update!"
 
         # Processing necessary statistics
-        all_unique_books = process.process_all_unique_books(response)
         all_avail_books = process.process_all_avail_books(response)
         all_unique_lib = process.process_all_unique_lib(response)
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
@@ -235,12 +234,9 @@ async def show_current_books(request: Request,
 
                 result = list({d['TitleName']: d for d in response}.values())
 
-                i = 0
                 output = []
                 for r in result:
-                    i += 1
                     output.append({
-                        # "No": "B" + str(i),
                         "CallNumber": r.get('CallNumber'),
                         "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
                         "BID": r.get("BID")
@@ -552,6 +548,7 @@ async def delete_book(BID: str,
 @app.get("/{username}/search/", response_class=HTMLResponse)
 async def show_search_books(request: Request,
                             book_search: Optional[str] = None,
+                            author: Optional[str] = None,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
@@ -585,7 +582,7 @@ async def show_search_books(request: Request,
         else:
             print("title")
             books = nlb_rest_api.get_rest_nlb_api(
-                "SearchTitles", book_search)
+                "SearchTitles", input=book_search, author=author)
 
         elist = [400, 404, 500, 401, 405, 429]
 
@@ -666,5 +663,6 @@ async def show_search_books(request: Request,
         'all_avail_books': all_avail_books,
         'avail_books': all_avail_bks_by_lib,
         'lib_book_summary': lib_book_summary,
-        "status": update_status
+        "status": update_status,
+        "author": author
     })

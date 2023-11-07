@@ -8141,6 +8141,10 @@ details.collapse summary::-webkit-details-marker {
   width: 100vw;
 }
 
+.w-1\/4 {
+  width: 25%;
+}
+
 .max-w-screen-lg {
   max-width: 1024px;
 }
@@ -10181,6 +10185,14 @@ details.collapse summary::-webkit-details-marker {
 
   .md\:w-5\/6 {
     width: 83.333333%;
+  }
+
+  .md\:w-1\/2 {
+    width: 50%;
+  }
+
+  .md\:w-1\/4 {
+    width: 25%;
   }
 
   .md\:flex-row {
