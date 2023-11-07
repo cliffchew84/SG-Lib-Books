@@ -240,7 +240,7 @@ async def show_current_books(request: Request,
                 for r in result:
                     i += 1
                     output.append({
-                        "No": "B" + str(i),
+                        # "No": "B" + str(i),
                         "CallNumber": r.get('CallNumber'),
                         "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
                         "BID": r.get("BID")

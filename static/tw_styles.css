@@ -8749,11 +8749,6 @@ details.collapse summary::-webkit-details-marker {
   border-style: none;
 }
 
-.divide-black > :not([hidden]) ~ :not([hidden]) {
-  --tw-divide-opacity: 1;
-  border-color: rgb(0 0 0 / var(--tw-divide-opacity));
-}
-
 .divide-gray-800 > :not([hidden]) ~ :not([hidden]) {
   --tw-divide-opacity: 1;
   border-color: rgb(31 41 55 / var(--tw-divide-opacity));
@@ -9141,11 +9136,6 @@ details.collapse summary::-webkit-details-marker {
   border-style: none;
 }
 
-.border-blue-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(96 165 250 / var(--tw-border-opacity));
-}
-
 .border-blue-800 {
   --tw-border-opacity: 1;
   border-color: rgb(30 64 175 / var(--tw-border-opacity));
@@ -9294,10 +9284,6 @@ details.collapse summary::-webkit-details-marker {
 
 .bg-origin-content {
   background-origin: content-box;
-}
-
-.fill-sky-700 {
-  fill: #0369a1;
 }
 
 .object-contain {
@@ -10160,6 +10146,11 @@ details.collapse summary::-webkit-details-marker {
     margin-left: calc(6rem * calc(1 - var(--tw-space-x-reverse)));
   }
 
+  .sm\:px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
   .sm\:px-20 {
     padding-left: 5rem;
     padding-right: 5rem;
@@ -10170,22 +10161,12 @@ details.collapse summary::-webkit-details-marker {
     padding-right: 1rem;
   }
 
-  .sm\:px-2 {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
   .sm\:underline {
     text-decoration-line: underline;
   }
 }
 
 @media (min-width: 768px) {
-  .md\:mx-20 {
-    margin-left: 5rem;
-    margin-right: 5rem;
-  }
-
   .md\:block {
     display: block;
   }
@@ -10202,10 +10183,6 @@ details.collapse summary::-webkit-details-marker {
     width: 83.333333%;
   }
 
-  .md\:w-1\/2 {
-    width: 50%;
-  }
-
   .md\:flex-row {
     flex-direction: row;
   }
@@ -10214,17 +10191,6 @@ details.collapse summary::-webkit-details-marker {
     --tw-space-x-reverse: 0;
     margin-right: calc(4rem * var(--tw-space-x-reverse));
     margin-left: calc(4rem * calc(1 - var(--tw-space-x-reverse)));
-  }
-
-  .md\:space-x-24 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-x-reverse: 0;
-    margin-right: calc(6rem * var(--tw-space-x-reverse));
-    margin-left: calc(6rem * calc(1 - var(--tw-space-x-reverse)));
-  }
-
-  .md\:px-2 {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
   }
 
   .md\:pb-2 {
@@ -10244,37 +10210,6 @@ details.collapse summary::-webkit-details-marker {
 @media (min-width: 1024px) {
   .lg\:w-1\/2 {
     width: 50%;
-  }
-
-  .lg\:w-2\/5 {
-    width: 40%;
-  }
-
-  .lg\:w-3\/5 {
-    width: 60%;
-  }
-
-  .lg\:w-4\/5 {
-    width: 80%;
-  }
-
-  .lg\:w-1\/5 {
-    width: 20%;
-  }
-
-  .lg\:flex-row {
-    flex-direction: row;
-  }
-
-  .lg\:space-x-24 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-x-reverse: 0;
-    margin-right: calc(6rem * var(--tw-space-x-reverse));
-    margin-left: calc(6rem * calc(1 - var(--tw-space-x-reverse)));
-  }
-
-  .lg\:px-2 {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
   }
 
   .lg\:text-lg {
