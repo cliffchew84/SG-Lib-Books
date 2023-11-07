@@ -14,7 +14,7 @@ def authenticate_into_nlb_rest(app_id, api_key):
 
 def get_rest_nlb_api(extension_url: str,
                      input: str,
-                     search_on='Title',
+                     author=None,
                      setid=None,
                      lastirn=None,
                      app_id: str = APPLICATION_ID,
@@ -29,11 +29,19 @@ def get_rest_nlb_api(extension_url: str,
     final_url = "https://openweb.nlb.gov.sg/api/v1/Catalogue/" + extension_url
 
     if extension_url == "SearchTitles":
-        payload = {search_on: input,
-                   'Limit': 50,
+        payload = {'Limit': 100,
                    "Format": "BK",
                    "setID": setid,
                    "lastIrn": lastirn}
+
+        if input:
+            if input.isdigit() and len(input) in [10, 13]:
+                payload.update({"ISBN": input})
+            else:
+                payload.update({"Title": input})
+
+        if author:
+            payload.update({"Author": author})
 
     else:
         payload = {'BRN': input}

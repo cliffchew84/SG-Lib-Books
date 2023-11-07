@@ -212,7 +212,6 @@ async def show_current_books(request: Request,
             update_status = "Updating In Progress... Please refresh to update!"
 
         # Processing necessary statistics
-        all_unique_books = process.process_all_unique_books(response)
         all_avail_books = process.process_all_avail_books(response)
         all_unique_lib = process.process_all_unique_lib(response)
         all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
@@ -235,12 +234,9 @@ async def show_current_books(request: Request,
 
                 result = list({d['TitleName']: d for d in response}.values())
 
-                i = 0
                 output = []
                 for r in result:
-                    i += 1
                     output.append({
-                        "No": "B" + str(i),
                         "CallNumber": r.get('CallNumber'),
                         "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
                         "BID": r.get("BID")
@@ -250,9 +246,7 @@ async def show_current_books(request: Request,
                 "request": request,
                 "username": username.get("UserName"),
                 "api_data": output,
-                'all_unique_books': all_unique_books,
                 'all_avail_books': all_avail_books,
-                'all_unique_lib': all_unique_lib,
                 'avail_books': all_avail_bks_by_lib,
                 'lib_book_summary': lib_book_summary,
                 "status": update_status
@@ -348,7 +342,6 @@ async def show_books_avail(request: Request,
                 "api_data": response,
                 'all_unique_books': all_unique_books,
                 'all_avail_books': all_avail_books,
-                'all_unique_lib': all_unique_lib,
                 'avail_books': all_avail_bks_by_lib,
                 'lib_book_summary': lib_book_summary,
                 'status': update_status
@@ -401,12 +394,11 @@ async def show_books_avail_by_lib(request: Request,
                 "username": username.get("UserName"),
                 "api_data": output,
                 'library': library,
-                'all_unique_books': all_unique_books,
                 'all_avail_books': all_avail_books,
-                'all_unique_lib': all_unique_lib,
-                'unique_lib': unique_lib,
                 'avail_books': all_avail_bks_by_lib,
+                'all_unique_books': all_unique_books,
                 'lib_book_summary': lib_book_summary,
+                'unique_lib': unique_lib,
                 'lib_avail': lib_avail,
                 'lib_all': lib_all,
                 'status': update_status
@@ -556,126 +548,123 @@ async def delete_book(BID: str,
 @app.get("/{username}/search/", response_class=HTMLResponse)
 async def show_search_books(request: Request,
                             book_search: Optional[str] = None,
+                            author: Optional[str] = None,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
-    try:
-        response = process_user_book_data(
-            db=db, username=username.get("UserName"))
+    response = process_user_book_data(
+        db=db, username=username.get("UserName"))
 
-        update_status = None
-        if m_db.mg_query_status(db=db, username=username.get("UserName")):
-            update_status = "Updating In Progress!"
+    update_status = None
+    if m_db.mg_query_status(db=db, username=username.get("UserName")):
+        update_status = "Updating In Progress!"
 
-        # Processing necessary statistics
-        all_unique_books = process.process_all_unique_books(response)
-        all_avail_books = process.process_all_avail_books(response)
-        all_unique_lib = process.process_all_unique_lib(response)
-        all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
-        lib_book_summary = process.process_lib_book_summary(
-            all_unique_lib, all_avail_bks_by_lib)
+    # Processing necessary statistics
+    all_avail_books = process.process_all_avail_books(response)
+    all_unique_lib = process.process_all_unique_lib(response)
+    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+    lib_book_summary = process.process_lib_book_summary(
+        all_unique_lib, all_avail_bks_by_lib)
 
-        text_output = "Please search for your book title"
-        final_response = list()
+    text_output = "Please search for your book title"
+    final_response = list()
 
-        if book_search:
-            book_search = re.sub('\W+', ' ', book_search)
-            print(f"{book_search} is happening")
+    if book_search or author:
+        if book_search.isdigit() and len(book_search) in [10, 13]:
+            book_search = str(book_search)
+            books = nlb_rest_api.get_rest_nlb_api(
+                "SearchTitles", book_search)
 
-            if book_search.isdigit() and len(book_search) in [10, 13]:
-                print("ISBN")
-                book_search = str(book_search)
+        else:
+            try:
+                book_search = re.sub('\W+', ' ', book_search)
+            except Exception:
+                pass
+            books = nlb_rest_api.get_rest_nlb_api(
+                "SearchTitles", input=book_search, author=author)
+
+        elist = [400, 404, 500, 401, 405, 429]
+
+        if books.get("totalRecords") == 0:
+            text_output = f"There are no records with '{book_search}'"
+
+        elif books.get("statusCode") in elist:
+            text_output = f"There are no records with '{book_search}'"
+
+        else:
+            # Get main list of books
+            searched_books = []
+            searched_books.append(books.get("titles"))
+
+            # Check for pagination
+            has_more_records = books.get("hasMoreRecords")
+            counter = 0
+            while has_more_records:
+                counter += 1
+                set_id = books.get("setId")
+                last_irn = books.get("lastIrn")
                 books = nlb_rest_api.get_rest_nlb_api(
-                    "SearchTitles", book_search, "ISBN")
+                    "SearchTitles",
+                    input=book_search,
+                    author=author,
+                    setid=set_id,
+                    lastirn=last_irn)
 
-            else:
-                print("title")
-                books = nlb_rest_api.get_rest_nlb_api(
-                    "SearchTitles", book_search)
-
-            elist = [400, 404, 500, 401, 405, 429]
-
-            if books.get("totalRecords") == 0:
-                text_output = f"There are no records with '{book_search}'"
-
-            elif books.get("statusCode") in elist:
-                text_output = f"There are no records with '{book_search}'"
-
-            else:
-                # Get main list of books
-                searched_books = []
-                searched_books.append(books.get("titles"))
-
-                # Check for pagination
+                searched_books.append(books.get('titles'))
                 has_more_records = books.get("hasMoreRecords")
-                counter = 0
-                while has_more_records:
-                    counter += 1
-                    set_id = books.get("setId")
-                    last_irn = books.get("lastIrn")
-                    books = nlb_rest_api.get_rest_nlb_api(
-                        "SearchTitles",
-                        input=book_search,
-                        search_on='Title',
-                        setid=set_id,
-                        lastirn=last_irn)
 
-                    searched_books.append(books.get('titles'))
-                    has_more_records = books.get("hasMoreRecords")
+            if counter > 0:
+                p_searched_books = [i for sl in searched_books for i in sl]
+            else:
+                p_searched_books = searched_books[0]
 
-                if counter > 0:
-                    p_searched_books = [i for sl in searched_books for i in sl]
-                else:
-                    p_searched_books = searched_books[0]
-
-                output_list = []
-                for book in p_searched_books:
-                    get_isbn = book.get("isbns")
-                    if get_isbn:
-                        if "electronic" not in get_isbn:
-                            output_list.append(book)
-                    else:
+            output_list = []
+            for book in p_searched_books:
+                get_isbn = book.get("isbns")
+                if get_isbn:
+                    if "electronic" not in get_isbn:
                         output_list.append(book)
+                else:
+                    output_list.append(book)
 
-                final_output = [nlb_rest_api.process_rest_bk_info(
-                    i) for i in output_list]
+            final_output = [nlb_rest_api.process_rest_bk_info(
+                i) for i in output_list]
 
-                # Search user book BIDs and
-                # disable add books for books already saved by user
-                user_books = m_db.mg_query_user_bookmarked_books(
-                    db=db, username=username.get("UserName"))
+            # print(final_output)
 
-                user_books_bids = [i.get("BID") for i in user_books]
+            # Search user book BIDs and
+            # disable add books for books already saved by user
+            user_books = m_db.mg_query_user_bookmarked_books(
+                db=db, username=username.get("UserName"))
 
-                for i in final_output:
-                    try:
-                        i['TitleName'] = i['TitleName'].split(
-                            "/")[0].strip() + " | " + str(i['BID'])
+            user_books_bids = [i.get("BID") for i in user_books]
 
-                        i['PublishYear'] = "Y" + i['PublishYear']
+            for i in final_output:
+                try:
+                    i['TitleName'] = i['TitleName'].split(
+                        "/")[0].strip() + " | " + str(i['BID'])
 
-                        disable = "disabled" if str(
-                            i['BID']) in user_books_bids else ""
+                    i['PublishYear'] = "Y" + i['PublishYear']
 
-                        i['BID'] = disable + " | " + str(i["BID"])
+                    disable = "disabled" if str(
+                        i['BID']) in user_books_bids else ""
 
-                        final_response.append(i)
-                    except Exception:
-                        pass
+                    i['BID'] = disable + " | " + str(i["BID"])
 
-        return templates.TemplateResponse("search.html", {
-            "request": request,
-            "keyword": book_search,
-            "username": username.get("UserName"),
-            "api_data": final_response,
-            "text_output": text_output,
-            'all_unique_books': all_unique_books,
-            'all_avail_books': all_avail_books,
-            'all_unique_lib': all_unique_lib,
-            'avail_books': all_avail_bks_by_lib,
-            'lib_book_summary': lib_book_summary,
-            "status": update_status
-        })
+                    final_response.append(i)
 
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+                except Exception:
+                    pass
+
+    return templates.TemplateResponse("search.html", {
+        "request": request,
+        "keyword": book_search,
+        "author": author,
+        "username": username.get("UserName"),
+        "api_data": final_response,
+        "text_output": text_output,
+        'all_avail_books': all_avail_books,
+        'avail_books': all_avail_bks_by_lib,
+        'lib_book_summary': lib_book_summary,
+        "status": update_status
+    })

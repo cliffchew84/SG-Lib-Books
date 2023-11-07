@@ -15,8 +15,7 @@
         <table class="mx-auto table-auto border-collapse rounded-lg table-sm w-full divide-y divide-gray-800">
             <thead class='rounded-lg'>
                 <tr class='bg-sky-700 text-white rounded-lg'>
-                    <th></th>
-                    <th>Lib No.</th>
+                    <th class="hidden md:block">Lib No.</th>
                     <th>Your Books</th>
                     <th></th>
                 </tr>
@@ -41,6 +40,7 @@
                     {% elif a == "TitleName" %}
                     {% set TitleName, BID = data[a].split(' | ') %}
                     <td>
+
                         <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
                             class="button text-blue-800 font-semibold my-2 underline" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}
@@ -48,7 +48,7 @@
 
                         {% else %}
 
-                    <td>{{ data[a] }}</td>
+                    <td class="hidden md:block">{{ data[a] }}</td>
 
                     {% endif %}
 
