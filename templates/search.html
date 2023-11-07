@@ -6,7 +6,8 @@
         {% if keyword %}
         <input
             class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-            placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search" value={{keyword}} />
+            placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
+            value="{{keyword|safe}}" />
 
         {% else %}
 
@@ -18,7 +19,7 @@
         {% if author %}
         <input
             class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-            placeholder="Author (Optional)" type="search" id="author" name="author" value={{author}} />
+            placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}" />
 
         {% else %}
 
@@ -46,7 +47,7 @@
 
     {% endif %}
 
-    {% if keyword %}
+    {% if keyword or author %}
 
     <table class="mx-auto table-auto border-collapse w-full table-sm divide-y divide-gray-800">
         <thead class='rounded-lg'>

@@ -569,18 +569,17 @@ async def show_search_books(request: Request,
     text_output = "Please search for your book title"
     final_response = list()
 
-    if book_search:
-        book_search = re.sub('\W+', ' ', book_search)
-        print(f"{book_search} is happening")
-
+    if book_search or author:
         if book_search.isdigit() and len(book_search) in [10, 13]:
-            print("ISBN")
             book_search = str(book_search)
             books = nlb_rest_api.get_rest_nlb_api(
-                "SearchTitles", book_search, "ISBN")
+                "SearchTitles", book_search)
 
         else:
-            print("title")
+            try:
+                book_search = re.sub('\W+', ' ', book_search)
+            except Exception:
+                pass
             books = nlb_rest_api.get_rest_nlb_api(
                 "SearchTitles", input=book_search, author=author)
 
@@ -607,7 +606,7 @@ async def show_search_books(request: Request,
                 books = nlb_rest_api.get_rest_nlb_api(
                     "SearchTitles",
                     input=book_search,
-                    search_on='Title',
+                    author=author,
                     setid=set_id,
                     lastirn=last_irn)
 
@@ -631,6 +630,8 @@ async def show_search_books(request: Request,
             final_output = [nlb_rest_api.process_rest_bk_info(
                 i) for i in output_list]
 
+            # print(final_output)
+
             # Search user book BIDs and
             # disable add books for books already saved by user
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -651,18 +652,19 @@ async def show_search_books(request: Request,
                     i['BID'] = disable + " | " + str(i["BID"])
 
                     final_response.append(i)
+
                 except Exception:
                     pass
 
     return templates.TemplateResponse("search.html", {
         "request": request,
         "keyword": book_search,
+        "author": author,
         "username": username.get("UserName"),
         "api_data": final_response,
         "text_output": text_output,
         'all_avail_books': all_avail_books,
         'avail_books': all_avail_bks_by_lib,
         'lib_book_summary': lib_book_summary,
-        "status": update_status,
-        "author": author
+        "status": update_status
     })
