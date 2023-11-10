@@ -9,7 +9,7 @@ from fastapi_login import LoginManager
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
-from typing import Optional, List
+from typing import Optional
 import urllib.parse
 import pendulum
 import os
@@ -530,11 +530,14 @@ async def api_book_ingest(BID: str,
 
 # To add all books ingest for heavy users on frontend
 @app.post("/ingest_all_books", response_class=HTMLResponse)
-async def api_ingest_all_books(bid_list: List[str],
+async def api_ingest_all_books(bids: list = Form(...),
                                db=Depends(get_db),
                                username=Depends(manager)):
 
-    for BID in bid_list:
+    print(bids)
+
+    for bid in bids:
+        BID = str(bid)
         # Makes API to bk info and bk avail and ingest the data into DB
         m_db.mg_add_user_book(db=db,
                               username=username.get("UserName"),
@@ -542,9 +545,11 @@ async def api_ingest_all_books(bid_list: List[str],
 
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
         update_bk_avail_in_mongo(db, BID)
+        print(f"{BID} ingested into mongo")
 
-    return RedirectResponse(f"/{username.get('UserName')}",
-                            status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(
+        f"/{username.get('UserName')}/yourbooks",
+        status_code=status.HTTP_302_FOUND)
 
 
 @app.post("/delete_book/{BID}", response_class=HTMLResponse)
@@ -604,15 +609,8 @@ async def show_search_books(request: Request,
         pass
 
     if book_search or author:
-        # Is user uses ISBN to search
-        if book_search.isdigit() and len(book_search) in [10, 13]:
-            book_search = str(book_search)
-            books = nlb_rest_api.get_rest_nlb_api(
-                "SearchTitles", book_search)
-
-        else:
-            books = nlb_rest_api.get_rest_nlb_api(
-                "SearchTitles", input=book_search, author=author)
+        books = nlb_rest_api.get_rest_nlb_api(
+            "SearchTitles", input=book_search, author=author)
 
         search_params = dict()
         search_params['title'] = book_search
