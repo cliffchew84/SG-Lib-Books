@@ -534,8 +534,6 @@ async def api_ingest_all_books(bids: list = Form(...),
                                db=Depends(get_db),
                                username=Depends(manager)):
 
-    print(bids)
-
     for bid in bids:
         BID = str(bid)
         # Makes API to bk info and bk avail and ingest the data into DB
@@ -545,7 +543,6 @@ async def api_ingest_all_books(bids: list = Form(...),
 
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
         update_bk_avail_in_mongo(db, BID)
-        print(f"{BID} ingested into mongo")
 
     return RedirectResponse(
         f"/{username.get('UserName')}/yourbooks",
@@ -573,6 +570,37 @@ async def delete_book(BID: str,
 
     m_db.mg_delete_bk_user_records(
         db=db, username=username.get("UserName"), bid_no=BID)
+
+    return RedirectResponse(f"/{username.get('UserName')}/yourbooks",
+                            status_code=status.HTTP_302_FOUND)
+
+
+# WIP
+@app.post("/delete_multiple_books", response_class=HTMLResponse)
+async def delete_multiple_book(bids: list = Form(...),
+                               db=Depends(get_db),
+                               username=Depends(manager)):
+    print(bids)
+
+    for bid in bids:
+        BID = str(bid)
+        print(BID)
+        # Check BID is linked to more than 1 user
+        counter = db.user_books.aggregate([
+            {"$match": {"BID": BID}},
+            {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+            {"$project": {"_id": 0}}
+        ])
+        final_count = counter.next().get("BID")
+
+        # If book is only linked to one user,
+        # delete book available and info records
+        if final_count == 1:
+            m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
+            m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
+
+        m_db.mg_delete_bk_user_records(
+            db=db, username=username.get("UserName"), bid_no=BID)
 
     return RedirectResponse(f"/{username.get('UserName')}/yourbooks",
                             status_code=status.HTTP_302_FOUND)
@@ -706,7 +734,6 @@ async def show_search_books(request: Request,
     })
 
 
-# WIP
 @app.get("/profile/{username}", response_class=HTMLResponse)
 async def user_profile(request: Request,
                        db=Depends(get_db),
@@ -727,7 +754,6 @@ async def user_profile(request: Request,
         all_unique_lib, all_avail_bks_by_lib)
     all_unique_lib.sort()
 
-    # WIP
     # Query user profile info from database
     user_info = m_db.mg_query_user_info(db, username.get("UserName"))
     email_address = user_info.get("email_address")

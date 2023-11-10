@@ -12,51 +12,60 @@
         <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
             id="myInput" type="text" placeholder="Search your saved books by keywords in their title!">
 
-        <table class="mx-auto table-auto border-collapse rounded-lg table-sm w-full divide-y divide-gray-800">
-            <thead class='rounded-lg'>
-                <tr class='bg-sky-700 text-white rounded-lg'>
-                    <th class="hidden md:block">Lib No.</th>
-                    <th>Your Books</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody id="myTable">
-
-                {% for data in api_data %}
-
-                <tr>
-                    {% for a in data %}
-                    {% if data[a]|int !=0 %}
-
-                    <td>
-                        <form action="/delete_book/{{data[a]}}" method="POST">
-                            <button type="submit" class="bg-red-700 px-2 py-1 rounded-lg 
-                            hover:text-white hover:bg-red-400 text-white">
+        <form action="/delete_multiple_books" method="POST">
+            <table class="mx-auto table-auto border-collapse rounded-lg table-sm w-full divide-y divide-gray-800">
+                <thead class='rounded-lg'>
+                    <tr class='bg-sky-700 text-white rounded-lg'>
+                        <th class="hidden md:block">Lib No.</th>
+                        <th>Your Books</th>
+                        <th class="flex justify-center items-center">
+                            <button type="submit" id="submitButton" class="bg-red-700 px-2 my-1 py-1 rounded-lg 
+                                    hover:text-white hover:bg-red-400 text-white disabled:bg-gray-400 
+                                    disabled:hover:bg-gray-400" disabled>
                                 <i class="fas fa-trash" aria-hidden="true"></i>
                             </button>
-                        </form>
-                    </td>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="myTable">
 
-                    {% elif a == "TitleName" %}
-                    {% set TitleName, BID = data[a].split(' | ') %}
-                    <td>
+                    {% for data in api_data %}
 
-                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                            class="button text-blue-800 font-semibold my-2 underline" target="_blank" rel="noopener
+                    <tr>
+                        {% for a in data %}
+                        {% if data[a]|int !=0 %}
+
+                        <td class="flex justify-center items-center">
+                            <div class="pt-1 h-full flex items-center">
+                                <label>
+                                    <input type="checkbox"
+                                        class="checkbox checkbox-error hover:bg-red-500 border-red-500" name='bids'
+                                        value='{{data[a]}}' onchange="checkSelection()" />
+                                </label>
+                            </div>
+                        </td>
+
+                        {% elif a == "TitleName" %}
+                        {% set TitleName, BID = data[a].split(' | ') %}
+                        <td>
+
+                            <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                                class="button text-blue-800 font-semibold my-2 underline" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}
-                        </a>
+                            </a>
 
-                        {% else %}
+                            {% else %}
 
-                    <td class="hidden md:block">{{ data[a] }}</td>
+                        <td class="hidden md:block">{{ data[a] }}</td>
 
-                    {% endif %}
+                        {% endif %}
 
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </form>
     </div>
 </div>
 
@@ -69,6 +78,25 @@
             });
         });
     });
+
+
+    function checkSelection() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var submitButton = document.getElementById("submitButton");
+        var atLeastOneChecked = false;
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                atLeastOneChecked = true;
+            }
+        });
+
+        if (atLeastOneChecked) {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
 </script>
 
 {% include 'footer.html' %}
