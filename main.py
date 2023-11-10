@@ -9,7 +9,7 @@ from fastapi_login import LoginManager
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
-from typing import Optional
+from typing import Optional, List
 import urllib.parse
 import pendulum
 import os
@@ -323,6 +323,11 @@ async def show_books_avail(request: Request,
             response = process_user_book_data(
                 db=db, username=username.get("UserName"))
 
+            # WIP
+            # Query user library preference
+            # If preference exist, redirect to "/{username}/lib/{library}/"
+            # else continue
+
             # Processing necessary statistics
             all_unique_books = process.process_all_unique_books(response)
             all_avail_books = process.process_all_avail_books(response)
@@ -514,7 +519,26 @@ async def api_book_ingest(BID: str,
     bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
     update_bk_avail_in_mongo(db, BID)
 
-    return RedirectResponse(f"/{username.get('UserName')}/search",
+    return RedirectResponse(f"/{username.get('UserName')}",
+                            status_code=status.HTTP_302_FOUND)
+
+
+# To add all books ingest for heavy users on frontend
+@app.post("/ingest_all_books", response_class=HTMLResponse)
+async def api_ingest_all_books(bid_list: List[str],
+                               db=Depends(get_db),
+                               username=Depends(manager)):
+
+    for BID in bid_list:
+        # Makes API to bk info and bk avail and ingest the data into DB
+        m_db.mg_add_user_book(db=db,
+                              username=username.get("UserName"),
+                              bid_no=BID)
+
+        bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
+        update_bk_avail_in_mongo(db, BID)
+
+    return RedirectResponse(f"/{username.get('UserName')}",
                             status_code=status.HTTP_302_FOUND)
 
 
@@ -569,19 +593,30 @@ async def show_search_books(request: Request,
     text_output = "Please search for your book title"
     final_response = list()
 
+    try:
+        book_search = re.sub(r'\W+', ' ', book_search)
+    except Exception:
+        pass
+
     if book_search or author:
+        # Is user uses ISBN to search
         if book_search.isdigit() and len(book_search) in [10, 13]:
             book_search = str(book_search)
             books = nlb_rest_api.get_rest_nlb_api(
                 "SearchTitles", book_search)
 
         else:
-            try:
-                book_search = re.sub('\W+', ' ', book_search)
-            except Exception:
-                pass
             books = nlb_rest_api.get_rest_nlb_api(
                 "SearchTitles", input=book_search, author=author)
+
+        search_params = dict()
+        search_params['title'] = book_search
+        search_params['author'] = author
+
+        m_db.mg_user_search_tracking(db,
+                                     table="user_search",
+                                     username=username.get("UserName"),
+                                     search_params=search_params)
 
         elist = [400, 404, 500, 401, 405, 429]
 
@@ -630,8 +665,6 @@ async def show_search_books(request: Request,
             final_output = [nlb_rest_api.process_rest_bk_info(
                 i) for i in output_list]
 
-            # print(final_output)
-
             # Search user book BIDs and
             # disable add books for books already saved by user
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -668,3 +701,68 @@ async def show_search_books(request: Request,
         'lib_book_summary': lib_book_summary,
         "status": update_status
     })
+
+
+# WIP
+@app.get("/profile/{username}", response_class=HTMLResponse)
+async def user_profile(request: Request,
+                       db=Depends(get_db),
+                       username=Depends(manager)):
+
+    response = process_user_book_data(
+        db=db, username=username.get("UserName"))
+
+    update_status = None
+    if m_db.mg_query_status(db=db, username=username.get("UserName")):
+        update_status = "Updating In Progress!"
+
+    # Processing necessary statistics
+    all_avail_books = process.process_all_avail_books(response)
+    all_unique_lib = process.process_all_unique_lib(response)
+    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+    lib_book_summary = process.process_lib_book_summary(
+        all_unique_lib, all_avail_bks_by_lib)
+
+    # WIP
+    # Query user profile info from database
+    user_info = m_db.mg_query_user_info(db, username.get("UserName"))
+    email_address = user_info.get("email_address")
+    preferred_lib = user_info.get("preferred_lib")
+
+    return templates.TemplateResponse("profile.html", {
+        "request": request,
+        "username": username.get("UserName"),
+        "email_address": email_address,
+        "preferred_lib": preferred_lib,
+        'all_avail_books': all_avail_books,
+        'avail_books': all_avail_bks_by_lib,
+        'lib_book_summary': lib_book_summary,
+        "status": update_status
+    })
+
+
+# WIP
+@app.post("/update_user/{username}", response_class=HTMLResponse)
+async def update_user(request: Request,
+                      email_address: str = Form(None),
+                      preferred_lib: str = Form(None),
+                      db=Depends(get_db),
+                      username=Depends(manager)):
+
+    # Update info
+    new_dict = {'email_address': email_address,
+                "preferred_lib": preferred_lib}
+    m_db.mg_update_user_info(db, username.get("UserName"), new_dict)
+
+    return RedirectResponse(f"/profile/{username.get('UserName')}",
+                            status_code=status.HTTP_302_FOUND)
+
+
+# WIP
+@app.post("/delete_user/{username}", response_class=HTMLResponse)
+async def delete_user(request: Request,
+                      db=Depends(get_db),
+                      username=Depends(manager)):
+
+    m_db.mg_delete_user(db, username=username.get("UserName"))
+    return RedirectResponse("/logout", status_code=status.HTTP_302_FOUND)

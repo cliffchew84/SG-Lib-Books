@@ -8141,12 +8141,12 @@ details.collapse summary::-webkit-details-marker {
   width: 100vw;
 }
 
-.w-1\/4 {
-  width: 25%;
-}
-
 .max-w-screen-lg {
   max-width: 1024px;
+}
+
+.max-w-xs {
+  max-width: 20rem;
 }
 
 .flex-1 {
@@ -9429,10 +9429,6 @@ details.collapse summary::-webkit-details-marker {
   padding-left: 1.5rem;
 }
 
-.pt-1 {
-  padding-top: 0.25rem;
-}
-
 .pt-10 {
   padding-top: 2.5rem;
 }
@@ -10183,16 +10179,16 @@ details.collapse summary::-webkit-details-marker {
     display: none;
   }
 
-  .md\:w-5\/6 {
-    width: 83.333333%;
-  }
-
   .md\:w-1\/2 {
     width: 50%;
   }
 
   .md\:w-1\/4 {
     width: 25%;
+  }
+
+  .md\:w-5\/6 {
+    width: 83.333333%;
   }
 
   .md\:flex-row {

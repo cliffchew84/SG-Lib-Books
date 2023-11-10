@@ -1,0 +1,80 @@
+{% include 'header.html' %}
+{% include 'navbar.html' %}
+
+<div class="mx-auto my-20 p-4 md:w-1/2 items-center justify-center">
+    <div class="pt-2 py-2 text-3xl font-semibold">
+        Your profile
+    </div>
+
+    {% if status %}
+
+    {% include 'update_status.html' %}
+
+    {% endif %}
+
+    <div>
+        <form action="/update_user/{{username}}" method="POST">
+            <label>Username </label>
+            <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
+                id="username" name="username" type="text" value="{{username|safe}}" disabled />
+
+            <label>Email Address </label>
+            <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
+                id="email_address" name="email_address" type="email" placeholder="{{email_address|safe}}"
+                value="{{email_address|safe}}" />
+
+            <label>Preferred Library </label>
+            <select id="preferred_lib" name="preferred_lib"
+                class="mx-auto md:text-base text-sm w-full form-control rounded-lg p-2 my-2 border-2 border-sky-700">
+
+                {% if preferred_lib %}
+                <option value={{preferred_lib}} selected>
+                    {{preferred_lib}}</option>
+
+                {% else %}
+
+                <option value='None' selected>None</option>
+
+                {% endif %}
+
+                {% for lib in lib_book_summary %}
+
+                {% if lib != preferred_lib %}
+                <option value={{lib.keys()|list|first}}>
+                    {{lib.keys()|list|first}}</option>
+
+                {% else %}
+
+                {% endif %}
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
+                    hover:text-white hover:bg-sky-500 text-white">
+                Update Account
+            </button>
+        </form>
+
+        <!-- Add modal content -->
+        <button class="bg-red-700 px-2 py-1 rounded-lg hover:text-white hover:bg-red-400 text-white"
+            onclick="my_modal_1.showModal()">Delete Account</button>
+        <dialog id="my_modal_1" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Hey!</h3>
+                <p class="py-4">Are you sure you want to delete the account?
+                    This action cannot be reversed!</p>
+                <div class="modal-action">
+                    <form action="/delete_user/{{username}}" method="POST">
+                        <button type="submit" class="bg-red-700 px-2 py-1 rounded-lg 
+                            hover:text-white hover:bg-red-400 text-white">
+                            Delete Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </dialog>
+
+    </div>
+
+</div>
+{% include 'footer.html' %}
