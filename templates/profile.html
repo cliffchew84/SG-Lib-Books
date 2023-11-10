@@ -23,13 +23,13 @@
                 id="email_address" name="email_address" type="email" placeholder="{{email_address|safe}}"
                 value="{{email_address|safe}}" />
 
-            <label class="italic">Default library when you when you login (Optional)</label>
+            <label class="italic">Default library when you login (Optional)</label>
             <select id="preferred_lib" name="preferred_lib"
                 class="mx-auto md:text-base text-sm w-full form-control rounded-lg px-2 my-2 border-2 border-sky-700">
 
                 {% if preferred_lib %}
-                <option value={{preferred_lib}} selected>
-                    {{preferred_lib}}</option>
+                <option value="{{preferred_lib|safe}}" selected>
+                    {{preferred_lib|safe}}</option>
 
                 {% else %}
 
@@ -37,11 +37,11 @@
 
                 {% endif %}
 
-                {% for lib in lib_book_summary %}
+                {% for lib in all_unique_lib %}
 
                 {% if lib != preferred_lib %}
-                <option value={{lib.keys()|list|first}}>
-                    {{lib.keys()|list|first}}</option>
+                <option value='{{ lib }}'>
+                    {{ lib }}</option>
 
                 {% else %}
 
@@ -49,7 +49,7 @@
                 {% endfor %}
             </select>
 
-            <button type="submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
+            <button type=" submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
                     hover:text-white hover:bg-sky-500 text-white">
                 Update Account
             </button>

@@ -727,6 +727,7 @@ async def user_profile(request: Request,
     all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
     lib_book_summary = process.process_lib_book_summary(
         all_unique_lib, all_avail_bks_by_lib)
+    all_unique_lib.sort()
 
     # WIP
     # Query user profile info from database
@@ -741,6 +742,7 @@ async def user_profile(request: Request,
         "preferred_lib": preferred_lib,
         'all_avail_books': all_avail_books,
         'avail_books': all_avail_bks_by_lib,
+        'all_unique_lib': all_unique_lib,
         'lib_book_summary': lib_book_summary,
         "status": update_status
     })
