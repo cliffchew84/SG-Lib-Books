@@ -62,6 +62,18 @@ def mg_query_status(db, username: str):
     return db.user_status.find_one({"UserName": username})
 
 
+def mg_update_user_info(db, username: str, dict_values_to_add: Dict):
+    """ Update user info """
+
+    new_dict = {"UserName": username}
+    new_dict.update(dict_values_to_add)
+
+    newvalues = {"$set": new_dict}
+
+    db['users'].update_one({"UserName": username}, newvalues)
+    return f"Tracked {dict_values_to_add} for {username}"
+
+
 # Deletes
 def mg_delete_bk_avail_records(db, bid_no):
     return db.books_avail.delete_many({'BID': bid_no})
@@ -78,6 +90,10 @@ def mg_delete_bk_info_records(db, bid_no):
 
 def mg_delete_bk_user_records(db, bid_no, username):
     return db.user_books.delete_many({'UserName': username, 'BID': bid_no})
+
+
+def mg_delete_user(db, username):
+    return db.users.delete_one({'UserName': username})
 
 
 # Queries
@@ -98,6 +114,12 @@ def mg_query_user_books_w_bid(db, username: str):
 def mg_query_user_by_username(db, username: str):
     """ Return user username and password from mongo DB """
     return db['users'].find_one({"UserName": username}, {"_id": 0})
+
+
+def mg_query_user_info(db, username: str):
+    """ Return user username and password from mongo DB """
+    return db['users'].find_one({"UserName": username},
+                                {"_id": 0, "HashedPassword": 0})
 
 
 def mg_query_user_bookmarked_books(db, username: str):
