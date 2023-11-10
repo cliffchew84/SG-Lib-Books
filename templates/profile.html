@@ -14,18 +14,18 @@
 
     <div>
         <form action="/update_user/{{username}}" method="POST">
-            <label>Username </label>
+            <label class="italic">Username</label>
             <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
                 id="username" name="username" type="text" value="{{username|safe}}" disabled />
 
-            <label>Email Address </label>
+            <label class="italic">Email for potential notification purposes (Optional)</label>
             <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
                 id="email_address" name="email_address" type="email" placeholder="{{email_address|safe}}"
                 value="{{email_address|safe}}" />
 
-            <label>Preferred Library </label>
+            <label class="italic">Default library when you when you login (Optional)</label>
             <select id="preferred_lib" name="preferred_lib"
-                class="mx-auto md:text-base text-sm w-full form-control rounded-lg p-2 my-2 border-2 border-sky-700">
+                class="mx-auto md:text-base text-sm w-full form-control rounded-lg px-2 my-2 border-2 border-sky-700">
 
                 {% if preferred_lib %}
                 <option value={{preferred_lib}} selected>

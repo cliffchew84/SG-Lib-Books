@@ -189,8 +189,18 @@ def login(request: Request,
         data={"sub": user.get("UserName")},
         expires=access_token_expires)
 
-    resp = RedirectResponse(
-        f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
+    # Check if user has a default library
+    user_info = m_db.mg_query_user_info(db, user.get("UserName"))
+    preferred_lib = user_info.get("preferred_lib").lower()
+
+    if preferred_lib:
+        resp = RedirectResponse(
+            f"/{user.get('UserName')}/lib/{preferred_lib}/",
+            status_code=status.HTTP_302_FOUND)
+    else:
+        resp = RedirectResponse(
+            f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
+
     manager.set_cookie(resp, access_token)
 
     # Track user login
@@ -322,11 +332,6 @@ async def show_books_avail(request: Request,
         if username:
             response = process_user_book_data(
                 db=db, username=username.get("UserName"))
-
-            # WIP
-            # Query user library preference
-            # If preference exist, redirect to "/{username}/lib/{library}/"
-            # else continue
 
             # Processing necessary statistics
             all_unique_books = process.process_all_unique_books(response)
@@ -741,7 +746,6 @@ async def user_profile(request: Request,
     })
 
 
-# WIP
 @app.post("/update_user/{username}", response_class=HTMLResponse)
 async def update_user(request: Request,
                       email_address: str = Form(None),
@@ -758,7 +762,6 @@ async def update_user(request: Request,
                             status_code=status.HTTP_302_FOUND)
 
 
-# WIP
 @app.post("/delete_user/{username}", response_class=HTMLResponse)
 async def delete_user(request: Request,
                       db=Depends(get_db),
