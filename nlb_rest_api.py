@@ -123,3 +123,65 @@ def process_single_bk_avail(lib_record: List[Dict]) -> Dict:
     output.update({"InsertTime": pendulum.now().int_timestamp})
 
     return output
+
+
+# eResource
+def get_eresource_info(title=None, creator=None):
+    """ Get eResource book info """
+    eresource_url = "https://openweb.nlb.gov.sg/api/v1/EResource"
+    headers = authenticate_into_nlb_rest(APPLICATION_ID, API_KEY)
+    payload = {"contenttype": 'eBooks', 'limit': 100}
+
+    if title:
+        payload.update({"title": title})
+
+    if creator:
+        payload.update({"creator": creator})
+
+    if title or creator:
+        return requests.get(eresource_url + "/SearchResources",
+                            headers=headers,
+                            params=payload).json()
+
+    else:
+        return {"results": "Please provide a Title or Creator"}
+
+
+def process_eresource_info(raw_bks: List[Dict]) -> List[Dict]:
+    """ Get eResource book availability """
+
+    all_books = []
+
+    # Loop through all books
+    for raw_bk in raw_bks:
+        # Single book process
+        single_bk = dict()
+        for i in raw_bk:
+            # Parameters needed for
+            if i in ['title', 'authors', 'resourceUrlExt', 'isbns']:
+                if i == 'authors':
+                    to_include = " | ".join(raw_bk[i])
+                elif i == "isbns":
+                    to_include = " | ".join(
+                        [''.join(filter(str.isdigit, i)) for i in raw_bk[i]])
+                else:
+                    to_include = raw_bk[i]
+                # Combining needed book parameters into single dict
+                single_bk.update({i: to_include})
+
+        # Combine all book results into a single list
+        all_books.append(single_bk)
+
+    return all_books
+
+
+def get_eresource_avail(isbn: str):
+    """ Get book availability based on isbn """
+
+    base_url = "https://openweb.nlb.gov.sg/api/v1/EResource"
+    headers = authenticate_into_nlb_rest(APPLICATION_ID, API_KEY)
+    payload = {"idtype": 'ISBN', 'id': isbn}
+
+    return requests.get(base_url + "/GetAvailabilityInfo",
+                        headers=headers,
+                        params=payload).json()

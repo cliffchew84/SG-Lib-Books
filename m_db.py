@@ -172,3 +172,15 @@ def mg_event_tracking(db, table, username: str, event_name: str):
 
     db[table].update_one({"UserName": username}, newvalues)
     return f"Tracked {event_name} in {table} for {username}"
+
+
+def mg_user_search_tracking(db, table, username: str, search_params: Dict):
+    """ Tracks user search on title and / or author """
+
+    search_time = time.mktime(datetime.now().timetuple())
+    values_to_insert = {"UserName": username, "search_time": search_time}
+    values_to_insert.update(search_params)
+
+    db[table].insert_one(values_to_insert)
+
+    return "Search Tracking done"

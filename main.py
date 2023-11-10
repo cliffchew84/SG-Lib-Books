@@ -569,19 +569,30 @@ async def show_search_books(request: Request,
     text_output = "Please search for your book title"
     final_response = list()
 
+    try:
+        book_search = re.sub(r'\W+', ' ', book_search)
+    except Exception:
+        pass
+
     if book_search or author:
+        # Is user uses ISBN to search
         if book_search.isdigit() and len(book_search) in [10, 13]:
             book_search = str(book_search)
             books = nlb_rest_api.get_rest_nlb_api(
                 "SearchTitles", book_search)
 
         else:
-            try:
-                book_search = re.sub('\W+', ' ', book_search)
-            except Exception:
-                pass
             books = nlb_rest_api.get_rest_nlb_api(
                 "SearchTitles", input=book_search, author=author)
+
+        search_params = dict()
+        search_params['title'] = book_search
+        search_params['author'] = author
+
+        m_db.mg_user_search_tracking(db,
+                                     table="user_search",
+                                     username=username.get("UserName"),
+                                     search_params=search_params)
 
         elist = [400, 404, 500, 401, 405, 429]
 
@@ -629,8 +640,6 @@ async def show_search_books(request: Request,
 
             final_output = [nlb_rest_api.process_rest_bk_info(
                 i) for i in output_list]
-
-            # print(final_output)
 
             # Search user book BIDs and
             # disable add books for books already saved by user
