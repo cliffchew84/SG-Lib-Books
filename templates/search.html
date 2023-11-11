@@ -49,56 +49,81 @@
 
     {% if keyword or author %}
 
-    <table class="mx-auto table-auto border-collapse w-full table-sm divide-y divide-gray-800">
-        <thead class='rounded-lg'>
-            <tr class='bg-sky-700 text-white rounded-lg'>
-                <th></th>
-                <th>Results from <i>'{{keyword}} by {{author}}'</i>
-                </th>
-                <th>Author</th>
-                <th>Year</th>
-            </tr>
-        </thead>
-        <tbody id="myTable">
-
-            {% for data in api_data %}
-
-            <tr>
-                {% for a in data %}
-
-                {% if a == "BID" %}
-                {% set disable, BID = data[a].split(' | ') %}
-
-                <td>
-                    <form action="/ingest_book/{{BID}}" method="POST">
-                        <button type="submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
-                                    hover:text-white hover:bg-sky-500 text-white disabled:bg-gray-400 
-                                    disabled:hover:bg-gray-400" {{ disable }}>
-                            <i class="fas fa-plus"></i>
+    <form action="/ingest_all_books" method="POST">
+        <table class="mx-auto table-auto border-collapse w-full table-sm divide-y divide-gray-800">
+            <thead class='rounded-lg'>
+                <tr class='bg-sky-700 text-white rounded-lg'>
+                    <th class="flex justify-center items-center">
+                        <button type="submit" id="submitButton" class="bg-sky-500 px-2 my-1 py-1 rounded-lg 
+                                    hover:text-white hover:bg-sky-200 text-white disabled:bg-gray-400 
+                                    disabled:hover:bg-gray-400" disabled>Add
                         </button>
-                    </form>
-                </td>
+                    </th>
+                    <th>Search by <i>'{{keyword}} / {{author}}'</i>
+                    </th>
+                    <th>Author</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody id="myTable">
 
-                {% elif a == "TitleName" %}
-                {% set TitleName, BID = data[a].split(' | ') %}
+                {% for data in api_data %}
 
-                <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                        class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
+                <tr>
+                    {% for a in data %}
+
+                    {% if a == "BID" %}
+                    {% set disable, BID = data[a].split(' | ') %}
+                    <td class="flex justify-center items-center">
+                        <div class="pt-1 h-full flex items-center">
+                            <label>
+                                <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
+                                    name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
+                            </label>
+                        </div>
+                    </td>
+
+                    {% elif a == "TitleName" %}
+                    {% set TitleName, BID = data[a].split(' | ') %}
+
+                    <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                            class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}</a>
 
-                    {% else %}
+                        {% else %}
 
-                <td>{{ data[a] }}</td>
+                    <td>{{ data[a] }}</td>
 
-                {% endif %}
+                    {% endif %}
 
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </form>
 
     {% endif %}
 </div>
+
+<script>
+    function checkSelection() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var submitButton = document.getElementById("submitButton");
+        var atLeastOneChecked = false;
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                atLeastOneChecked = true;
+            }
+        });
+
+        if (atLeastOneChecked) {
+            submitButton.disabled = false;
+        } else {
+            submitButton.disabled = true;
+        }
+    }
+</script>
 
 {% include 'footer.html' %}

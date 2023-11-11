@@ -14,22 +14,22 @@
 
     <div>
         <form action="/update_user/{{username}}" method="POST">
-            <label>Username </label>
+            <label class="italic">Username</label>
             <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
                 id="username" name="username" type="text" value="{{username|safe}}" disabled />
 
-            <label>Email Address </label>
+            <label class="italic">Email for potential notification purposes (Optional)</label>
             <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
                 id="email_address" name="email_address" type="email" placeholder="{{email_address|safe}}"
                 value="{{email_address|safe}}" />
 
-            <label>Preferred Library </label>
+            <label class="italic">Default library when you login (Optional)</label>
             <select id="preferred_lib" name="preferred_lib"
-                class="mx-auto md:text-base text-sm w-full form-control rounded-lg p-2 my-2 border-2 border-sky-700">
+                class="mx-auto md:text-base text-sm w-full form-control rounded-lg px-2 my-2 border-2 border-sky-700">
 
                 {% if preferred_lib %}
-                <option value={{preferred_lib}} selected>
-                    {{preferred_lib}}</option>
+                <option value="{{preferred_lib|safe}}" selected>
+                    {{preferred_lib|safe}}</option>
 
                 {% else %}
 
@@ -37,11 +37,11 @@
 
                 {% endif %}
 
-                {% for lib in lib_book_summary %}
+                {% for lib in all_unique_lib %}
 
                 {% if lib != preferred_lib %}
-                <option value={{lib.keys()|list|first}}>
-                    {{lib.keys()|list|first}}</option>
+                <option value='{{ lib }}'>
+                    {{ lib }}</option>
 
                 {% else %}
 
@@ -49,7 +49,7 @@
                 {% endfor %}
             </select>
 
-            <button type="submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
+            <button type=" submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
                     hover:text-white hover:bg-sky-500 text-white">
                 Update Account
             </button>

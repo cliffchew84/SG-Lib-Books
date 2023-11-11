@@ -9,7 +9,7 @@ from fastapi_login import LoginManager
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
-from typing import Optional, List
+from typing import Optional
 import urllib.parse
 import pendulum
 import os
@@ -189,8 +189,18 @@ def login(request: Request,
         data={"sub": user.get("UserName")},
         expires=access_token_expires)
 
-    resp = RedirectResponse(
-        f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
+    # Check if user has a default library
+    user_info = m_db.mg_query_user_info(db, user.get("UserName"))
+    preferred_lib = user_info.get("preferred_lib").lower()
+
+    if preferred_lib:
+        resp = RedirectResponse(
+            f"/{user.get('UserName')}/lib/{preferred_lib}/",
+            status_code=status.HTTP_302_FOUND)
+    else:
+        resp = RedirectResponse(
+            f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
+
     manager.set_cookie(resp, access_token)
 
     # Track user login
@@ -322,11 +332,6 @@ async def show_books_avail(request: Request,
         if username:
             response = process_user_book_data(
                 db=db, username=username.get("UserName"))
-
-            # WIP
-            # Query user library preference
-            # If preference exist, redirect to "/{username}/lib/{library}/"
-            # else continue
 
             # Processing necessary statistics
             all_unique_books = process.process_all_unique_books(response)
@@ -525,11 +530,12 @@ async def api_book_ingest(BID: str,
 
 # To add all books ingest for heavy users on frontend
 @app.post("/ingest_all_books", response_class=HTMLResponse)
-async def api_ingest_all_books(bid_list: List[str],
+async def api_ingest_all_books(bids: list = Form(...),
                                db=Depends(get_db),
                                username=Depends(manager)):
 
-    for BID in bid_list:
+    for bid in bids:
+        BID = str(bid)
         # Makes API to bk info and bk avail and ingest the data into DB
         m_db.mg_add_user_book(db=db,
                               username=username.get("UserName"),
@@ -538,8 +544,9 @@ async def api_ingest_all_books(bid_list: List[str],
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
         update_bk_avail_in_mongo(db, BID)
 
-    return RedirectResponse(f"/{username.get('UserName')}",
-                            status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(
+        f"/{username.get('UserName')}/yourbooks",
+        status_code=status.HTTP_302_FOUND)
 
 
 @app.post("/delete_book/{BID}", response_class=HTMLResponse)
@@ -563,6 +570,37 @@ async def delete_book(BID: str,
 
     m_db.mg_delete_bk_user_records(
         db=db, username=username.get("UserName"), bid_no=BID)
+
+    return RedirectResponse(f"/{username.get('UserName')}/yourbooks",
+                            status_code=status.HTTP_302_FOUND)
+
+
+# WIP
+@app.post("/delete_multiple_books", response_class=HTMLResponse)
+async def delete_multiple_book(bids: list = Form(...),
+                               db=Depends(get_db),
+                               username=Depends(manager)):
+    print(bids)
+
+    for bid in bids:
+        BID = str(bid)
+        print(BID)
+        # Check BID is linked to more than 1 user
+        counter = db.user_books.aggregate([
+            {"$match": {"BID": BID}},
+            {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+            {"$project": {"_id": 0}}
+        ])
+        final_count = counter.next().get("BID")
+
+        # If book is only linked to one user,
+        # delete book available and info records
+        if final_count == 1:
+            m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
+            m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
+
+        m_db.mg_delete_bk_user_records(
+            db=db, username=username.get("UserName"), bid_no=BID)
 
     return RedirectResponse(f"/{username.get('UserName')}/yourbooks",
                             status_code=status.HTTP_302_FOUND)
@@ -599,15 +637,8 @@ async def show_search_books(request: Request,
         pass
 
     if book_search or author:
-        # Is user uses ISBN to search
-        if book_search.isdigit() and len(book_search) in [10, 13]:
-            book_search = str(book_search)
-            books = nlb_rest_api.get_rest_nlb_api(
-                "SearchTitles", book_search)
-
-        else:
-            books = nlb_rest_api.get_rest_nlb_api(
-                "SearchTitles", input=book_search, author=author)
+        books = nlb_rest_api.get_rest_nlb_api(
+            "SearchTitles", input=book_search, author=author)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -703,7 +734,6 @@ async def show_search_books(request: Request,
     })
 
 
-# WIP
 @app.get("/profile/{username}", response_class=HTMLResponse)
 async def user_profile(request: Request,
                        db=Depends(get_db),
@@ -722,8 +752,8 @@ async def user_profile(request: Request,
     all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
     lib_book_summary = process.process_lib_book_summary(
         all_unique_lib, all_avail_bks_by_lib)
+    all_unique_lib.sort()
 
-    # WIP
     # Query user profile info from database
     user_info = m_db.mg_query_user_info(db, username.get("UserName"))
     email_address = user_info.get("email_address")
@@ -736,12 +766,12 @@ async def user_profile(request: Request,
         "preferred_lib": preferred_lib,
         'all_avail_books': all_avail_books,
         'avail_books': all_avail_bks_by_lib,
+        'all_unique_lib': all_unique_lib,
         'lib_book_summary': lib_book_summary,
         "status": update_status
     })
 
 
-# WIP
 @app.post("/update_user/{username}", response_class=HTMLResponse)
 async def update_user(request: Request,
                       email_address: str = Form(None),
@@ -758,7 +788,6 @@ async def update_user(request: Request,
                             status_code=status.HTTP_302_FOUND)
 
 
-# WIP
 @app.post("/delete_user/{username}", response_class=HTMLResponse)
 async def delete_user(request: Request,
                       db=Depends(get_db),
