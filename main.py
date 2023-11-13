@@ -631,14 +631,11 @@ async def show_search_books(request: Request,
     text_output = "Please search for your book title"
     final_response = list()
 
-    try:
-        book_search = re.sub(r'\W+', ' ', book_search)
-    except Exception:
-        pass
-
     if book_search or author:
+        book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
         books = nlb_rest_api.get_rest_nlb_api(
             "SearchTitles", input=book_search, author=author)
+        print(books)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -657,8 +654,12 @@ async def show_search_books(request: Request,
         elif books.get("statusCode") in elist:
             text_output = f"There are no records with '{book_search}'"
 
+        elif books == {}:
+            text_output = f"There are no records with '{book_search}'"
+
         else:
             # Get main list of books
+            print(books)
             searched_books = []
             searched_books.append(books.get("titles"))
 
