@@ -48,16 +48,13 @@
                         rounded-lg border-2 border-sky-800 js-password" id='password' name='password' required />
                 </div>
 
-                <button type="submit"
-                    class="bg-sky-700 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Login</button>
+                <div class="flex">
+                    <button type="submit"
+                        class="bg-sky-700 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Login</button>
+                    <button href="/forgot_password" class="text-blue-700 italic underline py-1.5 mt-4 px-3">Forgot
+                        Password</button>
+                </div>
             </form>
-
-            {% if login_invalid %}
-            <p class="text-red-700 bg-gray-200 mt-2 p-3 rounded-lg font-semibold">
-                Login failed. You might have used the wrong username,
-                password, or have not registered an account.
-            </p>
-            {% endif %}
         </div>
 
         <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border-4 rounded-lg">
