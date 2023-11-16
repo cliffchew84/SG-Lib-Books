@@ -208,6 +208,12 @@ def login(request: Request,
     return resp
 
 
+@app.get("/forgot_password", response_class=HTMLResponse)
+async def forgot_password(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {
+        "request": request})
+
+
 @app.get("/{username}/yourbooks")
 async def show_current_books(request: Request,
                              db=Depends(get_db),
