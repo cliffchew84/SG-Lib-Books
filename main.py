@@ -209,9 +209,36 @@ def login(request: Request,
 
 
 @app.get("/forgot_password", response_class=HTMLResponse)
-async def forgot_password(request: Request):
+async def forgot_password(request: Request,
+                          wrong_question=False):
     return templates.TemplateResponse("forgot_password.html", {
         "request": request})
+
+
+@app.get("/reset_password/", response_class=HTMLResponse)
+async def reset_password(request: Request,
+                         username: str = Form(...),
+                         pw_qn: str = Form(...),
+                         pw_ans: str = Form(...),
+                         new_password: str = Form(...)
+                         ):
+
+    db = m_db.connect_mdb()
+    db_nlb = db['nlb']
+
+    user = m_db.mg_query_user(db=db_nlb, username=username)
+    if user:
+        if user.get("pw_qn") == pw_qn & user.get("pw_ans") == pw_ans:
+            hashed_password = get_hashed_password(new_password)
+            new_dict = {"HashedPassword": hashed_password}
+            m_db.mg_update_user_info(db, username.get("UserName"), new_dict)
+
+    else:
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User email not found"
+        )
+    return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/{username}/yourbooks")
@@ -765,12 +792,16 @@ async def user_profile(request: Request,
     user_info = m_db.mg_query_user_info(db, username.get("UserName"))
     email_address = user_info.get("email_address")
     preferred_lib = user_info.get("preferred_lib")
+    pw_qn = user_info.get("pw_qn")
+    pw_ans = user_info.get("pw_ans")
 
     return templates.TemplateResponse("profile.html", {
         "request": request,
         "username": username.get("UserName"),
         "email_address": email_address,
         "preferred_lib": preferred_lib,
+        "pw_qn": pw_qn,
+        "pw_ans": pw_ans,
         'all_avail_books': all_avail_books,
         'avail_books': all_avail_bks_by_lib,
         'all_unique_lib': all_unique_lib,
@@ -783,12 +814,23 @@ async def user_profile(request: Request,
 async def update_user(request: Request,
                       email_address: str = Form(None),
                       preferred_lib: str = Form(None),
+                      pw_qn: str = Form(None),
+                      pw_ans: str = Form(None),
+                      password: str = Form(None),
                       db=Depends(get_db),
                       username=Depends(manager)):
 
     # Update info
     new_dict = {'email_address': email_address,
-                "preferred_lib": preferred_lib}
+                "preferred_lib": preferred_lib,
+                "pw_qn": pw_qn,
+                "pw_ans": pw_ans
+                }
+
+    if password:
+        hashed_password = get_hashed_password(password)
+        new_dict.update({"HashedPassword": hashed_password})
+
     m_db.mg_update_user_info(db, username.get("UserName"), new_dict)
 
     return RedirectResponse(f"/profile/{username.get('UserName')}",
