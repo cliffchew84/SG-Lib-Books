@@ -464,14 +464,10 @@ def update_bk_avail_in_mongo(db, bid_no):
     """
     try:
         # Make API call on book availability
-        bk = nlb_rest_api.get_rest_nlb_api("GetAvailabilityInfo", input=bid_no)
+        bk = nlb_rest_api.get_rest_nlb_api_v2(
+            "GetAvailabilityInfo", input=bid_no)
 
-        # Process and combine records
-        all_books_avail = []
-        for book in nlb_rest_api.process_rest_all_lib_avail(bk):
-            books_avail = nlb_rest_api.process_single_bk_avail(book)
-            books_avail.update({"BID": str(bid_no)})
-            all_books_avail.append(books_avail)
+        all_books_avail = nlb_rest_api.process_rest_all_lib_avail_v2(bk)
 
         if len(all_books_avail) > 0:
             # Delete existing MongoDB records
@@ -493,7 +489,7 @@ def update_bk_avail_in_mongo(db, bid_no):
 def bk_info_api_call_n_db_ingest(db, bid_no):
     # Make API calls to book info and ingest into DB
 
-    book_title_rest_api = nlb_rest_api.get_rest_nlb_api(
+    book_title_rest_api = nlb_rest_api.get_rest_nlb_api_v2(
         "GetTitleDetails", input=bid_no)
     book_title = nlb_rest_api.process_rest_bk_info(book_title_rest_api)
     book_title.update({"BID": str(bid_no)})
@@ -661,14 +657,12 @@ async def show_search_books(request: Request,
     lib_book_summary = process.process_lib_book_summary(
         all_unique_lib, all_avail_bks_by_lib)
 
-    text_output = "Please search for your book title"
     final_response = list()
 
-    if book_search or author:
+    if book_search:
         book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
-        books = nlb_rest_api.get_rest_nlb_api(
-            "SearchTitles", input=book_search, author=author)
-        print(books)
+        books = nlb_rest_api.get_rest_nlb_api_v2(
+            "SearchTitles", input=book_search)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -681,54 +675,33 @@ async def show_search_books(request: Request,
 
         elist = [400, 404, 500, 401, 405, 429]
 
-        if books.get("totalRecords") == 0:
-            text_output = f"There are no records with '{book_search}'"
-
-        elif books.get("statusCode") in elist:
-            text_output = f"There are no records with '{book_search}'"
-
-        elif books == {}:
-            text_output = f"There are no records with '{book_search}'"
+        if books.get("statusCode") in elist:
+            return templates.TemplateResponse("search.html", {
+                "request": request,
+                "keyword": book_search,
+                "author": author,
+                "username": username.get("UserName"),
+                "api_data": final_response,
+                'all_avail_books': all_avail_books,
+                'avail_books': all_avail_bks_by_lib,
+                'lib_book_summary': lib_book_summary,
+                "status": update_status
+            })
 
         else:
-            # Get main list of books
-            print(books)
-            searched_books = []
-            searched_books.append(books.get("titles"))
+            all_books = nlb_rest_api.process_new_search_all(books)
 
-            # Check for pagination
-            has_more_records = books.get("hasMoreRecords")
-            counter = 0
-            while has_more_records:
-                counter += 1
-                set_id = books.get("setId")
-                last_irn = books.get("lastIrn")
-                books = nlb_rest_api.get_rest_nlb_api(
-                    "SearchTitles",
-                    input=book_search,
-                    author=author,
-                    setid=set_id,
-                    lastirn=last_irn)
+            if books.get("hasMoreRecords"):
+                try:
+                    for offset in [20, 40, 60, 80, 100, 120, 140]:
+                        books = nlb_rest_api.get_rest_nlb_api_v2(
+                            "SearchTitles", input=book_search, offset=offset)
+                        all_books += nlb_rest_api.process_new_search_all(books)
+                except Exception:
+                    pass
 
-                searched_books.append(books.get('titles'))
-                has_more_records = books.get("hasMoreRecords")
-
-            if counter > 0:
-                p_searched_books = [i for sl in searched_books for i in sl]
-            else:
-                p_searched_books = searched_books[0]
-
-            output_list = []
-            for book in p_searched_books:
-                get_isbn = book.get("isbns")
-                if get_isbn:
-                    if "electronic" not in get_isbn:
-                        output_list.append(book)
-                else:
-                    output_list.append(book)
-
-            final_output = [nlb_rest_api.process_rest_bk_info(
-                i) for i in output_list]
+            if author:
+                all_books = nlb_rest_api.filter_for_author(all_books, author)
 
             # Search user book BIDs and
             # disable add books for books already saved by user
@@ -737,7 +710,7 @@ async def show_search_books(request: Request,
 
             user_books_bids = [i.get("BID") for i in user_books]
 
-            for i in final_output:
+            for i in all_books:
                 try:
                     i['TitleName'] = i['TitleName'].split(
                         "/")[0].strip() + " | " + str(i['BID'])
@@ -760,7 +733,6 @@ async def show_search_books(request: Request,
         "author": author,
         "username": username.get("UserName"),
         "api_data": final_response,
-        "text_output": text_output,
         'all_avail_books': all_avail_books,
         'avail_books': all_avail_bks_by_lib,
         'lib_book_summary': lib_book_summary,

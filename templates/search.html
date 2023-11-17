@@ -1,7 +1,7 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div class='items-center justify-center min-h-screen px-2'>
+<div class='items-center justify-center px-2'>
     <form class="join form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
         {% if keyword %}
         <input
@@ -47,8 +47,6 @@
 
     {% endif %}
 
-    {% if keyword or author %}
-
     <form action="/ingest_all_books" method="POST">
         <table class="mx-auto table-auto border-collapse w-full table-sm divide-y divide-gray-800">
             <thead class='rounded-lg'>
@@ -75,7 +73,7 @@
                     {% if a == "BID" %}
                     {% set disable, BID = data[a].split(' | ') %}
                     <td class="flex justify-center items-center">
-                        <div class="pt-1 h-full flex items-center">
+                        <div class="pt-1 flex items-center">
                             <label>
                                 <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
                                     name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
@@ -102,12 +100,6 @@
             </tbody>
         </table>
     </form>
-
-    {% elif text_output %}
-
-    <h3>{{ text_output }}</h3>
-
-    {% endif %}
 </div>
 
 <script>
