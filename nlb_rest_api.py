@@ -125,6 +125,101 @@ def process_single_bk_avail(lib_record: List[Dict]) -> Dict:
     return output
 
 
+# 17th Nov new NLB API #########################
+def get_rest_nlb_api_v2(extension_url: str,
+                        input: str,
+                        offset=None,
+                        app_id: str = APPLICATION_ID,
+                        api_key: str = API_KEY) -> Dict:
+    """ Using one function to call all REST API methods
+        extension_url param: (1) SearchTitles 
+                             (2) GetAvailabilityInfo
+                             (3) GetTitleDetails
+        search_on param: Just on Keywords
+    """
+
+    headers = authenticate_into_nlb_rest(app_id, api_key)
+    final_url = "https://openweb.nlb.gov.sg/api/v2/Catalogue/" + extension_url
+
+    if extension_url == "SearchTitles":
+        payload = {'Keywords': input}
+
+        if offset:
+            payload.update({"Offset": offset})
+
+    else:
+        payload = {'BRN': input}
+
+    return requests.get(final_url, headers=headers, params=payload).json()
+
+
+def process_rest_single_lib_avail_v2(nlb_input: Dict):
+    """ Process a single book availability from NLB rest API """
+    output = dict()
+    output['ItemNo'] = nlb_input['itemId']
+    output['CallNumber'] = nlb_input['callNumber']
+    output['BranchName'] = nlb_input.get('location').get("name")
+    output['StatusDesc'] = nlb_input.get('transactionStatus').get("name")
+    if output['StatusDesc'] == "On Loan":
+        output['DueDate'] = nlb_input.get(
+            'transactionStatus').get("date").split("T")[0]
+    else:
+        output['DueDate'] = None
+
+    output.update({"InsertTime": pendulum.now().int_timestamp})
+    output['BID'] = str(nlb_input['brn'])
+    return output
+
+
+def process_rest_all_lib_avail_v2(nlb_input: List[Dict]):
+    return [process_rest_single_lib_avail_v2(i) for i in nlb_input.get(
+        "items")]
+
+
+def process_new_search(single_search_record: List[Dict]) -> List[Dict]:
+    final_output = list()
+
+    # Get title and author of book
+    record_title = single_search_record.get("title").split(" | ")[0]
+    record_author = single_search_record.get("author")
+
+    for record in single_search_record.get('records'):
+        if record.get("format").get("name") == 'Book':
+            tmp_record = dict()
+            tmp_record["BID"] = record.get("brn")
+            tmp_record['TitleName'] = record_title
+            tmp_record['Author'] = record_author
+            tmp_record["PublishYear"] = record.get("publishDate")
+            final_output.append(tmp_record)
+
+    # Go through each record to get their BID, publishYear
+    return final_output
+
+
+def process_new_search_all(all_search_record: Dict) -> List[Dict]:
+    all_page_search_books = list()
+    for book in all_search_record.get("titles"):
+        single_title_result = process_new_search(book)
+        all_page_search_books += single_title_result
+
+    return all_page_search_books
+
+
+def filter_for_author(books: List[Dict], author: str) -> List[Dict]:
+    """ Temp filter for author name, as the new API doesn't
+        allow direct author query
+    """
+    final_books = list()
+    for book in books:
+        try:
+            if author.lower() in book.get("Author").lower():
+                final_books += [book]
+        except Exception:
+            pass
+
+    return final_books
+
+
 # eResource
 def get_eresource_info(title=None, creator=None):
     """ Get eResource book info """
