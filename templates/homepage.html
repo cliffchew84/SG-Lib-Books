@@ -58,9 +58,10 @@
             <form action="/" method="POST">
                 <div class="mb-3">
                     <label for="username" class="form-label mx-3">Username</label>
-                    <input type="text"
-                        class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control rounded-lg border-2 border-blue-800"
-                        id='username' name='username' required>
+                    <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm 
+                        form-control rounded-lg border-2 border-blue-800" id='username' name='username' required
+                        hx-get="/check_user_register" hx-trigger="change, keyup
+                        delay:200ms" hx-target="next .dup_user">
                 </div>
                 <label for="password" class="form-label mx-3">Password</label>
 
@@ -81,6 +82,7 @@
                 <button type="submit"
                     class="bg-red-400 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Register</button>
             </form>
+            <span class="dup_user"></span>
             {% if register_invalid %}
 
             <p class="text-red-500 bg-gray-200 mt-2 p-3 rounded-lg font-semibold">

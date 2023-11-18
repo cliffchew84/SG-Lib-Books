@@ -120,6 +120,19 @@ def get_register(request: Request, username: str):
         {"request": request, "username": username})
 
 
+@app.get("/check_user_register", response_class=HTMLResponse)
+async def check_user_register(request: Request,
+                              username: str = Form(...)
+                              ):
+
+    db = m_db.connect_mdb()
+    db_nlb = db['nlb']
+    user = m_db.mg_query_user_by_username(db=db_nlb, username=username)
+    if user:
+        dup_user_msg = "This username is already registered"
+        return templates.TemplateResponse(f"<p>{dup_user_msg}</p>")
+
+
 @app.post("/")
 def register_user(request: Request,
                   username: Optional[str] = Form(...),
