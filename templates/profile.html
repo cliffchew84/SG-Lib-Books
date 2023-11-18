@@ -24,7 +24,8 @@
                 value="{{email_address|safe}}" />
 
             <label class="italic">Favourite Library (Optional)</label>
-            <select id="preferred_lib" name="preferred_lib" class="select border-sky-800 border-2 mt-2 w-full mb-2">
+            <select id="preferred_lib" name="preferred_lib"
+                class="select select-ghost border-sky-800 border-2 mt-2 w-full mb-2">
 
                 {% if preferred_lib %}
                 <option value="{{preferred_lib|safe}}" selected>
@@ -49,15 +50,20 @@
             </select>
 
             <label for="pw_qn" class="w-full">Password Reset Question</label>
-            <select name='pw_qn' id='pw_qn' class="select border-sky-800 border-2 mt-2 w-full mb-2">
+            <select name='pw_qn' id='pw_qn' class="select select-ghost border-sky-800 border-2 mt-2 w-full mb-2">
                 {% if pw_qn %}
 
                 <option>{{ pw_qn }}</option>
+                <option>My Pet's Name</option>
+                <option>My Birthday (DD/MM/YY)</option>
+                <option>My Favourite Fruit</option>
+                <option>My Favourite City</option>
+                <option>My Favourite Local Food</option>
 
                 {% else %}
 
                 <option selected disabled>Select a question for password reset</option>
-                <option>My pet's name</option>
+                <option>My Pet's Name</option>
                 <option>My Birthday (DD/MM/YY)</option>
                 <option>My Favourite Fruit</option>
                 <option>My Favourite City</option>
