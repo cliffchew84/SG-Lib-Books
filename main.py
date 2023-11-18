@@ -127,10 +127,18 @@ async def check_user_register(username):
     db_nlb = db['nlb']
     user = m_db.mg_query_user_by_username(db=db_nlb, username=username)
     if user:
-        dup_user_msg = "This username is already registered"
-        return f"<p class='dup_user'>{dup_user_msg}</p>"
+        dup_user_msg = f"{username} is already registered"
+
+        return f"""<button type="submit" class="bg-gray-400 text-white
+                    border-white rounded-lg py-1.5 mt-4 px-3 mx-3
+                    disabled:bg-gray-400 disabled:hover:bg-gray-400" disabled
+                    >Register</button>
+                    <p class="italic py-1.5 mt-4 px-3">{dup_user_msg}</p>
+                    """
     else:
-        return None
+        return """<button type="submit"
+                class="bg-red-400 text-white border-white
+                rounded-lg py-1.5 mt-4 px-3 mx-2">Register</button>"""
 
 
 @ app.post("/")
