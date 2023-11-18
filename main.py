@@ -120,7 +120,28 @@ def get_register(request: Request, username: str):
         {"request": request, "username": username})
 
 
-@app.post("/")
+@app.get("/check_user_register/", response_class=HTMLResponse)
+async def check_user_register(username):
+
+    db = m_db.connect_mdb()
+    db_nlb = db['nlb']
+    user = m_db.mg_query_user_by_username(db=db_nlb, username=username)
+    if user:
+        dup_user_msg = f"{username} is already registered"
+
+        return f"""<button type="submit" class="bg-gray-400 text-white
+                    border-white rounded-lg py-1.5 mt-4 px-3 mx-3
+                    disabled:bg-gray-400 disabled:hover:bg-gray-400" disabled
+                    >Register</button>
+                    <p class="italic py-1.5 mt-4 px-3">{dup_user_msg}</p>
+                    """
+    else:
+        return """<button type="submit"
+                class="bg-red-400 text-white border-white
+                rounded-lg py-1.5 mt-4 px-3 mx-2">Register</button>"""
+
+
+@ app.post("/")
 def register_user(request: Request,
                   username: Optional[str] = Form(...),
                   password: Optional[str] = Form(...),
@@ -161,13 +182,13 @@ def register_user(request: Request,
 
 
 # Base page
-@app.get("/", response_class=HTMLResponse)
+@ app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("homepage.html", {"request": request})
 
 
 # Login
-@app.post("/login")
+@ app.post("/login")
 def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(),
           db=Depends(get_db)):
@@ -208,14 +229,14 @@ def login(request: Request,
     return resp
 
 
-@app.get("/forgot_password", response_class=HTMLResponse)
+@ app.get("/forgot_password", response_class=HTMLResponse)
 async def forgot_password(request: Request,
                           wrong_question=False):
     return templates.TemplateResponse("forgot_password.html", {
         "request": request})
 
 
-@app.get("/reset_password/", response_class=HTMLResponse)
+@ app.get("/reset_password/", response_class=HTMLResponse)
 async def reset_password(request: Request,
                          username: str = Form(...),
                          pw_qn: str = Form(...),
@@ -241,7 +262,7 @@ async def reset_password(request: Request,
     return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@app.get("/{username}/yourbooks")
+@ app.get("/{username}/yourbooks")
 async def show_current_books(request: Request,
                              db=Depends(get_db),
                              username=Depends(manager)):
@@ -356,7 +377,7 @@ def process_user_book_data(db, username: str):
     return response
 
 
-@app.get('/{username}')
+@ app.get('/{username}')
 async def show_books_avail(request: Request,
                            db=Depends(get_db),
                            username=Depends(manager)):
@@ -396,7 +417,7 @@ async def show_books_avail(request: Request,
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
+@ app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
 async def show_books_avail_by_lib(request: Request,
                                   library: Optional[str],
                                   db=Depends(get_db),
@@ -500,7 +521,7 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
     m_db.mg_add_book_info(db=db, books_info_input=book_title)
 
 
-@app.post("/update_book/{BID}", response_class=HTMLResponse)
+@ app.post("/update_book/{BID}", response_class=HTMLResponse)
 async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
@@ -529,7 +550,7 @@ def update_all_user_books(db, username):
     return {"message": "All user books are updated!"}
 
 
-@app.post("/update_user_books/{username}", response_class=HTMLResponse)
+@ app.post("/update_user_books/{username}", response_class=HTMLResponse)
 async def update_user_current_books(background_tasks: BackgroundTasks,
                                     db=Depends(get_db),
                                     username=Depends(manager)
@@ -540,7 +561,7 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
 
 
 # Adds book into user account
-@app.post("/ingest_book/{BID}", response_class=HTMLResponse)
+@ app.post("/ingest_book/{BID}", response_class=HTMLResponse)
 async def api_book_ingest(BID: str,
                           db=Depends(get_db),
                           username=Depends(manager)):
@@ -558,7 +579,7 @@ async def api_book_ingest(BID: str,
 
 
 # To add all books ingest for heavy users on frontend
-@app.post("/ingest_all_books", response_class=HTMLResponse)
+@ app.post("/ingest_all_books", response_class=HTMLResponse)
 async def api_ingest_all_books(bids: list = Form(...),
                                db=Depends(get_db),
                                username=Depends(manager)):
@@ -578,7 +599,7 @@ async def api_ingest_all_books(bids: list = Form(...),
         status_code=status.HTTP_302_FOUND)
 
 
-@app.post("/delete_book/{BID}", response_class=HTMLResponse)
+@ app.post("/delete_book/{BID}", response_class=HTMLResponse)
 async def delete_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
@@ -605,7 +626,7 @@ async def delete_book(BID: str,
 
 
 # WIP
-@app.post("/delete_multiple_books", response_class=HTMLResponse)
+@ app.post("/delete_multiple_books", response_class=HTMLResponse)
 async def delete_multiple_book(bids: list = Form(...),
                                db=Depends(get_db),
                                username=Depends(manager)):
@@ -636,7 +657,7 @@ async def delete_multiple_book(bids: list = Form(...),
 
 
 # To work on this!
-@app.get("/{username}/search/", response_class=HTMLResponse)
+@ app.get("/{username}/search/", response_class=HTMLResponse)
 async def show_search_books(request: Request,
                             book_search: Optional[str] = None,
                             author: Optional[str] = None,
@@ -740,7 +761,7 @@ async def show_search_books(request: Request,
     })
 
 
-@app.get("/profile/{username}", response_class=HTMLResponse)
+@ app.get("/profile/{username}", response_class=HTMLResponse)
 async def user_profile(request: Request,
                        db=Depends(get_db),
                        username=Depends(manager)):
@@ -782,7 +803,7 @@ async def user_profile(request: Request,
     })
 
 
-@app.post("/update_user/{username}", response_class=HTMLResponse)
+@ app.post("/update_user/{username}", response_class=HTMLResponse)
 async def update_user(request: Request,
                       email_address: str = Form(None),
                       preferred_lib: str = Form(None),
@@ -809,7 +830,7 @@ async def update_user(request: Request,
                             status_code=status.HTTP_302_FOUND)
 
 
-@app.post("/delete_user/{username}", response_class=HTMLResponse)
+@ app.post("/delete_user/{username}", response_class=HTMLResponse)
 async def delete_user(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):

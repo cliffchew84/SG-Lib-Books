@@ -11,9 +11,9 @@
                 <p>
                     Using the <a class="font-semibold underline" target="_blank"
                         href="https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs">official NLB
-                        APIs</a> <span class="font-bold">(14-08-2023)</span>, this site aims to provide an easier,
-                    single view of all your saved Singapore library books. Best viewed on desktop. For feedback, email
-                    me at <span class="font-semibold underline">sglibreads@gmail.com</span>. Read about my story
+                        REST v2 APIs</a> <span class="font-bold">(17-11-2023)</span>, this site aims to provide an
+                    easier, single view of all your saved Singapore library books. Best viewed on desktop. For feedback,
+                    email me at <span class="font-semibold underline">sglibreads@gmail.com</span>. Read about my story
                     <a class="font-semibold underline" target="_blank"
                         href="https://medium.com/@cliffy-gardens/my-singapore-library-app-is-live-b63fc9f5ae9a">here</a>,
                     or connect professionally at <a class="fa fa-linkedin-square" target="_blank" style="font-size:24px"
@@ -58,9 +58,10 @@
             <form action="/" method="POST">
                 <div class="mb-3">
                     <label for="username" class="form-label mx-3">Username</label>
-                    <input type="text"
-                        class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control rounded-lg border-2 border-blue-800"
-                        id='username' name='username' required>
+                    <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm 
+                        form-control rounded-lg border-2 border-blue-800" id='username' name='username' required
+                        hx-get="/check_user_register/" hx-trigger="change, keyup delay:500ms"
+                        hx-target="next .dup_user">
                 </div>
                 <label for="password" class="form-label mx-3">Password</label>
 
@@ -78,8 +79,10 @@
                     <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
                         rounded-lg border-2 border-sky-800 js-password_2" id='password' name='password' required>
                 </div>
-                <button type="submit"
-                    class="bg-red-400 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Register</button>
+                <div class='dup_user flex'>
+                    <button type="submit"
+                        class="bg-red-400 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Register</button>
+                </div>
             </form>
             {% if register_invalid %}
 
