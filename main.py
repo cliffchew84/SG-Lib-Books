@@ -130,7 +130,8 @@ async def check_user_register(request: Request,
     user = m_db.mg_query_user_by_username(db=db_nlb, username=username)
     if user:
         dup_user_msg = "This username is already registered"
-        return templates.TemplateResponse(f"<p>{dup_user_msg}</p>")
+        return templates.TemplateResponse(
+            f"<p class='dup_user'>{dup_user_msg}</p>")
 
 
 @app.post("/")
