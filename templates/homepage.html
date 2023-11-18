@@ -60,8 +60,8 @@
                     <label for="username" class="form-label mx-3">Username</label>
                     <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm 
                         form-control rounded-lg border-2 border-blue-800" id='username' name='username' required
-                        hx-get="/check_user_register" hx-trigger="change, keyup
-                        delay:200ms" hx-target="dup_user">
+                        hx-get="/check_user_register/" hx-trigger="change, keyup delay:500ms"
+                        hx-target="next .dup_user">
                 </div>
                 <label for="password" class="form-label mx-3">Password</label>
 
