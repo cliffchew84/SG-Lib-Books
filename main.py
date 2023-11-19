@@ -339,7 +339,7 @@ def process_user_book_data(db, username: str):
             except Exception:
                 input_date = datetime.strptime(tmp_date, "%d/%m/%Y")
 
-            due_date = input_date.strftime("%d %b")
+            due_date = input_date.strftime("%d/%m")
 
         else:
             due_date = None
@@ -362,7 +362,7 @@ def process_user_book_data(db, username: str):
         if due_date is None:
             final_status = status
         else:
-            final_status = status + ' - ' + str(due_date)
+            final_status = status + '[' + str(due_date) + ']'
 
         if "Lifelong Learning" in a.get("BranchName"):
             library = "Lifelong Learning Institute"
