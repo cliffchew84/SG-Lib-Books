@@ -449,10 +449,6 @@ async def show_books_avail_by_lib(request: Request,
             lib_avail = len(process.process_all_avail_books(output))
             lib_all = len(process.process_all_unique_books(output))
 
-            unique_lib = None
-            if len(set([i['BranchName'] for i in response])) == 1:
-                unique_lib = output[0]['BranchName']
-
             return templates.TemplateResponse("result.html", {
                 "request": request,
                 "username": username.get("UserName"),
@@ -462,7 +458,6 @@ async def show_books_avail_by_lib(request: Request,
                 'avail_books': all_avail_bks_by_lib,
                 'all_unique_books': all_unique_books,
                 'lib_book_summary': lib_book_summary,
-                'unique_lib': unique_lib,
                 'lib_avail': lib_avail,
                 'lib_all': lib_all,
                 'status': update_status
