@@ -220,7 +220,8 @@ def login(request: Request,
             status_code=status.HTTP_302_FOUND)
     else:
         resp = RedirectResponse(
-            f"/{user.get('UserName')}", status_code=status.HTTP_302_FOUND)
+            f"/{user.get('UserName')}/lib/all",
+            status_code=status.HTTP_302_FOUND)
 
     manager.set_cookie(resp, access_token)
 
@@ -377,52 +378,11 @@ def process_user_book_data(db, username: str):
     return response
 
 
-@ app.get('/{username}')
-async def show_books_avail(request: Request,
-                           db=Depends(get_db),
-                           username=Depends(manager)):
-
-    try:
-        if username:
-            response = process_user_book_data(
-                db=db, username=username.get("UserName"))
-
-            # Processing necessary statistics
-            all_unique_books = process.process_all_unique_books(response)
-            all_avail_books = process.process_all_avail_books(response)
-            all_unique_lib = process.process_all_unique_lib(response)
-            all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(
-                response)
-            lib_book_summary = process.process_lib_book_summary(
-                all_unique_lib, all_avail_bks_by_lib)
-
-            update_status = None
-            if m_db.mg_query_status(db=db, username=username.get("UserName")):
-                update_status = "Updating In Progress!"
-
-            return templates.TemplateResponse("result.html", {
-                "request": request,
-                "username": username.get("UserName"),
-                "api_data": response,
-                'all_unique_books': all_unique_books,
-                'all_avail_books': all_avail_books,
-                'avail_books': all_avail_bks_by_lib,
-                'lib_book_summary': lib_book_summary,
-                'status': update_status
-            })
-        else:
-            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-
 @ app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
 async def show_books_avail_by_lib(request: Request,
                                   library: Optional[str],
                                   db=Depends(get_db),
                                   username=Depends(manager)):
-
     try:
         if username:
             response = process_user_book_data(
@@ -441,17 +401,16 @@ async def show_books_avail_by_lib(request: Request,
             if m_db.mg_query_status(db=db, username=username.get("UserName")):
                 update_status = "Updating In Progress!"
 
-            output = []
-            for book in response:
-                if library in book['BranchName'].lower():
-                    output.append(book)
+            if library != 'all':
+                output = []
+                for book in response:
+                    if library in book['BranchName'].lower():
+                        output.append(book)
+            else:
+                output = response
 
             lib_avail = len(process.process_all_avail_books(output))
             lib_all = len(process.process_all_unique_books(output))
-
-            unique_lib = None
-            if len(set([i['BranchName'] for i in response])) == 1:
-                unique_lib = output[0]['BranchName']
 
             return templates.TemplateResponse("result.html", {
                 "request": request,
@@ -462,7 +421,6 @@ async def show_books_avail_by_lib(request: Request,
                 'avail_books': all_avail_bks_by_lib,
                 'all_unique_books': all_unique_books,
                 'lib_book_summary': lib_book_summary,
-                'unique_lib': unique_lib,
                 'lib_avail': lib_avail,
                 'lib_all': lib_all,
                 'status': update_status
@@ -476,7 +434,7 @@ async def show_books_avail_by_lib(request: Request,
 
 
 def update_bk_avail_in_mongo(db, bid_no):
-    """ This function does three things
+    """ This function does four things
     1. Make API calls to NLB to get book availability
     2. Process and combine the records into a single List[Dict]
     3. Delete existing book available records in MongoDB
@@ -560,29 +518,10 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
-# Adds book into user account
-@ app.post("/ingest_book/{BID}", response_class=HTMLResponse)
-async def api_book_ingest(BID: str,
-                          db=Depends(get_db),
-                          username=Depends(manager)):
-
-    # Makes API to bk info and bk avail and ingest the data into DB
-    m_db.mg_add_user_book(db=db,
-                          username=username.get("UserName"),
-                          bid_no=BID)
-
-    bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
-    update_bk_avail_in_mongo(db, BID)
-
-    return RedirectResponse(f"/{username.get('UserName')}",
-                            status_code=status.HTTP_302_FOUND)
-
-
-# To add all books ingest for heavy users on frontend
-@ app.post("/ingest_all_books", response_class=HTMLResponse)
-async def api_ingest_all_books(bids: list = Form(...),
-                               db=Depends(get_db),
-                               username=Depends(manager)):
+@ app.post("/ingest_books", response_class=HTMLResponse)
+async def ingest_books(bids: list = Form(...),
+                       db=Depends(get_db),
+                       username=Depends(manager)):
 
     for bid in bids:
         BID = str(bid)
@@ -599,42 +538,12 @@ async def api_ingest_all_books(bids: list = Form(...),
         status_code=status.HTTP_302_FOUND)
 
 
-@ app.post("/delete_book/{BID}", response_class=HTMLResponse)
-async def delete_book(BID: str,
-                      db=Depends(get_db),
-                      username=Depends(manager)):
-
-    # Check BID is linked to more than 1 user
-    counter = db.user_books.aggregate([
-        {"$match": {"BID": BID}},
-        {"$group": {"_id": 0, "BID": {"$sum": 1}}},
-        {"$project": {"_id": 0}}
-    ])
-    final_count = counter.next().get("BID")
-
-    # If book is only linked to one user,
-    # delete book available and info records
-    if final_count == 1:
-        m_db.mg_delete_bk_avail_records(db=db, bid_no=BID)
-        m_db.mg_delete_bk_info_records(db=db, bid_no=BID)
-
-    m_db.mg_delete_bk_user_records(
-        db=db, username=username.get("UserName"), bid_no=BID)
-
-    return RedirectResponse(f"/{username.get('UserName')}/yourbooks",
-                            status_code=status.HTTP_302_FOUND)
-
-
-# WIP
-@ app.post("/delete_multiple_books", response_class=HTMLResponse)
-async def delete_multiple_book(bids: list = Form(...),
-                               db=Depends(get_db),
-                               username=Depends(manager)):
-    print(bids)
-
+@ app.post("/delete_books", response_class=HTMLResponse)
+async def delete_books(bids: list = Form(...),
+                       db=Depends(get_db),
+                       username=Depends(manager)):
     for bid in bids:
         BID = str(bid)
-        print(BID)
         # Check BID is linked to more than 1 user
         counter = db.user_books.aggregate([
             {"$match": {"BID": BID}},
