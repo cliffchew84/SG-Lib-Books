@@ -350,13 +350,19 @@ def process_user_book_data(db, username: str):
 
         if "Not" in a.get("StatusDesc"):
             status = "Available"
+        elif "Loan" in a.get("StatusDesc"):
+            status = "Loan"
+        elif "Transit" in a.get("StatusDesc"):
+            status = "Transit"
+        elif "Reference" in a.get("StatusDesc"):
+            status = "Reference"
         else:
             status = a.get("StatusDesc")
 
         if due_date is None:
             final_status = status
         else:
-            final_status = status + ' [' + str(due_date) + ']'
+            final_status = status + ' - ' + str(due_date)
 
         if "Lifelong Learning" in a.get("BranchName"):
             library = "Lifelong Learning Institute"
@@ -487,7 +493,8 @@ async def update_book(BID: str,
     api_result = update_bk_avail_in_mongo(db, BID)
 
     if api_result.get("API call"):
-        return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse("/{username}/lib/all",
+                                status_code=status.HTTP_302_FOUND)
 
 
 def update_all_user_books(db, username):
@@ -515,7 +522,8 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
                                     ):
     """ Updates availability of all user's saved books """
     background_tasks.add_task(update_all_user_books, db, username)
-    return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(f"/{username.get('UserName')}/lib/all",
+                            status_code=status.HTTP_302_FOUND)
 
 
 @ app.post("/ingest_books", response_class=HTMLResponse)
