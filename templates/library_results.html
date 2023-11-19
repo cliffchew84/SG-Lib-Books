@@ -13,20 +13,20 @@
 
     <p class="py-2 text-xs italic">Best view on Desktop, by libary or landscape on mobile.</p>
 
-    {% if library %}
+    {% if library != 'all' %}
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building"></i>{{library|title}}</h3>
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building"></i> {{library|title}}</h3>
 
     {% else %}
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-city"></i>All</h3>
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-city"></i> All</h3>
 
     {% endif %}
 
     <table class="border-collapse w-full table-sm text-sm">
         <thead class='rounded-lg'>
             <tr class='bg-sky-700 text-white rounded-lg'>
-                {% if library %}
+                {% if library != 'all' %}
 
                 <th>{{ lib_avail }} / {{ lib_all }}</th>
 
@@ -107,7 +107,7 @@
 
                 {% else %}
 
-                {% if library and a == "BranchName" %}
+                {% if library != "all" and a == "BranchName" %}
 
                 {% else %}
 
