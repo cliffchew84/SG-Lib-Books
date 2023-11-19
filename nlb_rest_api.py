@@ -132,7 +132,7 @@ def get_rest_nlb_api_v2(extension_url: str,
                         app_id: str = APPLICATION_ID,
                         api_key: str = API_KEY) -> Dict:
     """ Using one function to call all REST API methods
-        extension_url param: (1) SearchTitles 
+        extension_url param: (1) SearchTitles
                              (2) GetAvailabilityInfo
                              (3) GetTitleDetails
         search_on param: Just on Keywords

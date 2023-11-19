@@ -2,13 +2,9 @@
     {% if not username %}
 
     <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
-        <a class="text-white text-2xl">
-            SGLibReads [Beta]
-        </a>
-
+        <a class="text-white text-2xl">SGLibReads [Beta]</a>
         <a class="ml-auto text-white hover:bg-sky-700 mr-1 mt-1.5" target="_blank"
             href='https://www.notion.so/cliffchew/SG-Libraries-App-Changelog-c9842dba13684212b6df1567688cffc8'>Changelog</a>
-
     </div>
 
     {% else %}
@@ -24,113 +20,22 @@
                 </label>
                 <ul tabindex="0"
                     class="bg-sky-700 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
-                    <li>
-                        <details>
-                            <summary class="hover:text-white hover:bg-sky-500">
-                                <i class="fas fa-city"></i>Libraries
-                            </summary>
-                            <ul class="bg-sky-700 text-sm text-white w-56">
-                                <li>
-                                    <a class="p-0.5 hover:text-white hover:bg-sky-500" href="/{{username}}/lib/all">
-                                        <i class="fas fa-city"></i>
-                                        All Libraries - {{all_avail_books|length}}
-                                    </a>
-                                </li>
 
-                                {% for lib in lib_book_summary %}
-                                <li>
-                                    <a class="p-0.5 hover:text-white hover:bg-sky-500
-                                        py-1" href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
-                                        {{lib.keys()|list|first}} -
-                                        {{lib.values()|list|first}}
-                                    </a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </details>
-                    </li>
-                    <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/yourbooks'>
-                            <i class="fas fa-book"></i>Books
-                        </a></li>
-                    <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/search/'>
-                            <i class="fas fa-search"></i>NLB</a></li>
+                    {% include 'nb_lib_btn.html' %}
+                    {% include 'nb_bk_search_logout.html' %}
 
-                    <li class="">
-                        <form class="form-inline hover:text-white hover:bg-sky-500"
-                            action="/update_user_books/{{username}}" method="POST">
-                            <button type="submit">
-                                <i class="fas fa-sync"></i>
-                                Book Status</button>
-                        </form>
-                    </li>
-
-                    <li><a class="hover:text-white text-white hover:bg-sky-500 " href='/logout'>
-                            <i class="fas fa-sign-out-alt"></i>Logout
-                        </a>
-                    </li>
                 </ul>
             </div>
-            <li>
-                <a class="text-white hover:text-white hover:bg-sky-500" href="/profile/{{username}}">
-                    <i class="fas fa-user"></i>Profile
-                </a>
-            </li>
+            {% include 'nb_profile_btn.html' %}
         </ul>
     </div>
 
     <div class="flex justify-between h-8 mx-auto">
         <nav class="w-screen flex items-center justify-between py-4">
             <ul class="menu menu-horizontal mx-auto z-50 lg:text-lg text-white items-center hidden md:flex">
-                <li>
-                    <a class="text-white hover:text-white hover:bg-sky-500" href="/profile/{{username}}">
-                        <i class="fas fa-user"></i>Profile
-                    </a>
-                </li>
-                <li>
-                    <details>
-                        <summary class="hover:text-white hover:bg-sky-500">
-                            <i class="fas fa-city"></i>Libraries
-                        </summary>
-                        <ul class="bg-sky-700 text-sm text-white w-56">
-                            <li>
-                                <a class="py-0.5 hover:text-white hover:bg-sky-500" href="/{{username}}/lib/all">
-                                    <i class="fas fa-city"></i>
-                                    All Libraries - {{all_avail_books|length}}
-                                </a>
-                            </li>
-
-                            {% for lib in lib_book_summary %}
-                            <li>
-                                <a class="py-0.5 hover:text-white hover:bg-sky-500"
-                                    href="/{{username}}/lib/{{lib.keys()|list|first|lower}}">
-                                    {{lib.keys()|list|first}} -
-                                    {{lib.values()|list|first}}
-                                </a>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </details>
-                </li>
-
-                <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/yourbooks'>
-                        <i class="fas fa-book"></i>Books
-                    </a></li>
-                <li><a class="hover:text-white hover:bg-sky-500" href='/{{username}}/search/'>
-                        <i class="fas fa-search"></i>NLB</a></li>
-
-                <li>
-                    <form class="form-inline hover:text-white hover:bg-sky-500" action="/update_user_books/{{username}}"
-                        method="POST">
-                        <button type="submit">
-                            <i class="fas fa-sync"></i>
-                            Book Status</button>
-                    </form>
-                </li>
-
-                <li><a class="hover:text-white text-white hover:bg-sky-500 " href='/logout'>
-                        <i class="fas fa-sign-out-alt"></i>Logout
-                    </a>
-                </li>
+                {% include 'nb_profile_btn.html' %}
+                {% include 'nb_lib_btn.html' %}
+                {% include 'nb_bk_search_logout.html' %}
             </ul>
         </nav>
     </div>

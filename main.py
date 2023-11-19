@@ -487,7 +487,8 @@ async def update_book(BID: str,
     api_result = update_bk_avail_in_mongo(db, BID)
 
     if api_result.get("API call"):
-        return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
+        return RedirectResponse("/{username}/lib/all",
+                                status_code=status.HTTP_302_FOUND)
 
 
 def update_all_user_books(db, username):
@@ -515,7 +516,8 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
                                     ):
     """ Updates availability of all user's saved books """
     background_tasks.add_task(update_all_user_books, db, username)
-    return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(f"/{username.get('UserName')}/lib/all",
+                            status_code=status.HTTP_302_FOUND)
 
 
 @ app.post("/ingest_books", response_class=HTMLResponse)
