@@ -350,13 +350,19 @@ def process_user_book_data(db, username: str):
 
         if "Not" in a.get("StatusDesc"):
             status = "Available"
+        elif "Loan" in a.get("StatusDesc"):
+            status = "Loan"
+        elif "Transit" in a.get("StatusDesc"):
+            status = "Transit"
+        elif "Reference" in a.get("StatusDesc"):
+            status = "Reference"
         else:
             status = a.get("StatusDesc")
 
         if due_date is None:
             final_status = status
         else:
-            final_status = status + ' [' + str(due_date) + ']'
+            final_status = status + ' - ' + str(due_date)
 
         if "Lifelong Learning" in a.get("BranchName"):
             library = "Lifelong Learning Institute"
