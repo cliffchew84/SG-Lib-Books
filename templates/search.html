@@ -2,7 +2,9 @@
 {% include 'navbar.html' %}
 
 <div class='items-center justify-center px-2'>
-    <form class="join form-inline flex items-center justify-center" action="/{{username}}/search/" method="GET">
+    <form method="GET" class="join form-inline flex items-center justify-center" hx-target="next .search_table"
+        hx-get="/htmx_search" hx-indicator="#loading-spinner">
+
         {% if keyword %}
         <input
             class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
@@ -35,9 +37,22 @@
             <i class="fas fa-search"></i>
         </button>
     </form>
-    <p class='items-center mx-auto flex justify-center text-sm italic pt-2 px-2'>
-        *Search with ISBN OR the book title with author for better results
-    </p>
+
+    <div class="flex justify-center mx-auto pt-2 px-2">
+        <div class="flex justify-center flex-wrap gap-2">
+            <p class='items-center mx-auto flex justify-center text-sm italic pt-2 px-2'>
+                *Search with ISBN OR the book title with author for better results
+            </p>
+            <span id='loading-spinner' class="items-center justify-center 
+                h-screen htmx-indicator loading loading-ball loading-xs"></span>
+            <span id='loading-spinner' class="items-center justify-center 
+                h-screen htmx-indicator loading loading-ball loading-sm"></span>
+            <span id='loading-spinner' class="items-center justify-center 
+                h-screen htmx-indicator loading loading-ball loading-md"></span>
+            <span id='loading-spinner' class="items-center justify-center 
+                h-screen htmx-indicator loading loading-ball loading-lg"></span>
+        </div>
+    </div>
 </div>
 
 <div class="mx-auto max-w-screen-lg px-4 mt-3">
@@ -47,59 +62,7 @@
 
     {% endif %}
 
-    <form action="/ingest_books" method="POST">
-        <table class="mx-auto table-auto border-collapse w-full table-sm divide-y divide-gray-800">
-            <thead class='rounded-lg'>
-                <tr class='bg-sky-700 text-white rounded-lg'>
-                    <th class="flex justify-center items-center">
-                        <button type="submit" id="submitButton" class="bg-sky-500 px-2 my-1 py-1 rounded-lg 
-                                    hover:text-white hover:bg-sky-200 text-white disabled:bg-gray-400 
-                                    disabled:hover:bg-gray-400" disabled>Add
-                        </button>
-                    </th>
-                    <th>Search by <i>'{{keyword}} / {{author}}'</i>
-                    </th>
-                    <th>Author</th>
-                    <th>Year</th>
-                </tr>
-            </thead>
-            <tbody id="myTable">
-
-                {% for data in api_data %}
-
-                <tr>
-                    {% for a in data %}
-
-                    {% if a == "BID" %}
-                    {% set disable, BID = data[a].split(' | ') %}
-                    <td class="flex justify-center items-center">
-                        <div class="pt-1 flex items-center">
-                            <label>
-                                <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
-                                    name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
-                            </label>
-                        </div>
-                    </td>
-
-                    {% elif a == "TitleName" %}
-                    {% set TitleName, BID = data[a].split(' | ') %}
-
-                    <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                            class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
-                            noreferrer">{{ TitleName }}</a>
-
-                        {% else %}
-
-                    <td>{{ data[a] }}</td>
-
-                    {% endif %}
-
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </form>
+    <div class="search_table"></div>
 </div>
 
 <script>

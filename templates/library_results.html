@@ -107,7 +107,16 @@
 
                 {% else %}
 
-                {% if library != "all" and a == "BranchName" %}
+                {% if library == "all" and a == "BranchName" %}
+
+                <td class="w-1/12">
+                    <a class="text-blue-700 underline py-1.5 mt-4 px-3"
+                        href="/{{username}}/lib/{{data[a].lower().strip()}}">
+                        {{ data[a] }}
+                    </a>
+                </td>
+
+                {% elif library != "all" and a == "BranchName" %}
 
                 {% else %}
 

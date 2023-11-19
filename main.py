@@ -346,7 +346,7 @@ def process_user_book_data(db, username: str):
 
         update_time = datetime.fromtimestamp(
             a.get("InsertTime"), pendulum.timezone("Asia/Singapore")
-        ).strftime("%d %b %H:%M")
+        ).strftime("%d/%m %H:%M")
 
         if "Not" in a.get("StatusDesc"):
             status = "Available"
@@ -482,6 +482,9 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
     # Consider keeping this so that I can show this as well
     del book_title['PublishYear']
 
+    # Need to clear up my title names now
+    book_title['TitleName'] = book_title['TitleName'].split("/")[0]
+
     m_db.mg_add_book_info(db=db, books_info_input=book_title)
 
 
@@ -574,12 +577,94 @@ async def delete_books(bids: list = Form(...),
 
 
 # To work on this!
-@ app.get("/{username}/search/", response_class=HTMLResponse)
-async def show_search_books(request: Request,
+@ app.get("/htmx_search", response_class=HTMLResponse)
+async def htmx_search_books(request: Request,
                             book_search: Optional[str] = None,
                             author: Optional[str] = None,
                             db=Depends(get_db),
                             username=Depends(manager)):
+
+    final_response = list()
+
+    if book_search:
+        book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
+        books = nlb_rest_api.get_rest_nlb_api_v2(
+            "SearchTitles", input=book_search)
+
+        search_params = dict()
+        search_params['title'] = book_search
+        search_params['author'] = author
+
+        m_db.mg_user_search_tracking(db,
+                                     table="user_search",
+                                     username=username.get("UserName"),
+                                     search_params=search_params)
+
+        elist = [400, 404, 500, 401, 405, 429]
+
+        if books.get("statusCode") in elist:
+            return templates.TemplateResponse("search_table.html", {
+                "request": request,
+                "keyword": book_search,
+                "author": author,
+                "username": username.get("UserName"),
+                "api_data": final_response,
+            })
+
+        else:
+            all_books = nlb_rest_api.process_new_search_all(books)
+
+            if books.get("hasMoreRecords"):
+                try:
+                    for offset in [20, 40, 60, 80, 100, 120, 140]:
+                        books = nlb_rest_api.get_rest_nlb_api_v2(
+                            "SearchTitles", input=book_search, offset=offset)
+                        all_books += nlb_rest_api.process_new_search_all(books)
+                except Exception:
+                    pass
+
+            if author:
+                all_books = nlb_rest_api.filter_for_author(all_books, author)
+
+            # Search user book BIDs and
+            # disable add books for books already saved by user
+            user_books = m_db.mg_query_user_bookmarked_books(
+                db=db, username=username.get("UserName"))
+
+            user_books_bids = [i.get("BID") for i in user_books]
+
+            for i in all_books:
+                try:
+                    i['TitleName'] = i['TitleName'].split(
+                        " / ")[0].strip() + " | " + str(i['BID'])
+
+                    i['PublishYear'] = "Y" + i['PublishYear']
+
+                    disable = "disabled" if str(
+                        i['BID']) in user_books_bids else ""
+
+                    i['BID'] = disable + " | " + str(i["BID"])
+
+                    final_response.append(i)
+
+                except Exception:
+                    pass
+
+    return templates.TemplateResponse("search_table.html", {
+        "request": request,
+        "keyword": book_search,
+        "author": author,
+        "username": username.get("UserName"),
+        "api_data": final_response,
+    })
+
+
+@ app.get("/{username}/search/", response_class=HTMLResponse)
+async def search_books(request: Request,
+                       book_search: Optional[str] = None,
+                       author: Optional[str] = None,
+                       db=Depends(get_db),
+                       username=Depends(manager)):
 
     response = process_user_book_data(
         db=db, username=username.get("UserName"))
@@ -651,7 +736,7 @@ async def show_search_books(request: Request,
             for i in all_books:
                 try:
                     i['TitleName'] = i['TitleName'].split(
-                        "/")[0].strip() + " | " + str(i['BID'])
+                        " / ")[0].strip() + " | " + str(i['BID'])
 
                     i['PublishYear'] = "Y" + i['PublishYear']
 
