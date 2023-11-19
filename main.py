@@ -434,7 +434,7 @@ async def show_books_avail_by_lib(request: Request,
 
 
 def update_bk_avail_in_mongo(db, bid_no):
-    """ This function does three things
+    """ This function does four things
     1. Make API calls to NLB to get book availability
     2. Process and combine the records into a single List[Dict]
     3. Delete existing book available records in MongoDB
@@ -518,11 +518,10 @@ async def update_user_current_books(background_tasks: BackgroundTasks,
     return RedirectResponse("/results", status_code=status.HTTP_302_FOUND)
 
 
-# To add all books ingest for heavy users on frontend
-@ app.post("/ingest_all_books", response_class=HTMLResponse)
-async def api_ingest_all_books(bids: list = Form(...),
-                               db=Depends(get_db),
-                               username=Depends(manager)):
+@ app.post("/ingest_books", response_class=HTMLResponse)
+async def ingest_books(bids: list = Form(...),
+                       db=Depends(get_db),
+                       username=Depends(manager)):
 
     for bid in bids:
         BID = str(bid)
@@ -539,10 +538,10 @@ async def api_ingest_all_books(bids: list = Form(...),
         status_code=status.HTTP_302_FOUND)
 
 
-@ app.post("/delete_multiple_books", response_class=HTMLResponse)
-async def delete_multiple_book(bids: list = Form(...),
-                               db=Depends(get_db),
-                               username=Depends(manager)):
+@ app.post("/delete_books", response_class=HTMLResponse)
+async def delete_books(bids: list = Form(...),
+                       db=Depends(get_db),
+                       username=Depends(manager)):
     for bid in bids:
         BID = str(bid)
         # Check BID is linked to more than 1 user
