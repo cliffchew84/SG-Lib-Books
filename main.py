@@ -596,10 +596,19 @@ async def show_search_books(request: Request,
 
     final_response = list()
 
+    keyword_search = None
+
     if book_search:
-        book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
+        keyword_search = book_search
+    elif author:
+        keyword_search = author
+
+    print(keyword_search)
+
+    if keyword_search:
+        keyword_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', keyword_search)
         books = nlb_rest_api.get_rest_nlb_api_v2(
-            "SearchTitles", input=book_search)
+            "SearchTitles", input=keyword_search)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -632,12 +641,13 @@ async def show_search_books(request: Request,
                 try:
                     for offset in [20, 40, 60, 80, 100, 120, 140]:
                         books = nlb_rest_api.get_rest_nlb_api_v2(
-                            "SearchTitles", input=book_search, offset=offset)
+                            "SearchTitles", input=keyword_search,
+                            offset=offset)
                         all_books += nlb_rest_api.process_new_search_all(books)
                 except Exception:
                     pass
 
-            if author:
+            if author != keyword_search:
                 all_books = nlb_rest_api.filter_for_author(all_books, author)
 
             # Search user book BIDs and
