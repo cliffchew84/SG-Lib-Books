@@ -110,8 +110,8 @@
                 {% if library == "all" and a == "BranchName" %}
 
                 <td class="w-1/12">
-                    <a class="text-blue-700 underline py-1.5 mt-4 px-3"
-                        href="/{{username}}/lib/{{data[a].lower().strip()}}">
+                    <a class="text-blue-700 underline py-1.5 mt-4 px-3" hx-target=".main_content"
+                        hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}" hx-push-url="true">
                         {{ data[a] }}
                     </a>
                 </td>
