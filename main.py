@@ -212,16 +212,15 @@ def login(request: Request,
 
     # Check if user has a default library
     user_info = m_db.mg_query_user_info(db, user.get("UserName"))
-    preferred_lib = user_info.get("preferred_lib").lower()
 
-    if preferred_lib:
-        resp = RedirectResponse(
-            f"/{user.get('UserName')}/lib/{preferred_lib}/",
-            status_code=status.HTTP_302_FOUND)
+    if user_info.get("preferred_lib"):
+        preferred_lib = user_info.get("preferred_lib").lower()
     else:
-        resp = RedirectResponse(
-            f"/{user.get('UserName')}/lib/all",
-            status_code=status.HTTP_302_FOUND)
+        preferred_lib = 'all'
+
+    resp = RedirectResponse(
+        f"/{user.get('UserName')}/lib/{preferred_lib}/",
+        status_code=status.HTTP_302_FOUND)
 
     manager.set_cookie(resp, access_token)
 
