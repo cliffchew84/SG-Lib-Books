@@ -280,14 +280,17 @@ async def htmx_main(request: Request,
 
         # Check if user has a default library
         user_info = m_db.mg_query_user_info(db, username.get("UserName"))
-        preferred_lib = user_info.get("preferred_lib").lower()
+        preferred_lib = user_info.get("preferred_lib")
 
         if preferred_lib:
+            preferred_lib = preferred_lib.lower()
             output = []
             for book in response:
                 if preferred_lib in book['BranchName'].lower():
                     output.append(book)
+
         else:
+            preferred_lib = 'all'
             output = response
 
         lib_avail = len(process.process_all_avail_books(output))
@@ -620,10 +623,16 @@ async def htmx_search_books(request: Request,
     """ Calls NLB Search API and pushes the results as a search_table.html"""
 
     final_response = list()
+
     if book_search:
-        book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
+        keyword_search = book_search
+    elif author:
+        keyword_search = author
+
+    if keyword_search:
+        keyword_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', keyword_search)
         books = nlb_rest_api.get_rest_nlb_api_v2(
-            "SearchTitles", input=book_search)
+            "SearchTitles", input=keyword_search)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -652,12 +661,13 @@ async def htmx_search_books(request: Request,
                 try:
                     for offset in [20, 40, 60, 80, 100, 120, 140]:
                         books = nlb_rest_api.get_rest_nlb_api_v2(
-                            "SearchTitles", input=book_search, offset=offset)
+                            "SearchTitles", input=keyword_search,
+                            offset=offset)
                         all_books += nlb_rest_api.process_new_search_all(books)
                 except Exception:
                     pass
 
-            if author:
+            if author != keyword_search:
                 all_books = nlb_rest_api.filter_for_author(all_books, author)
 
             # Search user book BIDs and
