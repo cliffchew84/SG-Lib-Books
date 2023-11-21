@@ -75,19 +75,23 @@
                 {% set TitleName, BID = data[a].split(' | ') %}
 
                 <td>
-                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                        class="hidden md:block text-blue-800 font-semibold underline" target="_blank"
-                        rel="noopener noreferrer">{{
-                        TitleName }}</a>
+                    <div class="inline-block">
+                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                            class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline"
+                            target="_blank" rel="noopener noreferrer">{{
+                            TitleName }}</a>
+                    </div>
+                    <div class="inline-block">
+                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                            class="block md:hidden text-blue-800 hover:text-blue-600 font-semibold underline"
+                            target="_blank" rel="noopener noreferrer">{{
+                            TitleName.split(" : ")[0] }}</a>
+                    </div>
+                </td>
 
-                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                        class="block md:hidden text-blue-800 font-semibold underline" target="_blank"
-                        rel="noopener noreferrer">{{
-                        TitleName.split(" : ")[0] }}</a>
+                {% elif a == "StatusDesc" %}
 
-                    {% elif a == "StatusDesc" %}
-
-                    {% if data[a] == "Available" %}
+                {% if data[a] == "Available" %}
 
                 <td class="w-1/12 px-3 py-1 text-xs">
                     <span class="px-2 py-1 font-semibold leading-tight text-green-700 
@@ -110,8 +114,8 @@
                 {% if library == "all" and a == "BranchName" %}
 
                 <td class="w-1/12">
-                    <a class="text-blue-700 underline py-1.5 mt-4 px-3" hx-target=".main_content"
-                        hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}" hx-push-url="true">
+                    <a class="text-blue-800 hover:text-blue-600 hover:cursor-pointer underline"
+                        hx-target=".main_content" hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}">
                         {{ data[a] }}
                     </a>
                 </td>
