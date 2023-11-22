@@ -1,0 +1,78 @@
+<header class="mx-auto pt-2 pb-8 bg-sky-700">
+    {% if not username %}
+
+    <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
+        <a class="text-white text-2xl">SGLibReads [Beta]</a>
+        <a class="ml-auto text-white hover:bg-sky-700 mr-1 mt-1.5" target="_blank"
+            href='https://www.notion.so/cliffchew/SG-Libraries-App-Changelog-c9842dba13684212b6df1567688cffc8'>Changelog</a>
+    </div>
+
+    {% else %}
+
+    <!-- Mobile -->
+    <div class="flex justify-between h-2 mx-auto">
+        <ul class="menu menu-horizontal mx-1 items-center md:hidden">
+            <div class="dropdown">
+                <label tabindex="0" class="btn btn-ghost md:hidden text-white hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h8m-8 6h16" />
+                    </svg>
+                </label>
+                <ul tabindex="0"
+                    class="bg-sky-700 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
+
+                    {% include 'm_nb_lib_btn.html' %}
+                    {% include 'm_nb_bk_search_logout.html' %}
+
+                </ul>
+            </div>
+            {% include 'm_nb_profile_btn.html' %}
+            <div class="md:hidden">
+                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-xs"></span>
+                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-sm"></span>
+                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-md"></span>
+                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-lg"></span>
+            </div>
+        </ul>
+    </div>
+
+    <!-- Desktop -->
+    <div class="flex justify-between h-8 mx-auto">
+        <nav class="w-screen flex items-center justify-between py-4">
+            <ul class="menu menu-horizontal mx-auto z-50 text-lg text-white items-center hidden md:flex">
+                <div class="hidden md:flex">
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-lg"></span>
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-md"></span>
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-sm"></span>
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-xs"></span>
+                </div>
+
+                {% include 'm_nb_profile_btn.html' %}
+                {% include 'm_nb_lib_btn.html' %}
+                {% include 'm_nb_bk_search_logout.html' %}
+
+                <div class="hidden md:flex">
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-xs"></span>
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-sm"></span>
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-md"></span>
+                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
+                htmx-indicator loading loading-ball loading-lg"></span>
+                </div>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</header>

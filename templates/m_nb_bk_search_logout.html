@@ -1,0 +1,24 @@
+<li>
+    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/{{username}}/m_yourbooks"
+        hx-indicator="#head-spinner" hx-target=".main_content"><i class="fas fa-book"></i>Books
+    </a>
+</li>
+
+<li>
+    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/{{username}}/m_search" hx-indicator="#head-spinner"
+        hx-target=".main_content"><i class="fas fa-search"></i>NLB
+    </a>
+</li>
+
+<li>
+    <form class="form-inline hover:text-white hover:bg-sky-500" hx-post="/m_update_user_books/{{username}}"
+        hx-indicator="#head-spinner" hx-target=".main_content"><button type="submit">
+            <i class="fas fa-sync"></i> Book Status</button>
+    </form>
+</li>
+
+<li>
+    <a class="hover:text-white text-white hover:bg-sky-500" href='/logout'>
+        <i class="fas fa-sign-out-alt"></i>Logout
+    </a>
+</li>

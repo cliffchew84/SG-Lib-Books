@@ -1,0 +1,22 @@
+<div class="dropdown dropdown-end">
+    <label tabindex="0" class="capitalize btn btn-ghost rounded-btn hover:bg-sky-500 
+        text-lg font-medium hover:text-white"><i class="fas fa-city"></i>Libraries
+    </label>
+    <ul tabindex="0" class="menu dropdown-content z-[1] p-2 rounded-box w-56 mt-4 bg-sky-700 text-white">
+        <li>
+            <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-get="/{{username}}/m_lib/all"
+                hx-target=".main_content"><i class="fas fa-city"></i>
+                All Libraries - {{all_avail_books|length}}
+            </a>
+        </li>
+
+        {% for lib in lib_book_summary %}
+        <li>
+            <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-target=".main_content"
+                hx-get="/{{username}}/m_lib/{{lib.keys()|list|first|lower}}">
+                {{lib.keys()|list|first}} - {{lib.values()|list|first}}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
