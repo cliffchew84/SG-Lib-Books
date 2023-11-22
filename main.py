@@ -210,8 +210,7 @@ def login(request: Request,
         expires=access_token_expires)
 
     resp = RedirectResponse(
-        f"/{user.get('UserName')}/main/",
-        status_code=status.HTTP_302_FOUND)
+        f"/{user.get('UserName')}/main/", status_code=status.HTTP_302_FOUND)
 
     manager.set_cookie(resp, access_token)
 
@@ -624,6 +623,8 @@ async def htmx_search_books(request: Request,
     """ Calls NLB Search API and pushes the results as a search_table.html"""
 
     final_response = list()
+
+    keyword_search = None
 
     if book_search:
         keyword_search = book_search
