@@ -336,7 +336,7 @@ async def m_current_books(request: Request,
             response = []
             for a in query:
                 response.append({
-                    "TitleName": a.get('TitleName').strip(),
+                    "TitleName": a.get('TitleName').split("/")[0].strip(),
                     "BID": a.get("BID"),
                     "CallNumber": a.get("CallNumber").split(" -")[0].strip()})
 
@@ -414,7 +414,8 @@ def process_user_book_data(db, username: str):
             library = a.get("BranchName")
 
         response.append({
-            "TitleName": a.get('TitleName') + ' | ' + a.get("BID"),
+            "TitleName": a.get('TitleName'
+                               ).split("/")[0] + ' | ' + a.get("BID"),
             "BranchName": library,
             "CallNumber": a.get("CallNumber").split(" -")[0],
             "StatusDesc": final_status,
@@ -579,7 +580,7 @@ async def ingest_books(bids: list = Form(...),
     # And then render the new template
 
     return RedirectResponse(
-        f"/{username.get('UserName')}/m_yourbooks",
+        f"/{username.get('UserName')}/main",
         status_code=status.HTTP_302_FOUND)
 
 
@@ -609,7 +610,7 @@ async def delete_books(bids: list = Form(...),
     # WIP - To include code to recalculate the book count
     # And then render the new template
 
-    return RedirectResponse(f"/{username.get('UserName')}/m_yourbooks",
+    return RedirectResponse(f"/{username.get('UserName')}/main",
                             status_code=status.HTTP_302_FOUND)
 
 
