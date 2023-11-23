@@ -8152,6 +8152,14 @@ details.collapse summary::-webkit-details-marker {
   height: 1.5rem;
 }
 
+.h-96 {
+  height: 24rem;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
 .w-1\/12 {
   width: 8.333333%;
 }

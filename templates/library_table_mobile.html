@@ -1,0 +1,102 @@
+<table class="border-collapse w-full table table-sm text-sm table-pin-rows">
+    <thead class='rounded-lg'>
+        <tr class='bg-sky-700 text-white rounded-lg'>
+            {% if library != 'all' %}
+
+            <th>{{ lib_avail }} / {{ lib_all }}</th>
+
+            {% else %}
+
+            <th>{{all_avail_books|length}} / {{all_unique_books|length}}</th>
+            <th>Library</th>
+
+            {% endif %}
+
+            <th>Number</th>
+            <th class="flex items-center justify-center gap-1">Status
+                <input class="checkbox checkbox-xs checkbox-info border-white border-2" type="checkbox"
+                    id="availableCheckbox">
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="myTable">
+
+        {% for data in api_data %}
+
+        <tr class='rounded-lg'>
+            {% for a in data %}
+
+            {% if a == 'UpdateTime' %}
+
+            {% elif data[a]|int !=0 %}
+
+            <td class="px-1">
+                <form action="/update_book/{{data[a]}}" method="POST">
+                    <button type="submit" class="bg-sky-700 px-3 py-1 rounded-lg
+                        hover:text-white hover:bg-sky-500 text-white">
+                        <i class="fas fa-sync items-center justify-center"></i>
+                    </button>
+
+                </form>
+            </td>
+
+            {% elif a == "TitleName" %}
+            {% set TitleName, BID = data[a].split(' | ') %}
+
+            <td>
+                <div class="inline-block">
+                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                        class="text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
+                        rel="noopener noreferrer">{{
+                        TitleName.split(" : ")[0] }}</a>
+                </div>
+            </td>
+
+            {% elif a == "StatusDesc" %}
+
+            {% if data[a] == "Available" %}
+
+            <td class="w-1/12 px-3 py-1 text-xs">
+                <span class="px-2 py-1 font-semibold leading-tight text-green-700 
+                        bg-green-100 rounded-lg text-center">{{ data[a] }}
+                </span>
+            </td>
+
+            {% else %}
+
+            <td class="w-1/12 px-3 py-1 text-xs">
+                <span class="px-2 py-1 font-semibold leading-tight text-red-700 
+                        bg-red-100 rounded-lg text-center">{{ data[a] }}
+                </span>
+            </td>
+
+            {% endif %}
+
+            {% else %}
+
+            {% if library == "all" and a == "BranchName" %}
+
+            <td class="w-1/12">
+                <a class="text-blue-800 hover:text-blue-600 hover:cursor-pointer underline" hx-target=".main_content"
+                    hx-indicator="#head-spinner" hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}">
+                    {{ data[a] }}
+                </a>
+            </td>
+
+            {% elif library != "all" and a == "BranchName" %}
+
+            {% else %}
+
+            <td class="w-1/12">{{ data[a] }}</td>
+
+            {% endif %}
+
+            {% endif %}
+
+            {% endfor %}
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
