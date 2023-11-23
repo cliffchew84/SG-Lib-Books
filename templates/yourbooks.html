@@ -28,39 +28,26 @@
                     </tr>
                 </thead>
                 <tbody id="myTable">
-
                     {% for data in api_data %}
-
                     <tr>
-                        {% for a in data %}
-                        {% if data[a]|int !=0 %}
-
                         <td class="flex justify-center items-center">
                             <div class="pt-1 h-full flex items-center">
                                 <label>
                                     <input type="checkbox"
                                         class="checkbox checkbox-error hover:bg-red-500 border-red-500" name='bids'
-                                        value='{{data[a]}}' onchange="checkSelection()" />
+                                        value="{{data['BID']}}" onchange="checkSelection()" />
                                 </label>
                             </div>
                         </td>
 
-                        {% elif a == "TitleName" %}
-                        {% set TitleName, BID = data[a].split(' | ') %}
+                        {% set TitleName, BID = data['TitleName'].split(' | ') %}
                         <td>
-
                             <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
                                 class="button text-blue-800 font-semibold my-2 underline" target="_blank" rel="noopener
                             noreferrer">{{ TitleName }}
                             </a>
-
-                            {% else %}
-
-                        <td class="hidden md:block">{{ data[a] }}</td>
-
-                        {% endif %}
-
-                        {% endfor %}
+                        </td>
+                        <td class="hidden md:block">{{ data['CallNumber'] }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

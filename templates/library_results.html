@@ -10,130 +10,21 @@
 
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
         type="text" placeholder="Search books by their title keywords!">
-
     <p class="py-2 text-xs italic">Best view on Desktop, by libary or landscape on mobile.</p>
 
-    {% if library != 'all' %}
+    {% if library == 'all' %}
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building"></i> {{library|title}}</h3>
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building">
+        </i> {{library|title}} - {{all_avail_books|length}} / {{all_unique_books|length}}</h3>
 
     {% else %}
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-city"></i> All</h3>
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building">
+        </i> {{library|title}} - {{ lib_avail }} / {{ lib_all }}</h3>
 
     {% endif %}
 
-    <table class="border-collapse w-full table-sm text-sm">
-        <thead class='rounded-lg'>
-            <tr class='bg-sky-700 text-white rounded-lg'>
-                {% if library != 'all' %}
+    {% include "library_result_table.html" %}
 
-                <th>{{ lib_avail }} / {{ lib_all }}</th>
-
-                {% else %}
-
-                <th>{{all_avail_books|length}} / {{all_unique_books|length}}</th>
-                <th>Library</th>
-
-                {% endif %}
-
-                <th>Number</th>
-                <th class="flex items-center justify-center gap-1">Status
-                    <input class="checkbox checkbox-xs checkbox-info border-white border-2" type="checkbox"
-                        id="availableCheckbox">
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="myTable">
-
-            {% for data in api_data %}
-
-            <tr class='rounded-lg'>
-                {% for a in data %}
-
-                {% if a == 'UpdateTime' %}
-
-                {% elif data[a]|int !=0 %}
-
-                <td class="px-1">
-                    <form action="/update_book/{{data[a]}}" method="POST">
-                        <button type="submit" class="hidden md:block 
-                                bg-sky-700 px-3 py-1 rounded-lg hover:text-white hover:bg-sky-500 text-white">
-                            {{ data['UpdateTime'] }}</button>
-
-                        <button type="submit" class="block md:hidden 
-                                bg-sky-700 px-3 py-1 rounded-lg  hover:text-white hover:bg-sky-500 text-white">
-                            <i class="fas fa-sync items-center justify-center"></i>
-                        </button>
-
-                    </form>
-                </td>
-
-                {% elif a == "TitleName" %}
-                {% set TitleName, BID = data[a].split(' | ') %}
-
-                <td>
-                    <div class="inline-block">
-                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                            class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline"
-                            target="_blank" rel="noopener noreferrer">{{
-                            TitleName }}</a>
-                    </div>
-                    <div class="inline-block">
-                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
-                            class="block md:hidden text-blue-800 hover:text-blue-600 font-semibold underline"
-                            target="_blank" rel="noopener noreferrer">{{
-                            TitleName.split(" : ")[0] }}</a>
-                    </div>
-                </td>
-
-                {% elif a == "StatusDesc" %}
-
-                {% if data[a] == "Available" %}
-
-                <td class="w-1/12 px-3 py-1 text-xs">
-                    <span class="px-2 py-1 font-semibold leading-tight text-green-700 
-                        bg-green-100 rounded-lg text-center">{{ data[a] }}
-                    </span>
-                </td>
-
-                {% else %}
-
-                <td class="w-1/12 px-3 py-1 text-xs">
-                    <span class="px-2 py-1 font-semibold leading-tight text-red-700 
-                        bg-red-100 rounded-lg text-center">{{ data[a] }}
-                    </span>
-                </td>
-
-                {% endif %}
-
-                {% else %}
-
-                {% if library == "all" and a == "BranchName" %}
-
-                <td class="w-1/12">
-                    <a class="text-blue-800 hover:text-blue-600 hover:cursor-pointer underline"
-                        hx-target=".main_content" hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}">
-                        {{ data[a] }}
-                    </a>
-                </td>
-
-                {% elif library != "all" and a == "BranchName" %}
-
-                {% else %}
-
-                <td class="w-1/12">{{ data[a] }}</td>
-
-                {% endif %}
-
-                {% endif %}
-
-                {% endfor %}
-
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
     {% endif %}
 </div>
