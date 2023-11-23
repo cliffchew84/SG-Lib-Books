@@ -114,7 +114,8 @@
 
                 <td class="w-1/12">
                     <a class="text-blue-800 hover:text-blue-600 hover:cursor-pointer underline"
-                        hx-target=".main_content" hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}">
+                        hx-target=".main_content" hx-indicator="#head-spinner"
+                        hx-get="/{{username}}/m_lib/{{data[a].lower().strip()}}">
                         {{ data[a] }}
                     </a>
                 </td>
