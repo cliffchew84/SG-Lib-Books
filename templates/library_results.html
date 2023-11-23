@@ -11,15 +11,20 @@
     <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
         type="text" placeholder="Search books by their title keywords!">
     <p class="py-2 text-xs italic">Best view on Desktop, by libary or landscape on mobile.</p>
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building"></i> {{library|title}}</h3>
 
-    <div class="hidden md:block overflow-x-auto h-96">
-        {% include "library_table_desktop.html" %}
-    </div>
+    {% if library == 'all' %}
 
-    <div class="block md:hidden">
-        {% include "library_table_mobile.html" %}
-    </div>
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building">
+        </i> {{library|title}} - {{all_avail_books|length}} / {{all_unique_books|length}}</h3>
+
+    {% else %}
+
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building">
+        </i> {{library|title}} - {{ lib_avail }} / {{ lib_all }}</h3>
+
+    {% endif %}
+
+    {% include "library_result_table.html" %}
 
     {% endif %}
 </div>
