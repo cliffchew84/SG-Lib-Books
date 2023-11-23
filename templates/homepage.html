@@ -1,32 +1,36 @@
 {% include 'header.html' %}
 {% include 'm_navbar.html' %}
 
-<div class="pt-4 mt-2 pb-3 px-10 sm:px-20 xl:px-40">
-    <div class="text-gray-700">
+<div class="pt-4 mt-2 pb-3 px-10 sm:px-20 xl:px-40 text-gray-600">
+    <div>
         <p class="text-xl">A library-centric view of your favourite Singapore library books!</p>
         <div class='md:flex text-base py-3 space-x-1'>
             <div>
                 <p>
-                    Using the <a class="font-semibold underline" target="_blank"
+                    Using the <a class="font-s
+                        emibold underline" target="_blank"
                         href="https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs">official NLB
                         REST v2 APIs</a> <span class="font-bold">(17-11-2023)</span>, this site aims to provide an
-                    easier, single view of all your saved Singapore library books. Best viewed on desktop. For feedback,
-                    email me at <span class="font-semibold underline">sglibreads@gmail.com</span>. Read about my story
-                    <a class="font-semibold underline" target="_blank"
-                        href="https://medium.com/@cliffy-gardens/my-singapore-library-app-is-live-b63fc9f5ae9a">here</a>,
-                    or connect professionally at <a class="fa fa-linkedin-square" target="_blank" style="font-size:24px"
-                        href="https://www.linkedin.com/in/cliff-chew-kt/"></a>
+                    easier, single view of all your saved Singapore library books. Best viewed on desktop. Provide
+                    feedback <a href="mailto: sglibreads@gmail.com" class="" text-gray-600 hover:text-gray-500"><i
+                            class="far fa-envelope fa-lg"></i></a> Read about this project <a class="" text-gray-600
+                        hover:text-gray-500 font-semibold underline" target="_blank"
+                        href="https://medium.com/@cliffy-gardens/my-singapore-library-app-is-live-b63fc9f5ae9a"><i
+                            class="fab fa-medium fa-lg"></i></a> Connect professionally <a
+                        href="https://www.linkedin.com/in/cliff-chew-kt/" target="_blank"
+                        class="text-gray-600 hover:text-gray-500"><i class="fab fa-linkedin fa-lg"></i>
+                    </a>
                 </p>
             </div>
         </div>
     </div>
-    <div class="flex flex-col md:flex-row items-center justify-center md:space-x-16">
-        <div class="w-full md:w-5/6 lg:w-1/2 md:pb-2 md:pt-2 py-4 px-6 border-4 rounded-lg">
+    <div class="flex flex-col md:flex-row items-center justify-center md:space-x-16 pt-4">
+        <div class="w-full md:w-5/6 lg:w-1/2 md:pb-2 md:pt-2 py-4 px-6 border-1 border-gray-400 shadow-md rounded-lg">
             <form action="/login" method="POST">
                 <div class="mb-3 items-center justify-center">
                     <label for="username" class="mx-3 form-label">Username</label>
                     <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
-                        rounded-lg border-2 border-blue-800" id='username' name='username' required>
+                        rounded-lg border-1 border-black" id='username' name='username' required>
                 </div>
                 <label for="password" class="mx-3 form-label">Password</label>
 
@@ -40,24 +44,24 @@
                     <!-- Password show and hide button -->
 
                     <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
-                        rounded-lg border-2 border-sky-800 js-password" id='password' name='password' required />
+                        rounded-lg border-1 border-black js-password" id='password' name='password' required />
                 </div>
 
                 <div class="flex">
                     <button type="submit"
-                        class="bg-sky-700 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Login</button>
+                        class="bg-blue-700 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Login</button>
                     <a href="/forgot_password" class="text-blue-700 italic underline py-1.5 mt-4 px-3">Forgot
                         Password</a>
                 </div>
             </form>
         </div>
 
-        <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border-4 rounded-lg">
+        <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border-1 border-gray-400 shadow-md rounded-lg">
             <form action="/" method="POST">
                 <div class="mb-3">
                     <label for="username" class="form-label mx-3">Username</label>
                     <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm 
-                        form-control rounded-lg border-2 border-blue-800" id='username' name='username' required
+                        form-control rounded-lg border-1 border-black" id='username' name='username' required
                         hx-get="/check_user_register/" hx-trigger="change, keyup delay:500ms"
                         hx-target="next .dup_user">
                 </div>
@@ -75,7 +79,7 @@
                     <!-- Adding password hide and show button -->
 
                     <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
-                        rounded-lg border-2 border-sky-800 js-password_2" id='password' name='password' required>
+                        rounded-lg border-1 border-black js-password_2" id='password' name='password' required>
                 </div>
                 <div class='dup_user flex'>
                     <button type="submit"
@@ -88,6 +92,44 @@
         </div>
     </div>
 </div>
+
+<footer class="relative pt-4 mt-2 pb-3 sm:px-20 xl:px-40">
+    <div class="max-w-screen-xl px-4 py-12 mx-auto space-y-8 overflow-hidden sm:px-6 lg:px-8">
+        <nav class="flex flex-wrap justify-center -mx-5 -my-2">
+            <div class="px-5 py-2">
+                <a href="#" class="text-base leading-6 text-gray-500 hover:text-gray-900">
+                    About (WIP)
+                </a>
+            </div>
+            <div class="px-5 py-2">
+                <a href="https://medium.com/@cliffy-gardens/my-singapore-library-app-is-live-b63fc9f5ae9a"
+                    class="text-base leading-6 text-gray-500 hover:text-gray-900">
+                    Blog
+                </a>
+            </div>
+            <div class="px-5 py-2">
+                <a href="#" disabled class="text-base leading-6 text-gray-500 hover:text-gray-900">
+                    Team (WIP)
+            </div>
+            <div class="px-5 py-2">
+                <a href="mailto: sglibreads@gmail.com" class="text-base leading-6 text-gray-500 hover:text-gray-900">
+                    Contact
+                </a>
+            </div>
+        </nav>
+        <div class="flex justify-center mt-8 space-x-6">
+            <a href="https://www.linkedin.com/in/cliff-chew-kt/" target="_blank"
+                class="text-gray-400 hover:text-gray-500">
+                <i class="fab fa-linkedin fa-lg"></i>
+            </a>
+
+            <a href="https://github.com/cliffchew84/SG-Lib-Books" class="text-gray-400 hover:text-gray-500"
+                target="_blank">
+                <i class="fab fa-github fa-lg"></i>
+            </a>
+        </div>
+    </div>
+</footer>
 
 <script>
     const passwordToggle = document.querySelector('.js-password-toggle')
