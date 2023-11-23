@@ -1,7 +1,7 @@
 <div class='main_content'>
-    <div class='items-center justify-center px-2'>
+    <div class='items-center justify-center px-2 h-full'>
         <form method="GET" class="join form-inline flex items-center justify-center" hx-target="next .search_table"
-            hx-get="/htmx_search" hx-indicator="#loading-spinner">
+            hx-get="/htmx_search" hx-indicator="#head-spinner">
 
             {% if keyword %}
             <input
@@ -37,27 +37,9 @@
         </form>
 
         <div class="flex justify-center mx-auto pt-2 px-2">
-            <div class="flex flex-wrap gap-2">
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-lg"></span>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-xs"></span>
-                <p class='mx-auto flex justify-center text-sm italic pt-2 px-2'>
-                    *Search using ISBN OR book title with author for better results
-                </p>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-xs"></span>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
-                <span id='loading-spinner' class="text-sky-700 justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-lg"></span>
-            </div>
+            <p class='mx-auto flex justify-center text-sm italic pt-2 px-2'>
+                *Search using ISBN OR book title with author for better results
+            </p>
         </div>
     </div>
 

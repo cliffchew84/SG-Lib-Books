@@ -90,19 +90,21 @@
 
                 {% if pw_ans %}
 
-                <input type="password" class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700
-                    js-password" id='pw_ans' name='pw_ans' value={{ pw_ans }} />
+                <input type="password" class="mx-auto md:text-base text-sm form-control w-full rounded-lg 
+                    p-2 my-2 border-2 border-sky-700 js-password" id='pw_ans' name='pw_ans' value={{ pw_ans }} />
 
                 {% else %}
 
-                <input type="password" class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700
-                    js-password" id='pw_ans' name='pw_ans' placeholder="******** (No answer)" />
+                <input type="password" class="mx-auto md:text-base text-sm form-control w-full rounded-lg 
+                    p-2 my-2 border-2 border-sky-700 js-password" id='pw_ans' name='pw_ans'
+                    placeholder="******** (None)" />
 
                 {% endif %}
 
                 <label for="pw_ans">Change Account Password</label>
-                <input type="new_password" class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700
-                    js-password" id='password' name='password' placeholder="Input your new password here" />
+                <input type="new_password" class="mx-auto md:text-base text-sm form-control w-full rounded-lg 
+                    p-2 my-2 border-2 border-sky-700 js-password" id='password' name='password'
+                    placeholder="Input your new password here" />
 
                 <button type=" submit" class="bg-sky-800 px-2 my-1 py-1 rounded-lg 
                     hover:text-white hover:bg-sky-500 text-white">
