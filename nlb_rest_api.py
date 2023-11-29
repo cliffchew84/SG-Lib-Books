@@ -1,7 +1,7 @@
 import os
 import requests
 import pendulum
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 # Add os.environ for authentication
 APPLICATION_ID = os.environ['nlb_rest_app_id']
@@ -64,22 +64,36 @@ def get_rest_nlb_api_v2(extension_url: str,
     return requests.get(final_url, headers=headers, params=payload).json()
 
 
-def get_rest_title(title: Optional[str] = None,
-                   author: Optional[str] = None,
+def get_rest_title(input_dict: Dict,
                    offset=None,
                    app_id: str = APPLICATION_ID,
                    api_key: str = API_KEY) -> Dict:
-
+    """ Makes API call to GetTitles """
     headers = authenticate_into_nlb_rest(app_id, api_key)
     final_url = "https://openweb.nlb.gov.sg/api/v2/Catalogue/GetTitles"
-    payload = dict()
+    if offset:
+        input_dict.update({"Offset": offset})
 
-    if title:
-        payload.update({"Title": title})
-    if author:
-        payload.update({"Author": author})
+    return requests.get(final_url, headers=headers, params=input_dict).json()
 
-    return requests.get(final_url, headers=headers, params=payload).json()
+
+def get_title_process(api_input) -> List[Dict]:
+    """ Processes the GetTitles API data to fit my origin data structure"""
+    main_list = []
+    for i in api_input.get("titles"):
+        tmp_dict = dict()
+        tmp_dict['TitleName'] = i.get('title')
+        tmp_dict['Author'] = i.get('author')
+        tmp_dict['BID'] = i.get('brn')
+        tmp_dict['PublishYear'] = i.get('publishDate')
+        try:
+            tmp_dict["type"] = i.get('format').get('name')
+        except Exception:
+            tmp_dict["type"] = None
+
+        main_list.append(tmp_dict)
+
+    return main_list
 
 
 def process_rest_single_lib_avail_v2(nlb_input: Dict):
