@@ -633,18 +633,18 @@ async def htmx_search_books(request: Request,
     """ Calls NLB Search API and pushes the results as a search_table.html"""
 
     final_response = list()
-
-    keyword_search = None
+    search_input = dict()
 
     if book_search:
-        keyword_search = book_search
-    elif author:
-        keyword_search = author
+        c_book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
+        search_input.update({"Title": c_book_search})
 
-    if keyword_search:
-        keyword_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', keyword_search)
-        books = nlb_rest_api.get_rest_nlb_api_v2(
-            "SearchTitles", input=keyword_search)
+    if author:
+        c_author = re.sub(r'[^a-zA-Z0-9\s]', ' ', author)
+        search_input.update({"Author": c_author})
+
+    if book_search or author:
+        titles = nlb_rest_api.get_rest_title(input_dict=search_input)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -655,32 +655,40 @@ async def htmx_search_books(request: Request,
                                      username=username.get("UserName"),
                                      search_params=search_params)
 
+        bad_result = templates.TemplateResponse("search_table.html", {
+            "request": request,
+            "keyword": book_search,
+            "author": author,
+            "username": username.get("UserName"),
+            "api_data": final_response,
+        })
+
         elist = [400, 404, 500, 401, 405, 429]
 
-        if books.get("statusCode") in elist:
-            return templates.TemplateResponse("search_table.html", {
-                "request": request,
-                "keyword": book_search,
-                "author": author,
-                "username": username.get("UserName"),
-                "api_data": final_response,
-            })
+        if titles.get("statusCode") in elist:
+            return bad_result
+
+        elif titles.get("totalRecords") == 0:
+            return bad_result
 
         else:
-            all_books = nlb_rest_api.process_new_search_all(books)
+            all_titles = nlb_rest_api.get_title_process(titles)
 
-            if books.get("hasMoreRecords"):
+            if titles.get("hasMoreRecords"):
                 try:
                     for offset in [20, 40, 60, 80, 100, 120, 140]:
-                        books = nlb_rest_api.get_rest_nlb_api_v2(
-                            "SearchTitles", input=keyword_search,
-                            offset=offset)
-                        all_books += nlb_rest_api.process_new_search_all(books)
+                        titles = nlb_rest_api.get_rest_title(
+                            input_dict=search_input, offset=offset)
+                        all_titles += nlb_rest_api.get_title_process(
+                            titles)
                 except Exception:
                     pass
 
-            if author != keyword_search:
-                all_books = nlb_rest_api.filter_for_author(all_books, author)
+            # Only keep physical books for now
+            books_only = []
+            for title in all_titles:
+                if title['type'] == "Book":
+                    books_only.append(title)
 
             # Search user book BIDs and
             # disable add books for books already saved by user
@@ -689,7 +697,7 @@ async def htmx_search_books(request: Request,
 
             user_books_bids = [i.get("BID") for i in user_books]
 
-            for i in all_books:
+            for i in books_only:
                 try:
                     i['TitleName'] = i['TitleName'].split(
                         " / ")[0].strip() + " | " + str(i['BID'])
@@ -706,104 +714,12 @@ async def htmx_search_books(request: Request,
                 except Exception:
                     pass
 
-    return templates.TemplateResponse("search_table.html", {
-        "request": request,
-        "keyword": book_search,
-        "author": author,
-        "username": username.get("UserName"),
-        "api_data": final_response,
-    })
-
-
-@app.get("/htmx_search_v2", response_class=HTMLResponse)
-async def htmx_search_books_v2(request: Request,
-                               book_search: Optional[str] = None,
-                               author: Optional[str] = None,
-                               next_page: Optional[str] = None,
-                               db=Depends(get_db),
-                               username=Depends(manager)):
-
-    """ Calls NLB Search API and pushes the results as a search_table.html"""
-
-    final_response = list()
-
-    keyword_search = None
-
-    if book_search:
-        keyword_search = book_search
-    elif author:
-        keyword_search = author
-
-    if keyword_search:
-        keyword_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', keyword_search)
-        books = nlb_rest_api.get_rest_nlb_api_v2(
-            "SearchTitles", input=keyword_search)
-
-        search_params = dict()
-        search_params['title'] = book_search
-        search_params['author'] = author
-
-        m_db.mg_user_search_tracking(db,
-                                     table="user_search",
-                                     username=username.get("UserName"),
-                                     search_params=search_params)
-
-        elist = [400, 404, 500, 401, 405, 429]
-
-        if books.get("statusCode") in elist:
-            return templates.TemplateResponse("search_table.html", {
-                "request": request,
-                "keyword": book_search,
-                "author": author,
-                "username": username.get("UserName"),
-                "api_data": final_response,
-            })
-
-        else:
-            all_books = nlb_rest_api.process_new_search_all(books)
-
-            if books.get("hasMoreRecords"):
-                try:
-                    for offset in [20, 40, 60, 80, 100, 120, 140]:
-                        books = nlb_rest_api.get_rest_nlb_api_v2(
-                            "SearchTitles", input=keyword_search,
-                            offset=offset)
-                        all_books += nlb_rest_api.process_new_search_all(books)
-                except Exception:
-                    pass
-
-            if author != keyword_search:
-                all_books = nlb_rest_api.filter_for_author(all_books, author)
-
-            # Search user book BIDs and
-            # disable add books for books already saved by user
-            user_books = m_db.mg_query_user_bookmarked_books(
-                db=db, username=username.get("UserName"))
-
-            user_books_bids = [i.get("BID") for i in user_books]
-
-            for i in all_books:
-                try:
-                    i['TitleName'] = i['TitleName'].split(
-                        " / ")[0].strip() + " | " + str(i['BID'])
-
-                    i['PublishYear'] = "Y" + i['PublishYear']
-
-                    disable = "disabled" if str(
-                        i['BID']) in user_books_bids else ""
-
-                    i['BID'] = disable + " | " + str(i["BID"])
-
-                    final_response.append(i)
-
-                except Exception:
-                    pass
+            print(final_response)
 
     return templates.TemplateResponse("search_table.html", {
         "request": request,
         "keyword": book_search,
         "author": author,
-        "next_page": next_page,
         "username": username.get("UserName"),
         "api_data": final_response,
     })
