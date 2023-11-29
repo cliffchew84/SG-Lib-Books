@@ -1,0 +1,46 @@
+<div class="main_content">
+    <div class="w-full overflow-x-auto my-3 px-4">
+        {% if status %}
+
+        {% include 'update_status.html' %}
+
+        {% endif %}
+
+        <div x-data="{ isOpen: false }" class='w-full'>
+            <div class="join flex items-center justify-center">
+                <button @click="isOpen = !isOpen"
+                    class="join-item bg-sky-800 hover:bg-sky-500 text-white font-bold py-2 px-4 rounded">
+                    Show
+                </button>
+                <input
+                    class="join-item md:text-base text-sm form-control w-full rounded-lg pt-2 my-2 border-2 border-sky-700"
+                    id="myInput" type="text" placeholder="Search for specific NLB events!">
+            </div>
+            <p class="px-2 py-1 text-xs italic">*Experimental. Data is updated
+                periodically from the NLB EventBrite website. Please sign up
+                with the NLB EventBrite website directly if you are interested
+                in any of their events.
+            </p>
+            {% include 'm_lib_events_table.html' %}
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#myTable tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+
+    // Initialize Alpine.js reactive state
+    window.onload = function () {
+        Alpine.data('collapsible', () => ({
+            isOpen: false,
+        }));
+    }
+
+</script>

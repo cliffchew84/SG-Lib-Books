@@ -1,0 +1,59 @@
+<div class="main_content w-full overflow-x-auto my-3 px-4">
+    {% if status %}
+
+    {% include 'update_status.html' %}
+
+    {% endif %}
+
+    <div class="flex items-center justify-center space-x-4 mb-2">
+        <p class="items-start justify-start text-sky-800 font-semibold">{{ total_records }} events</p>
+
+        <select class="select select-info select-sm max-w-xs border-sky-700 text-sky-800" hx-target=".main_content"
+            hx-get="/events" hx-trigger='change' hx-indicator='#head-spinner' name='lib'>
+
+            <option disabled selected class="text-sky-800">{{ selected_lib|safe }}</option>
+
+            {% for lib in lib_locations %}
+
+            <option class="text-sky-800" value="{{lib|safe}}">{{ lib|safe }}</option>
+
+            {% endfor %}
+
+        </select>
+    </div>
+    <p class="px-1 py-1 text-xs italic">*Experimental. Data is updated
+        periodically from the NLB EventBrite website. Please sign up
+        with the NLB EventBrite website directly if you are interested
+        in any of their events.
+    </p>
+    <table class="mx-auto table-auto table-sm w-full mt-1">
+        <thead>
+            <tr class='bg-sky-700 text-white'>
+                <th>Day</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Category</th>
+                <th>Event Name</th>
+            </tr>
+        </thead>
+        <tbody id="myTable">
+            {% for events in lib_events %}
+            <tr>
+                <td>{{ events['end_day'] }}</td>
+                <td>{{ events['start'].split("T")[0] }}</td>
+                <td>
+                    {{ events['start'].split("T")[-1][:-3].replace(":", "") }}-{{
+                    events['end'].split("T")[-1][:-3].replace(":", "") }}
+                </td>
+                <td>{{ events['category'] }}</td>
+                <td>
+                    <a href="{{ events['url'] }}" class="button text-blue-800 font-semibold my-2 underline"
+                        target="_blank" rel="noopener
+                            noreferrer">{{ events['name'] }}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

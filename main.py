@@ -141,7 +141,7 @@ async def check_user_register(username):
                 rounded-lg py-1.5 mt-4 px-3 mx-2">Register</button>"""
 
 
-@ app.post("/")
+@app.post("/")
 def register_user(request: Request,
                   username: Optional[str] = Form(...),
                   password: Optional[str] = Form(...),
@@ -182,13 +182,13 @@ def register_user(request: Request,
 
 
 # Base page
-@ app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("homepage.html", {"request": request})
 
 
 # Login
-@ app.post("/login")
+@app.post("/login")
 def login(request: Request,
           form_data: OAuth2PasswordRequestForm = Depends(),
           db=Depends(get_db)):
@@ -219,14 +219,14 @@ def login(request: Request,
     return resp
 
 
-@ app.get("/forgot_password", response_class=HTMLResponse)
+@app.get("/forgot_password", response_class=HTMLResponse)
 async def forgot_password(request: Request,
                           wrong_question=False):
     return templates.TemplateResponse("forgot_password.html", {
         "request": request})
 
 
-@ app.get("/reset_password/", response_class=HTMLResponse)
+@app.get("/reset_password/", response_class=HTMLResponse)
 async def reset_password(request: Request,
                          username: str = Form(...),
                          pw_qn: str = Form(...),
@@ -252,7 +252,7 @@ async def reset_password(request: Request,
     return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@ app.get("/{username}/main")
+@app.get("/{username}/main")
 async def htmx_main(request: Request,
                     db=Depends(get_db),
                     username=Depends(manager)):
@@ -313,7 +313,7 @@ async def htmx_main(request: Request,
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@ app.get("/{username}/m_yourbooks")
+@app.get("/{username}/m_yourbooks")
 async def m_current_books(request: Request,
                           db=Depends(get_db),
                           username=Depends(manager)):
@@ -424,7 +424,7 @@ def process_user_book_data(db, username: str):
     return response
 
 
-@ app.get("/{username}/m_lib/{library}/", response_class=HTMLResponse)
+@app.get("/{username}/m_lib/{library}/", response_class=HTMLResponse)
 async def show_avail_m_books(request: Request,
                              library: Optional[str],
                              db=Depends(get_db),
@@ -520,7 +520,7 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
     m_db.mg_add_book_info(db=db, books_info_input=book_title)
 
 
-@ app.post("/update_book/{BID}", response_class=HTMLResponse)
+@app.post("/update_book/{BID}", response_class=HTMLResponse)
 async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
@@ -550,7 +550,7 @@ def update_all_user_books(db, username):
     return {"message": "All user books are updated!"}
 
 
-@ app.post("/m_update_user_books/{username}", response_class=HTMLResponse)
+@app.post("/m_update_user_books/{username}", response_class=HTMLResponse)
 async def m_update_user_current_books(background_tasks: BackgroundTasks,
                                       db=Depends(get_db),
                                       username=Depends(manager)):
@@ -560,7 +560,7 @@ async def m_update_user_current_books(background_tasks: BackgroundTasks,
                             status_code=status.HTTP_302_FOUND)
 
 
-@ app.post("/ingest_books", response_class=HTMLResponse)
+@app.post("/ingest_books", response_class=HTMLResponse)
 async def ingest_books(bids: list = Form(...),
                        db=Depends(get_db),
                        username=Depends(manager)):
@@ -575,15 +575,25 @@ async def ingest_books(bids: list = Form(...),
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
         update_bk_avail_in_mongo(db, BID)
 
-    # WIP - To include code to recalculate the book count
-    # And then render the new template
+    return RedirectResponse(
+        f"/{username.get('UserName')}/main",
+        status_code=status.HTTP_302_FOUND)
+
+
+@app.post("/ingest_books_v2", response_class=HTMLResponse)
+async def ingest_books_stay(bids: list = Form(...),
+                            db=Depends(get_db),
+                            username=Depends(manager)):
+
+    # WIP - I want to change it such that my
+    # page will ingest and remain in the original page
 
     return RedirectResponse(
         f"/{username.get('UserName')}/main",
         status_code=status.HTTP_302_FOUND)
 
 
-@ app.post("/delete_books", response_class=HTMLResponse)
+@app.post("/delete_books", response_class=HTMLResponse)
 async def delete_books(bids: list = Form(...),
                        db=Depends(get_db),
                        username=Depends(manager)):
@@ -613,7 +623,7 @@ async def delete_books(bids: list = Form(...),
                             status_code=status.HTTP_302_FOUND)
 
 
-@ app.get("/htmx_search", response_class=HTMLResponse)
+@app.get("/htmx_search", response_class=HTMLResponse)
 async def htmx_search_books(request: Request,
                             book_search: Optional[str] = None,
                             author: Optional[str] = None,
@@ -705,7 +715,101 @@ async def htmx_search_books(request: Request,
     })
 
 
-@ app.get("/{username}/m_search/", response_class=HTMLResponse)
+@app.get("/htmx_search_v2", response_class=HTMLResponse)
+async def htmx_search_books_v2(request: Request,
+                               book_search: Optional[str] = None,
+                               author: Optional[str] = None,
+                               next_page: Optional[str] = None,
+                               db=Depends(get_db),
+                               username=Depends(manager)):
+
+    """ Calls NLB Search API and pushes the results as a search_table.html"""
+
+    final_response = list()
+
+    keyword_search = None
+
+    if book_search:
+        keyword_search = book_search
+    elif author:
+        keyword_search = author
+
+    if keyword_search:
+        keyword_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', keyword_search)
+        books = nlb_rest_api.get_rest_nlb_api_v2(
+            "SearchTitles", input=keyword_search)
+
+        search_params = dict()
+        search_params['title'] = book_search
+        search_params['author'] = author
+
+        m_db.mg_user_search_tracking(db,
+                                     table="user_search",
+                                     username=username.get("UserName"),
+                                     search_params=search_params)
+
+        elist = [400, 404, 500, 401, 405, 429]
+
+        if books.get("statusCode") in elist:
+            return templates.TemplateResponse("search_table.html", {
+                "request": request,
+                "keyword": book_search,
+                "author": author,
+                "username": username.get("UserName"),
+                "api_data": final_response,
+            })
+
+        else:
+            all_books = nlb_rest_api.process_new_search_all(books)
+
+            if books.get("hasMoreRecords"):
+                try:
+                    for offset in [20, 40, 60, 80, 100, 120, 140]:
+                        books = nlb_rest_api.get_rest_nlb_api_v2(
+                            "SearchTitles", input=keyword_search,
+                            offset=offset)
+                        all_books += nlb_rest_api.process_new_search_all(books)
+                except Exception:
+                    pass
+
+            if author != keyword_search:
+                all_books = nlb_rest_api.filter_for_author(all_books, author)
+
+            # Search user book BIDs and
+            # disable add books for books already saved by user
+            user_books = m_db.mg_query_user_bookmarked_books(
+                db=db, username=username.get("UserName"))
+
+            user_books_bids = [i.get("BID") for i in user_books]
+
+            for i in all_books:
+                try:
+                    i['TitleName'] = i['TitleName'].split(
+                        " / ")[0].strip() + " | " + str(i['BID'])
+
+                    i['PublishYear'] = "Y" + i['PublishYear']
+
+                    disable = "disabled" if str(
+                        i['BID']) in user_books_bids else ""
+
+                    i['BID'] = disable + " | " + str(i["BID"])
+
+                    final_response.append(i)
+
+                except Exception:
+                    pass
+
+    return templates.TemplateResponse("search_table.html", {
+        "request": request,
+        "keyword": book_search,
+        "author": author,
+        "next_page": next_page,
+        "username": username.get("UserName"),
+        "api_data": final_response,
+    })
+
+
+@app.get("/{username}/m_search/", response_class=HTMLResponse)
 async def m_search_books(request: Request,
                          book_search: Optional[str] = None,
                          author: Optional[str] = None,
@@ -725,7 +829,7 @@ async def m_search_books(request: Request,
     })
 
 
-@ app.get("/{username}/m_profile", response_class=HTMLResponse)
+@app.get("/{username}/m_profile", response_class=HTMLResponse)
 async def user_m_profile(request: Request,
                          db=Depends(get_db),
                          username=Depends(manager)):
@@ -758,7 +862,7 @@ async def user_m_profile(request: Request,
     })
 
 
-@ app.post("/update_user/{username}", response_class=HTMLResponse)
+@app.post("/update_user/{username}", response_class=HTMLResponse)
 async def update_user(request: Request,
                       email_address: str = Form(None),
                       preferred_lib: str = Form(None),
@@ -784,10 +888,143 @@ async def update_user(request: Request,
                             status_code=status.HTTP_302_FOUND)
 
 
-@ app.post("/delete_user/{username}", response_class=HTMLResponse)
+@app.post("/delete_user/{username}", response_class=HTMLResponse)
 async def delete_user(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
     m_db.mg_delete_user(db, username=username.get("UserName"))
     return RedirectResponse("/logout", status_code=status.HTTP_302_FOUND)
+
+
+lib_locations = ['Ang Mo Kio Public Library', 'Bedok Public Library',
+                 'Bishan Public Library', 'Bukit Panjang Public Library',
+                 'Cheng San Public Library', 'Choa Chu Kang Public Library',
+                 'Clementi Public Library', 'Geylang East Public Library',
+                 'Jurong Regional Library', 'Jurong West Public Library',
+                 'National Library', 'Online',
+                 'Pasir Ris Public Library', 'Punggol Regional Library',
+                 'Queenstown Public Library', 'Sengkang Public Library',
+                 'Serangoon Public Library', 'Tampines Regional Library',
+                 'The LLiBrary', 'Toa Payoh Public Library',
+                 'Woodlands Regional Library', 'Yishun Public Library',
+                 'library@chinatown', 'library@harbourfront',
+                 'library@orchard']
+
+
+@app.get("/events", response_class=HTMLResponse)
+async def show_events(request: Request,
+                      lib: str = "Online",
+                      db=Depends(get_db),
+                      username=Depends(manager)):
+
+    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
+    today = str(datetime.now().date())
+
+    final_output = list()
+    for events in lib_events:
+        event_date = events.get('start').split("T")[0]
+        if event_date >= today:
+            final_output.append(events)
+
+    return templates.TemplateResponse("m_lib_events.html", {
+        "request": request,
+        "username": username.get("UserName"),
+        "lib_events": final_output,
+        "total_records": len(final_output),
+        'lib_locations': lib_locations,
+        "selected_lib": lib
+    })
+
+
+# Functions that are useful for pagination
+ITEMS_PER_PAGE = 15
+
+
+def calculate_total_pages(total_records: int) -> int:
+    # Ceiling division to get the total pages
+    return -(-total_records // ITEMS_PER_PAGE)
+
+
+def get_pagination_links(page: int, total_pages: int):
+    previous_page = max(page - 1, 1) if page > 1 else None
+    next_page = min(page + 1, total_pages) if page < total_pages else None
+
+    return {
+        "previous_page": previous_page,
+        "next_page": next_page,
+        "total_pages": total_pages,
+        "current_page": page,
+    }
+
+
+@app.get("/lib_events_base", response_class=HTMLResponse)
+async def show_library_events(request: Request,
+                              page: int = 1,
+                              lib: str = "Online",
+                              db=Depends(get_db),
+                              username=Depends(manager)):
+
+    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
+    today = str(datetime.now().date())
+
+    final_output = list()
+    for events in lib_events:
+        event_date = events.get('start').split("T")[0]
+        if event_date >= today:
+            final_output.append(events)
+
+    start_index = (page - 1) * ITEMS_PER_PAGE
+    end_index = start_index + ITEMS_PER_PAGE
+
+    total_records = len(final_output)
+    records = final_output[start_index: end_index]
+    total_pages = calculate_total_pages(len(final_output))
+    pagination_links = get_pagination_links(page, total_pages)
+
+    return templates.TemplateResponse("m_lib_events.html", {
+        "request": request,
+        "username": username.get("UserName"),
+        "lib_events": records,
+        "pagination": pagination_links,
+        "total_records": total_records,
+        'lib_locations': lib_locations,
+        "selected_lib": lib
+    })
+
+
+@app.get("/lib_events", response_class=HTMLResponse)
+async def show_lib_events(request: Request,
+                          lib: str,
+                          page: int = 1,
+                          db=Depends(get_db),
+                          username=Depends(manager)):
+
+    # Filter for online events first
+    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
+    today = str(datetime.now().date())
+
+    final_output = list()
+    for events in lib_events:
+        event_date = events.get('start').split("T")[0]
+        if event_date >= today:
+            final_output.append(events)
+
+    start_index = (page - 1) * ITEMS_PER_PAGE
+    end_index = start_index + ITEMS_PER_PAGE
+
+    total_records = len(final_output)
+
+    records = final_output[start_index: end_index]
+    total_pages = calculate_total_pages(len(final_output))
+    pagination_links = get_pagination_links(page, total_pages)
+
+    return templates.TemplateResponse("m_lib_events_table.html", {
+        "request": request,
+        "username": username.get("UserName"),
+        "lib_events": records,
+        "pagination": pagination_links,
+        "total_records": total_records,
+        'lib_locations': lib_locations,
+        "selected_lib": lib
+    })

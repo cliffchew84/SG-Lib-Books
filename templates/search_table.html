@@ -38,4 +38,12 @@
             </tbody>
         </table>
     </form>
+    {% if start_page %}
+    <div class="items-center justify-center">
+        <button hx-get="/navigate_search" hx-target='.search_table' hx_indicator="#head_spinner"
+            class="hx_indicator italic underline text-blue-800 hover:text-blue-500">Previous</button>
+        <button hx-get="/next_search" hx-target=".search_table" hx_indicator="#head_spinner"
+            class="italic underline text-blue-800 hover:text-blue-500">Next</button>
+    </div>
+    {% endif %}
 </div>
