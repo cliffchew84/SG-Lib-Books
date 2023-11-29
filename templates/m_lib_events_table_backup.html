@@ -1,0 +1,74 @@
+<div x-show="isOpen" class="comment">
+    <div id="lib_events_table">
+        <div class="flex flex-row items-center justify-center space-x-4">
+            <p class="items-start justify-start text-sky-800 font-semibold">Total Events - {{ total_records
+                }}</p>
+
+            <form class="border-sky-700 text-sky-800" hx-target="#lib_events_table" hx-get="/lib_events"
+                hx-indicator='#head-spinner'>
+                <select class="select select-info select-sm max-w-xs border-sky-700 text-sky-800" name='lib'>
+                    <option disabled selected class="text-sky-800">{{ selected_lib|safe }}</option>
+                    {% for lib in lib_locations %}
+                    <option class="text-sky-800" value="{{lib|safe}}">{{ lib|safe }}</option>
+                    {% endfor %}
+                </select>
+                <button class="bg-sky-700 text-white border-white rounded-lg py-1.5 px-3" type="submit">Submit</button>
+            </form>
+
+            <div class="join flex items-center justify-center py-1">
+                <button hx-indicator='#head-spinner' hx-target="#lib_events_table"
+                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page=1"
+                    class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pagination.previous_page == None else '' }}">First</button>
+
+                <button hx-indicator='#head-spinner' hx-target=" #lib_events_table"
+                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.previous_page}}" class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                btn-sm {{ 'btn-disabled' if pagination.previous_page == None else '' }}">«</button>
+
+                <button class="join-item bg-sky-700 hover:bg-sky-500 text-white btn btn-sm" hx-indicator='#head-spinner'
+                    hx-target="#lib_events_table"
+                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.current_page }}">
+                    {{ pagination.current_page }}</button>
+
+                <button hx-indicator='#head-spinner' class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                {{ 'btn-disabled' if pagination.next_page == None else '' }} btn-sm" hx-target="#lib_events_table"
+                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.next_page }}">»</button>
+
+                <button hx-indicator='#head-spinner' class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                {{ 'btn-disabled' if pagination.next_page == None else '' }} btn-sm" hx-target="#lib_events_table"
+                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.total_pages }}">Last</button>
+            </div>
+        </div>
+        <table class="mx-auto table-auto table-sm w-full">
+            <thead>
+                <tr class='bg-sky-700 text-white'>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Category</th>
+                    <th>Event Name</th>
+                </tr>
+            </thead>
+            <tbody id="myTable">
+                {% for events in lib_events %}
+                <tr>
+                    <td>{{ events['lib_filter'] }}</td>
+                    <td>{{ events['start'].split("T")[0] }}</td>
+                    <td>{{ events['end_day'] }}</td>
+                    <td>
+                        {{ events['start'].split("T")[-1][:-3].replace(":", "") }}-{{
+                        events['end'].split("T")[-1][:-3].replace(":", "") }}
+                    </td>
+                    <td>{{ events['category'] }}</td>
+                    <td>
+                        <a href="{{ events['url'] }}" class="button text-blue-800 font-semibold my-2 underline"
+                            target="_blank" rel="noopener
+                            noreferrer">{{ events['name'] }}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

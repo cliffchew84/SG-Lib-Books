@@ -185,6 +185,10 @@ def mg_query_user_books(db, username: str):
     return [i for i in user_books]
 
 
+def mg_query_lib_events_by_lib(db, library: str):
+    return db.lib_events.find({"lib_filter": library}, {"_id": 0})
+
+
 # EventTracking
 def mg_event_tracking(db, table, username: str, event_name: str):
     """ Tracks the timestamp of an event"""

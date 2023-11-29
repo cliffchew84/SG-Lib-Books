@@ -36,9 +36,12 @@
             </button>
         </form>
 
-        <div class="flex justify-center mx-auto pt-2 px-2">
+        <div class="flex justify-center mx-auto pt-2 px-2 md:w-3/4 w-full">
             <p class='mx-auto flex justify-center text-sm italic pt-2 px-2'>
-                *Search using ISBN OR book title with author for better results
+                *Currently, Search is directly from NLB, and it isn't good.
+                I would advise to search with ISBN OR book titles with author for
+                specific books. I am trying to see how I can make this NLB search
+                function workable.
             </p>
         </div>
     </div>
@@ -50,6 +53,7 @@
 
         {% endif %}
 
+        <!-- Search Results -->
         <div class="search_table"></div>
     </div>
 
