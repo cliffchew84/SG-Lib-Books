@@ -26,7 +26,7 @@ def process_rest_bk_info(nlb_input: Dict) -> Dict:
 def process_single_bk_avail(lib_record: List[Dict]) -> Dict:
     """ Process a single lib record to keep what I want"""
     output = dict()
-    item_list = ['ItemNo', 'BranchName', 'CallNumber', 'StatusDesc', 'DueDate']
+    item_list = set(['ItemNo', 'BranchName', 'CallNumber', 'StatusDesc', 'DueDate'])
     for items in lib_record:
         if items in item_list:
             output.update({items: lib_record[items]})
@@ -86,10 +86,7 @@ def get_title_process(api_input) -> List[Dict]:
         tmp_dict['Author'] = i.get('author')
         tmp_dict['BID'] = i.get('brn')
         tmp_dict['PublishYear'] = i.get('publishDate')
-        try:
-            tmp_dict["type"] = i.get('format').get('name')
-        except Exception:
-            tmp_dict["type"] = None
+        tmp_dict["type"] = i.get('format', None).get('name', None)
 
         main_list.append(tmp_dict)
 
@@ -99,8 +96,8 @@ def get_title_process(api_input) -> List[Dict]:
 def process_rest_single_lib_avail_v2(nlb_input: Dict):
     """ Process a single book availability from NLB rest API """
     output = dict()
-    output['ItemNo'] = nlb_input['itemId']
-    output['CallNumber'] = nlb_input['callNumber']
+    output['ItemNo'] = nlb_input.get('itemId')
+    output['CallNumber'] = nlb_input.get('callNumber')
     output['BranchName'] = nlb_input.get('location').get("name")
     output['StatusDesc'] = nlb_input.get('transactionStatus').get("name")
     if output['StatusDesc'] == "On Loan":
@@ -110,7 +107,7 @@ def process_rest_single_lib_avail_v2(nlb_input: Dict):
         output['DueDate'] = None
 
     output.update({"InsertTime": pendulum.now().int_timestamp})
-    output['BID'] = str(nlb_input['brn'])
+    output['BID'] = str(nlb_input.get('brn'))
     return output
 
 
@@ -120,7 +117,7 @@ def process_rest_all_lib_avail_v2(nlb_input: List[Dict]):
 
 
 def process_new_search(single_search_record: List[Dict]) -> List[Dict]:
-    final_output = list()
+    final_output = []
 
     # Get title and author of book
     record_title = single_search_record.get("title").split(" | ")[0]
@@ -140,7 +137,7 @@ def process_new_search(single_search_record: List[Dict]) -> List[Dict]:
 
 
 def process_new_search_all(all_search_record: Dict) -> List[Dict]:
-    all_page_search_books = list()
+    all_page_search_books = []
     for book in all_search_record.get("titles"):
         single_title_result = process_new_search(book)
         all_page_search_books += single_title_result
@@ -152,13 +149,12 @@ def filter_for_author(books: List[Dict], author: str) -> List[Dict]:
     """ Temp filter for author name, as the new API doesn't
         allow direct author query
     """
-    final_books = list()
+    final_books = []
+    author_lower = author.lower()
     for book in books:
-        try:
-            if author.lower() in book.get("Author").lower():
-                final_books += [book]
-        except Exception:
-            pass
+        book_author = book.get("Author", None)
+        if book_author is not None and author_lower in book_author.lower():
+            final_books.append(book)
 
     return final_books
 
@@ -181,14 +177,14 @@ def get_eresource_info(title=None, creator=None):
                             headers=headers,
                             params=payload).json()
 
-    else:
-        return {"results": "Please provide a Title or Creator"}
+    return {"results": "Please provide a Title or Creator"}
 
 
 def process_eresource_info(raw_bks: List[Dict]) -> List[Dict]:
     """ Get eResource book availability """
 
     all_books = []
+    needed_parameters = set(['title', 'authors', 'resourceUrlExt', 'isbns'])
 
     # Loop through all books
     for raw_bk in raw_bks:
@@ -196,16 +192,17 @@ def process_eresource_info(raw_bks: List[Dict]) -> List[Dict]:
         single_bk = dict()
         for i in raw_bk:
             # Parameters needed for
-            if i in ['title', 'authors', 'resourceUrlExt', 'isbns']:
-                if i == 'authors':
-                    to_include = " | ".join(raw_bk[i])
-                elif i == "isbns":
-                    to_include = " | ".join(
-                        [''.join(filter(str.isdigit, i)) for i in raw_bk[i]])
-                else:
-                    to_include = raw_bk[i]
-                # Combining needed book parameters into single dict
-                single_bk.update({i: to_include})
+            if i not in needed_parameters:
+                continue
+            if i == 'authors':
+                to_include = " | ".join(raw_bk[i])
+            elif i == "isbns":
+                to_include = " | ".join(
+                    [''.join(filter(str.isdigit, i)) for i in raw_bk[i]])
+            else:
+                to_include = raw_bk[i]
+            # Combining needed book parameters into single dict
+            single_bk.update({i: to_include})
 
         # Combine all book results into a single list
         all_books.append(single_bk)
