@@ -65,6 +65,7 @@ def get_rest_nlb_api_v2(extension_url: str,
     return requests.get(final_url, headers=headers, params=payload).json()
 
 
+# 29th Nov latest GetTitles API used for Search
 def get_rest_title(input_dict: Dict,
                    offset=None,
                    app_id: str = APPLICATION_ID,
@@ -202,3 +203,16 @@ def get_eresource_avail(isbn: str):
     payload = {"idtype": 'ISBN', 'id': isbn}
 
     return requests.get(url, headers=headers, params=payload).json()
+
+
+def process_single_eresource_avail(raw_bk: Dict) -> Dict:
+    """ Additional eResource availability data to include into eResource info
+    """
+
+    output_bk = dict()
+    output_bk['total'] = raw_bk.get('totalCopies')
+    output_bk['available'] = raw_bk.get('available')
+    output_bk['avail_copies'] = raw_bk.get('totalAvailableCopies')
+    output_bk['reserved_copies'] = raw_bk.get('totalReservationCopies')
+
+    return output_bk

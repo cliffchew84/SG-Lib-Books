@@ -30,8 +30,9 @@
                     {% set TitleName, BID = data['TitleName'].split(' | ') %}
                     <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
                             class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
-                            noreferrer">{{ TitleName }}</a>
-
+                            noreferrer">{{ TitleName }}
+                        </a>
+                    </td>
                     <td>{{ data['Author']}}</td>
                     <td>{{ data['PublishYear'] }}</td>
                 </tr>

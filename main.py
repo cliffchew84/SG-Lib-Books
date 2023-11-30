@@ -630,7 +630,7 @@ async def htmx_search_books(request: Request,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
-    """ Calls NLB Search API and pushes the results as a search_table.html"""
+    """ Calls new GetTitles Search and show results in search_table.html"""
 
     final_response = list()
     search_input = dict()
@@ -673,48 +673,41 @@ async def htmx_search_books(request: Request,
 
         else:
             all_titles = nlb_rest_api.get_title_process(titles)
+            more_records = titles.get("hasMoreRecords")
+            offset = titles.get("nextRecordsOffset")
 
-            if titles.get("hasMoreRecords"):
-                try:
-                    for offset in [20, 40, 60, 80, 100, 120, 140]:
-                        titles = nlb_rest_api.get_rest_title(
-                            input_dict=search_input, offset=offset)
-                        all_titles += nlb_rest_api.get_title_process(
-                            titles)
-                except Exception:
-                    pass
+            # WIP - Limit to just 140 records for now.
+            # To update once I have pagination set up properly
+            while more_records and offset <= 140:
+                titles = nlb_rest_api.get_rest_title(
+                    input_dict=search_input, offset=offset)
+                all_titles += nlb_rest_api.get_title_process(titles)
+
+                more_records = titles.get("hasMoreRecords")
+                offset = titles.get("nextRecordsOffset")
 
             # Only keep physical books for now
-            books_only = []
-            for title in all_titles:
-                if title['type'] == "Book":
-                    books_only.append(title)
+            books_only = [t for t in all_titles if t['type'] == "Book"]
 
-            # Search user book BIDs and
-            # disable add books for books already saved by user
+            # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
-            user_books_bids = [i.get("BID") for i in user_books]
+            bid_checks = [i.get("BID") for i in user_books]
 
-            for i in books_only:
-                try:
-                    i['TitleName'] = i['TitleName'].split(
-                        " / ")[0].strip() + " | " + str(i['BID'])
+            for book in books_only:
+                bid = str(book.get('BID'))
+                title = book.get("TitleName")
+                title = title if title is not None else ""
+                title = title.split(" / ")[0].strip()
 
-                    i['PublishYear'] = "Y" + i['PublishYear']
+                # Enable disable button if book is already saved
+                disable = "disabled" if bid in bid_checks else ""
 
-                    disable = "disabled" if str(
-                        i['BID']) in user_books_bids else ""
+                book['TitleName'] = title + " | " + bid
+                book['BID'] = disable + " | " + bid
 
-                    i['BID'] = disable + " | " + str(i["BID"])
-
-                    final_response.append(i)
-
-                except Exception:
-                    pass
-
-            print(final_response)
+                final_response.append(book)
 
     return templates.TemplateResponse("search_table.html", {
         "request": request,
