@@ -26,7 +26,8 @@ def process_rest_bk_info(nlb_input: Dict) -> Dict:
 def process_single_bk_avail(lib_record: List[Dict]) -> Dict:
     """ Process a single lib record to keep what I want"""
     output = dict()
-    item_list = set(['ItemNo', 'BranchName', 'CallNumber', 'StatusDesc', 'DueDate'])
+    item_list = set(
+        ['ItemNo', 'BranchName', 'CallNumber', 'StatusDesc', 'DueDate'])
     for items in lib_record:
         if items in item_list:
             output.update({items: lib_record[items]})
@@ -160,63 +161,44 @@ def filter_for_author(books: List[Dict], author: str) -> List[Dict]:
 
 
 # eResource
-def get_eresource_info(title=None, creator=None):
-    """ Get eResource book info """
-    eresource_url = "https://openweb.nlb.gov.sg/api/v1/EResource"
+def get_eresource_info(input_dict: Dict) -> List[Dict]:
+    """ Get eResource book info, using dictionary
+        with keys of either 'title', 'creator' or both
+
+        Issue - There are books with missing isbns records from the DB
+        Hence, I need keep more relevant data from this API call later on.
+    """
+    url = "https://openweb.nlb.gov.sg/api/v1/EResource/SearchResources"
     headers = authenticate_into_nlb_rest(APPLICATION_ID, API_KEY)
-    payload = {"contenttype": 'eBooks', 'limit': 100}
+    input_dict.update({"contenttype": 'eBooks', 'limit': 100})
 
-    if title:
-        payload.update({"title": title})
-
-    if creator:
-        payload.update({"creator": creator})
-
-    if title or creator:
-        return requests.get(eresource_url + "/SearchResources",
-                            headers=headers,
-                            params=payload).json()
-
-    return {"results": "Please provide a Title or Creator"}
+    return requests.get(url, headers=headers, params=input_dict).json()
 
 
-def process_eresource_info(raw_bks: List[Dict]) -> List[Dict]:
-    """ Get eResource book availability """
+def process_single_eresource_info(raw_bk: Dict) -> Dict:
+    """ Process required eResource book data to get a list of isbns
 
-    all_books = []
-    needed_parameters = set(['title', 'authors', 'resourceUrlExt', 'isbns'])
+    - isbns are needed to make extra API calls to get eResource availabilities
+    - Need to keep other details as I found records with missing isbns
+    """
 
-    # Loop through all books
-    for raw_bk in raw_bks:
-        # Single book process
-        single_bk = dict()
-        for i in raw_bk:
-            # Parameters needed for
-            if i not in needed_parameters:
-                continue
-            if i == 'authors':
-                to_include = " | ".join(raw_bk[i])
-            elif i == "isbns":
-                to_include = " | ".join(
-                    [''.join(filter(str.isdigit, i)) for i in raw_bk[i]])
-            else:
-                to_include = raw_bk[i]
-            # Combining needed book parameters into single dict
-            single_bk.update({i: to_include})
+    # Single book process
+    single_bk = dict()
+    single_bk['title'] = raw_bk['title'].replace(
+        " [electronic resource] ", " ")
+    single_bk['url'] = raw_bk['resourceUrlExt']
+    single_bk['authors'] = " | ".join(raw_bk['authors'])
+    single_bk['isbns'] = " | ".join(
+        [''.join(filter(str.isdigit, i)) for i in raw_bk["isbns"]])
 
-        # Combine all book results into a single list
-        all_books.append(single_bk)
-
-    return all_books
+    # Combine all book results into a single list
+    return single_bk
 
 
 def get_eresource_avail(isbn: str):
-    """ Get book availability based on isbn """
-
-    base_url = "https://openweb.nlb.gov.sg/api/v1/EResource"
+    """ Get eResource availability by ISBN """
+    url = "https://openweb.nlb.gov.sg/api/v1/EResource/GetAvailabilityInfo"
     headers = authenticate_into_nlb_rest(APPLICATION_ID, API_KEY)
     payload = {"idtype": 'ISBN', 'id': isbn}
 
-    return requests.get(base_url + "/GetAvailabilityInfo",
-                        headers=headers,
-                        params=payload).json()
+    return requests.get(url, headers=headers, params=payload).json()
