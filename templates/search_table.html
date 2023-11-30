@@ -19,19 +19,34 @@
                 <tr>
                     {% set disable, BID = data['BID'].split(' | ') %}
                     <td class="flex justify-center items-center">
+                        {% if data['type'] == "Book" %}
                         <div class="pt-1 flex items-center">
                             <label>
                                 <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
                                     name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
                             </label>
                         </div>
+                        {% endif %}
                     </td>
 
                     {% set TitleName, BID = data['TitleName'].split(' | ') %}
-                    <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                    <td>
+                        {% if data['type'] == "Book" %}
+                        <i class="fas fa-book text-sky-800"></i>
+                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
                             class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
-                            noreferrer">{{ TitleName }}
+                                noreferrer">{{ TitleName }}
                         </a>
+
+                        {% elif data['type'] == "Ebook" %}
+
+                        <i class="fas fa-tablet-alt"></i>
+                        <a href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
+                            class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
+                                noreferrer">{{ TitleName }}
+                        </a>
+                        {% endif %}
+
                     </td>
                     <td>{{ data['Author']}}</td>
                     <td>{{ data['PublishYear'] }}</td>

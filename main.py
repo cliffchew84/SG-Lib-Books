@@ -627,6 +627,7 @@ async def delete_books(bids: list = Form(...),
 async def htmx_search_books(request: Request,
                             book_search: Optional[str] = None,
                             author: Optional[str] = None,
+                            books_only=True,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
@@ -687,7 +688,8 @@ async def htmx_search_books(request: Request,
                 offset = titles.get("nextRecordsOffset")
 
             # Only keep physical books for now
-            books_only = [t for t in all_titles if t['type'] == "Book"]
+            if books_only:
+                all_titles = [t for t in all_titles if t['type'] == "Book"]
 
             # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -695,8 +697,11 @@ async def htmx_search_books(request: Request,
 
             bid_checks = [i.get("BID") for i in user_books]
 
-            for book in books_only:
-                bid = str(book.get('BID'))
+            for book in all_titles:
+                bid = book.get('BID') if book.get(
+                    'DigitalID') is None else book.get('DigitalID')
+                bid = str(bid)
+
                 title = book.get("TitleName")
                 title = title if title is not None else ""
                 title = title.split(" / ")[0].strip()
@@ -708,6 +713,8 @@ async def htmx_search_books(request: Request,
                 book['BID'] = disable + " | " + bid
 
                 final_response.append(book)
+
+            print(final_response)
 
     return templates.TemplateResponse("search_table.html", {
         "request": request,

@@ -87,6 +87,7 @@ def get_title_process(api_input) -> List[Dict]:
         tmp_dict['TitleName'] = i.get('title')
         tmp_dict['Author'] = i.get('author')
         tmp_dict['BID'] = i.get('brn')
+        tmp_dict['DigitalID'] = i.get('digitalId')
         tmp_dict['PublishYear'] = i.get('publishDate')
         tmp_dict["type"] = i.get('format', None).get('name', None)
 
