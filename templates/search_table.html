@@ -1,6 +1,8 @@
 <div class="search_table overflow-x-auto h-screen">
-    <form method="POST" action="/ingest_books">
-        <table class="table table-pin-rows w-full table-sm">
+    <!-- <form method="POST" action="/ingest_books"> -->
+    <form id="myForm" hx-post="/ingest_books_navbar" hx-indicator="#head-spinner" hx-target="#header"
+        hx-swap="outerHTML">
+        <table class="small_search_table table table-pin-rows w-full table-sm">
             <thead class='rounded-lg'>
                 <tr class='bg-sky-700 text-white rounded-lg'>
                     <th class="flex justify-center items-center">
@@ -38,6 +40,7 @@
                                 noreferrer">{{ TitleName }}
                         </a>
 
+                        <!-- Not showing this yet -->
                         {% elif data['type'] == "Ebook" %}
 
                         <i class="fas fa-tablet-alt"></i>
@@ -64,3 +67,19 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevents the form from submitting normally
+
+        // Get all checkboxes inside the form
+        var checkboxes = this.querySelectorAll('input[type="checkbox"]');
+
+        // Loop through checkboxes
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                checkbox.disabled = true; // Disable the checked checkboxes
+            }
+        });
+    });
+</script>

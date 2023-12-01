@@ -369,39 +369,26 @@ def process_user_book_data(db, username: str):
     response = []
 
     for a in query:
+        bid = a.get("BID")
+        title = a.get("TitleName").split("/")[0]
+
+        due_date = None
         if a.get("DueDate"):
             tmp_date = a.get("DueDate").split("T")[0]
-
-            try:
-                input_date = datetime.strptime(tmp_date, "%Y-%m-%d")
-
-            except Exception:
-                input_date = datetime.strptime(tmp_date, "%d/%m/%Y")
-
+            input_date = datetime.strptime(tmp_date, "%Y-%m-%d")
             due_date = input_date.strftime("%d/%m")
-
-        else:
-            due_date = None
 
         update_time = datetime.fromtimestamp(
             a.get("InsertTime"), pendulum.timezone("Asia/Singapore")
         ).strftime("%d/%m %H:%M")
 
-        if "Not" in a.get("StatusDesc"):
-            status = "Available"
-        elif "Loan" in a.get("StatusDesc"):
-            status = "Loan"
-        elif "Transit" in a.get("StatusDesc"):
-            status = "Transit"
-        elif "Reference" in a.get("StatusDesc"):
-            status = "Reference"
-        else:
-            status = a.get("StatusDesc")
+        raw_status = a.get("StatusDesc")
+        status = re.findall('Not Loan|Loan|Reference|Transit|$', raw_status)[0]
+        status = "Available" if status == "Not Loan" else status
+        status = raw_status if status == "" else status
 
-        if due_date is None:
-            final_status = status
-        else:
-            final_status = status + '[' + str(due_date) + ']'
+        if due_date is not None:
+            status = status + '[' + str(due_date) + ']'
 
         if "Lifelong Learning" in a.get("BranchName"):
             library = "Lifelong Learning Institute"
@@ -413,11 +400,10 @@ def process_user_book_data(db, username: str):
             library = a.get("BranchName")
 
         response.append({
-            "TitleName": a.get('TitleName'
-                               ).split("/")[0] + ' | ' + a.get("BID"),
+            "TitleName": title + ' | ' + bid,
             "BranchName": library,
             "CallNumber": a.get("CallNumber").split(" -")[0],
-            "StatusDesc": final_status,
+            "StatusDesc": status,
             "UpdateTime": update_time,
             "BID": a.get("BID")})
 
@@ -560,6 +546,44 @@ async def m_update_user_current_books(background_tasks: BackgroundTasks,
                             status_code=status.HTTP_302_FOUND)
 
 
+# Experimental navbar updates
+@app.post("/ingest_books_navbar", response_class=HTMLResponse)
+async def ingest_books_navbar(request: Request,
+                              bids: list = Form(...),
+                              db=Depends(get_db),
+                              username=Depends(manager)):
+
+    for bid in bids:
+        BID = str(bid)
+        # Makes API to bk info and bk avail and ingest the data into DB
+        m_db.mg_add_user_book(db=db,
+                              username=username.get("UserName"),
+                              bid_no=BID)
+
+        bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
+        update_bk_avail_in_mongo(db, BID)
+
+        # Update the books calculation on the navbar
+        response = process_user_book_data(
+            db=db, username=username.get("UserName"))
+
+        # Processing necessary statistics
+        all_unique_books = process.process_all_unique_books(response)
+        all_avail_books = process.process_all_avail_books(response)
+        all_unique_lib = process.process_all_unique_lib(response)
+        all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+        lib_book_summary = process.process_lib_book_summary(
+            all_unique_lib, all_avail_bks_by_lib)
+
+    return templates.TemplateResponse("m_navbar.html", {
+        "request": request,
+        "username": username.get("UserName"),
+        'all_avail_books': all_avail_books,
+        'all_unique_books': all_unique_books,
+        'lib_book_summary': lib_book_summary,
+    })
+
+
 @app.post("/ingest_books", response_class=HTMLResponse)
 async def ingest_books(bids: list = Form(...),
                        db=Depends(get_db),
@@ -574,19 +598,6 @@ async def ingest_books(bids: list = Form(...),
 
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
         update_bk_avail_in_mongo(db, BID)
-
-    return RedirectResponse(
-        f"/{username.get('UserName')}/main",
-        status_code=status.HTTP_302_FOUND)
-
-
-@app.post("/ingest_books_v2", response_class=HTMLResponse)
-async def ingest_books_stay(bids: list = Form(...),
-                            db=Depends(get_db),
-                            username=Depends(manager)):
-
-    # WIP - I want to change it such that my
-    # page will ingest and remain in the original page
 
     return RedirectResponse(
         f"/{username.get('UserName')}/main",
@@ -656,7 +667,7 @@ async def htmx_search_books(request: Request,
                                      username=username.get("UserName"),
                                      search_params=search_params)
 
-        bad_result = templates.TemplateResponse("search_table.html", {
+        empty_table_result = templates.TemplateResponse("search_table.html", {
             "request": request,
             "keyword": book_search,
             "author": author,
@@ -667,10 +678,10 @@ async def htmx_search_books(request: Request,
         elist = [400, 404, 500, 401, 405, 429]
 
         if titles.get("statusCode") in elist:
-            return bad_result
+            return empty_table_result
 
         elif titles.get("totalRecords") == 0:
-            return bad_result
+            return empty_table_result
 
         else:
             all_titles = nlb_rest_api.get_title_process(titles)
@@ -853,7 +864,7 @@ async def show_events(request: Request,
     })
 
 
-# Functions that are useful for pagination
+# Functions useful for pagination
 ITEMS_PER_PAGE = 15
 
 
