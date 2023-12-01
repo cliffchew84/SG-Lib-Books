@@ -1,36 +1,43 @@
 <div class='main_content'>
     <div class='items-center justify-center px-2 h-full'>
-        <form method="GET" class="join form-inline flex items-center justify-center" hx-target="next .search_table"
-            hx-get="/htmx_search" hx-indicator="#head-spinner">
+        <form method="GET" hx-target="next .search_table" hx-get="/htmx_search" hx-indicator="#head-spinner">
 
-            {% if keyword %}
-            <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
-                class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-                value="{{keyword|safe}}" />
+            <div class="flex justify-center items-center space-x-2 pt-2 ">
+                <input type="checkbox" id="e_resources" name="e_resources" value="True"
+                    class="checkbox checkbox-info hover:bg-sky-500 border-sky-500">
+                <label for="e_resources">Include eResources</label>
+            </div>
 
-            {% else %}
+            <div class="join form-inline flex items-center justify-center">
+                {% if keyword %}
+                <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
+                    class="join-item flex mt-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+                    value="{{keyword|safe}}" />
 
-            <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
-                class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
+                {% else %}
 
-            {% endif %}
+                <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
+                    class="join-item flex mt-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
-            {% if author%}
-            <input placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}"
-                class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
+                {% endif %}
 
-            {% else %}
+                {% if author %}
+                <input placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}"
+                    class="join-item flex mt-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
-            <input placeholder="Author (Optional)" type="search" id="author" name="author"
-                class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
+                {% else %}
 
-            {% endif %}
+                <input placeholder="Author (Optional)" type="search" id="author" name="author"
+                    class="join-item flex mt-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
-            <!--Search button-->
-            <button type="submit" class="join-item flex items-center bg-sky-700 mt-4 px-2 py-2 rounded-lg 
+                {% endif %}
+
+                <!--Search button-->
+                <button type="submit" class="join-item flex items-center bg-sky-700 mt-2 px-2 py-2 rounded-lg 
             hover:text-white hover:bg-sky-500 text-white">
-                <i class="fas fa-search"></i>
-            </button>
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
         </form>
 
         <div class="flex flex-col justify-center mx-auto pt-2 px-2 md:w-3/4 w-full">
