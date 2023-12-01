@@ -1,7 +1,33 @@
-<div class="search_table overflow-x-auto h-screen">
-    <form method="POST" action="/ingest_books">
-        <table class="table table-pin-rows w-full table-sm">
-            <thead class='rounded-lg'>
+<div id="small_search_table" class="search_table overflow-x-auto">
+    {% if offset_links %}
+    <div class="join flex items-center justify-center">
+        <button hx-indicator='#head-spinner' hx-target="#small_search_table"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset=30" hx-swap="outerHTML"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
+            First</button>
+
+        <button hx-indicator='#head-spinner' hx-target=" #small_search_table" hx-swap="outerHTML"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.previous }}"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
+            «</button>
+
+        <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm" distabled> {{
+            offset_links.current }} - {{ total_records }}**</button>
+
+        <button hx-indicator='#head-spinner' hx-swap="outerHTML" class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                {{ 'btn-disabled' if offset_links.next == None else '' }} btn-sm" hx-target="#small_search_table"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.next }}">»</button>
+
+        <button hx-indicator='#head-spinner' hx-swap="outerHTML" class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                {{ 'btn-disabled' if offset_links.next == None else '' }} btn-sm" hx-target="#small_search_table"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.last }}">Last</button>
+    </div>
+    {% endif %}
+
+    <form id="myForm" hx-post="/ingest_books_navbar" hx-indicator="#head-spinner" hx-target="#header"
+        hx-swap="outerHTML">
+        <table class="table w-full">
+            <thead>
                 <tr class='bg-sky-700 text-white rounded-lg'>
                     <th class="flex justify-center items-center">
                         <button type="submit" id="submitButton" class="bg-sky-500 px-2 my-1 py-1 rounded-lg 
@@ -19,19 +45,36 @@
                 <tr>
                     {% set disable, BID = data['BID'].split(' | ') %}
                     <td class="flex justify-center items-center">
+                        {% if data['type'] == "Book" %}
                         <div class="pt-1 flex items-center">
                             <label>
                                 <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
                                     name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
                             </label>
                         </div>
+                        {% endif %}
                     </td>
 
                     {% set TitleName, BID = data['TitleName'].split(' | ') %}
-                    <td> <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
+                    <td>
+                        {% if data['type'] == "Book" %}
+                        <i class="fas fa-book text-sky-800"></i>
+                        <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{BID}}&type=bid&app=mylibrary"
                             class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
-                            noreferrer">{{ TitleName }}</a>
+                                noreferrer">{{ TitleName }}
+                        </a>
 
+                        <!-- Not showing this yet -->
+                        {% elif data['type'] == "Ebook" %}
+
+                        <i class="fas fa-tablet-alt"></i>
+                        <a href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
+                            class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
+                                noreferrer">{{ TitleName }}
+                        </a>
+                        {% endif %}
+
+                    </td>
                     <td>{{ data['Author']}}</td>
                     <td>{{ data['PublishYear'] }}</td>
                 </tr>
@@ -39,12 +82,21 @@
             </tbody>
         </table>
     </form>
-    {% if start_page %}
-    <div class="items-center justify-center">
-        <button hx-get="/navigate_search" hx-target='.search_table' hx_indicator="#head_spinner"
-            class="hx_indicator italic underline text-blue-800 hover:text-blue-500">Previous</button>
-        <button hx-get="/next_search" hx-target=".search_table" hx_indicator="#head_spinner"
-            class="italic underline text-blue-800 hover:text-blue-500">Next</button>
-    </div>
-    {% endif %}
 </div>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevents the form from submitting normally
+
+        // Get all checkboxes inside the form
+        var checkboxes = this.querySelectorAll('input[type="checkbox"]');
+
+        // Loop through checkboxes
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                checkbox.disabled = true; // Disable the checked checkboxes
+            }
+        });
+        document.getElementById('submitButton').disabled = true;
+    });
+</script>

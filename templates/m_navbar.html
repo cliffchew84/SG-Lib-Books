@@ -1,4 +1,4 @@
-<header class="mx-auto pt-2 pb-8 bg-sky-700">
+<header id="header" class="mx-auto pt-2 pb-8 bg-sky-700">
     {% if not username %}
 
     <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
@@ -10,7 +10,7 @@
     {% else %}
 
     <!-- Mobile -->
-    <div class="flex justify-between h-2 mx-auto">
+    <div class="flex justify-between h-2 mx-auto" hx-trigger='load'>
         <ul class="menu menu-horizontal mx-1 items-center lg:hidden">
             <div class="dropdown">
                 <label tabindex="0" class="btn btn-ghost lg:hidden text-white hover:text-white">
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Desktop -->
-    <div class="flex justify-between h-8 mx-auto">
+    <div class="flex justify-between h-8 mx-auto" hx-trigger="load">
         <nav class="w-screen flex items-center justify-between py-4">
             <ul class="menu menu-horizontal mx-auto z-50 text-lg text-white items-center hidden lg:flex">
                 <div class="hidden lg:flex">
