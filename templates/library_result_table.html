@@ -29,12 +29,12 @@
             <!-- Title -->
             <td>
                 <div class="inline-block">
-                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{data['BID']}}&type=bid&app=mylibrary"
+                    <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                         class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline"
                         target="_blank" rel="noopener noreferrer">{{
                         data['TitleName'].split(" | ")[0] }}</a>
 
-                    <a href="https://eservice.nlb.gov.sg/item_holding.aspx?id={{data['BID']}}&type=bid&app=mylibrary"
+                    <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                         class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline"
                         target="_blank" rel="noopener noreferrer">{{
                         data['TitleName'].split(" : ")[0] }}</a>
