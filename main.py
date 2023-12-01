@@ -642,8 +642,6 @@ async def htmx_search_books(request: Request,
     """ Calls new GetTitles Search and show results in search_table.html"""
 
     print(e_resources)
-    print(book_search)
-    print(author)
 
     final_response = list()
     search_input = dict()
@@ -693,9 +691,16 @@ async def htmx_search_books(request: Request,
             all_titles = nlb_rest_api.get_title_process(titles)
 
             # Only keep physical books for now
-            if not e_resources:
-                print("I filter away ebooks")
-                all_titles = [t for t in all_titles if t['type'] == "Book"]
+            books = [t for t in all_titles if t['type'] == "Book"]
+
+            if e_resources:
+                print("I am including ebooks")
+                ebooks = [t for t in all_titles if t['type'] == "Ebook"]
+
+                final_titles = books + ebooks
+
+            else:
+                final_titles = books
 
             # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -703,7 +708,7 @@ async def htmx_search_books(request: Request,
 
             bid_checks = [i.get("BID") for i in user_books]
 
-            for book in all_titles:
+            for book in final_titles:
                 bid = book.get('BID') if book.get(
                     'DigitalID') is None else book.get('DigitalID')
                 bid = str(bid)
@@ -729,6 +734,7 @@ async def htmx_search_books(request: Request,
         "total_records": total_records,
         "more_records": more_records,
         "offset_links": offset_links,
+        "e_resources": e_resources
     })
 
 
@@ -737,7 +743,7 @@ async def htmx_paginate_search_books(request: Request,
                                      book_search: Optional[str] = None,
                                      author: Optional[str] = None,
                                      offset: Optional[str] = None,
-                                     e_resources: Optional[str] = Form(...),
+                                     e_resources: Optional[str] = None,
                                      db=Depends(get_db),
                                      username=Depends(manager)):
 
@@ -783,9 +789,16 @@ async def htmx_paginate_search_books(request: Request,
             more_records = titles.get("hasMoreRecords")
 
             # Only keep physical books for now
-            if e_resources != "on":
-                print("I filter away ebooks")
-                all_titles = [t for t in all_titles if t['type'] == "Book"]
+            books = [t for t in all_titles if t['type'] == "Book"]
+
+            if e_resources:
+                print("I am including ebooks")
+                ebooks = [t for t in all_titles if t['type'] == "Ebook"]
+
+                final_titles = books + ebooks
+
+            else:
+                final_titles = books
 
             # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -793,7 +806,7 @@ async def htmx_paginate_search_books(request: Request,
 
             bid_checks = [i.get("BID") for i in user_books]
 
-            for book in all_titles:
+            for book in final_titles:
                 # Prep for eResources in the future
                 bid = book.get('BID') if book.get(
                     'DigitalID') is None else book.get('DigitalID')
@@ -820,6 +833,7 @@ async def htmx_paginate_search_books(request: Request,
         "total_records": total_records,
         "more_records": more_records,
         "offset_links": offset_links,
+        "e_resources": e_resources
     })
 
 
