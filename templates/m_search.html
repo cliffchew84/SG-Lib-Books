@@ -4,28 +4,25 @@
             hx-get="/htmx_search" hx-indicator="#head-spinner">
 
             {% if keyword %}
-            <input
+            <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
                 class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-                placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
                 value="{{keyword|safe}}" />
 
             {% else %}
 
-            <input
-                class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-                placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search" />
+            <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
+                class="join-item flex mt-4 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
+
             {% endif %}
 
-            {% if author %}
-            <input
-                class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-                placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}" />
+            {% if author%}
+            <input placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}"
+                class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
             {% else %}
 
-            <input
-                class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-                placeholder="Author (Optional)" type="search" id="author" name="author" />
+            <input placeholder="Author (Optional)" type="search" id="author" name="author"
+                class="join-item flex mt-4 py-2 md:w-1/4 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
             {% endif %}
 
@@ -36,12 +33,14 @@
             </button>
         </form>
 
-        <div class="flex justify-center mx-auto pt-2 px-2 md:w-3/4 w-full">
-            <p class='mx-auto flex justify-center text-sm italic pt-2 px-2'>
-                *Currently, Search is directly from NLB, and it isn't good.
-                I would advise to search with ISBN OR book titles with author for
-                specific books. I am trying to see how I can make this NLB search
-                function workable.
+        <div class="flex flex-col justify-center mx-auto pt-2 px-2 md:w-3/4 w-full">
+            <p class='mx-auto flex justify-start text-sm italic pt-2 px-2'>
+                *The direct Search from NLB isn't good, and I am trying to improve on it.
+                Use [ISBN] OR [Titles / Author] to get better search results.
+            </p>
+            <p class='mx-auto flex justify-start text-sm italic px-2'>
+                **Current Search drops the eResources found in the results,
+                so search result counts may vary.
             </p>
         </div>
     </div>

@@ -584,26 +584,6 @@ async def ingest_books_navbar(request: Request,
     })
 
 
-@app.post("/ingest_books", response_class=HTMLResponse)
-async def ingest_books(bids: list = Form(...),
-                       db=Depends(get_db),
-                       username=Depends(manager)):
-
-    for bid in bids:
-        BID = str(bid)
-        # Makes API to bk info and bk avail and ingest the data into DB
-        m_db.mg_add_user_book(db=db,
-                              username=username.get("UserName"),
-                              bid_no=BID)
-
-        bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
-        update_bk_avail_in_mongo(db, BID)
-
-    return RedirectResponse(
-        f"/{username.get('UserName')}/main",
-        status_code=status.HTTP_302_FOUND)
-
-
 @app.post("/delete_books", response_class=HTMLResponse)
 async def delete_books(bids: list = Form(...),
                        db=Depends(get_db),
@@ -634,6 +614,24 @@ async def delete_books(bids: list = Form(...),
                             status_code=status.HTTP_302_FOUND)
 
 
+# Items per page for searched books
+ITEMS_PER_PAGE = 1
+items = 30
+
+
+def get_offsets(current: int, next: int, total: int):
+    previous = max(current - items, items) if current > items else None
+    next = next if next != total else None
+    last = items * (total // items)
+
+    return {
+        "previous": previous,
+        "next": next,
+        "last": last,
+        "current": current,
+    }
+
+
 @app.get("/htmx_search", response_class=HTMLResponse)
 async def htmx_search_books(request: Request,
                             book_search: Optional[str] = None,
@@ -657,6 +655,12 @@ async def htmx_search_books(request: Request,
 
     if book_search or author:
         titles = nlb_rest_api.get_rest_title(input_dict=search_input)
+        total_records = titles.get("totalRecords")
+        next_offset = titles.get("nextRecordsOffset")
+        current_offset = titles.get('count')
+
+        offset_links = get_offsets(current_offset, next_offset, total_records)
+        print(offset_links)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -686,17 +690,6 @@ async def htmx_search_books(request: Request,
         else:
             all_titles = nlb_rest_api.get_title_process(titles)
             more_records = titles.get("hasMoreRecords")
-            offset = titles.get("nextRecordsOffset")
-
-            # WIP - Limit to just 140 records for now.
-            # To update once I have pagination set up properly
-            while more_records and offset <= 140:
-                titles = nlb_rest_api.get_rest_title(
-                    input_dict=search_input, offset=offset)
-                all_titles += nlb_rest_api.get_title_process(titles)
-
-                more_records = titles.get("hasMoreRecords")
-                offset = titles.get("nextRecordsOffset")
 
             # Only keep physical books for now
             if books_only:
@@ -725,7 +718,98 @@ async def htmx_search_books(request: Request,
 
                 final_response.append(book)
 
-            print(final_response)
+    return templates.TemplateResponse("search_table.html", {
+        "request": request,
+        "keyword": book_search,
+        "author": author,
+        "username": username.get("UserName"),
+        "api_data": final_response,
+        "total_records": total_records,
+        "more_records": more_records,
+        "offset": current_offset,
+        "offset_links": offset_links,
+    })
+
+
+@app.get("/navigate_search", response_class=HTMLResponse)
+async def htmx_paginate_search_books(request: Request,
+                                     book_search: Optional[str] = None,
+                                     author: Optional[str] = None,
+                                     offset: Optional[str] = None,
+                                     books_only=True,
+                                     db=Depends(get_db),
+                                     username=Depends(manager)):
+
+    """ Calls new GetTitles Search and show results in search_table.html"""
+
+    final_response = list()
+    search_input = dict()
+
+    if book_search:
+        c_book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
+        search_input.update({"Title": c_book_search})
+
+    if author:
+        c_author = re.sub(r'[^a-zA-Z0-9\s]', ' ', author)
+        search_input.update({"Author": c_author})
+
+    if book_search or author:
+        titles = nlb_rest_api.get_rest_title(input_dict=search_input,
+                                             offset=offset)
+        total_records = titles.get("totalRecords")
+        next_offset = titles.get("nextRecordsOffset")
+        current_offset = int(offset)
+
+        offset_links = get_offsets(current_offset, next_offset, total_records)
+        print(offset_links)
+
+        empty_table_result = templates.TemplateResponse("search_table.html", {
+            "request": request,
+            "keyword": book_search,
+            "author": author,
+            "username": username.get("UserName"),
+            "api_data": final_response,
+        })
+
+        elist = [400, 404, 500, 401, 405, 429]
+
+        if titles.get("statusCode") in elist:
+            return empty_table_result
+
+        elif titles.get("totalRecords") == 0:
+            return empty_table_result
+
+        else:
+            all_titles = nlb_rest_api.get_title_process(titles)
+            more_records = titles.get("hasMoreRecords")
+
+            # Only keep physical books for now
+            if books_only:
+                all_titles = [t for t in all_titles if t['type'] == "Book"]
+
+            # Search user book BIDs and disable add book if user saved the book
+            user_books = m_db.mg_query_user_bookmarked_books(
+                db=db, username=username.get("UserName"))
+
+            bid_checks = [i.get("BID") for i in user_books]
+
+            for book in all_titles:
+                # Prep for eResources in the future
+                bid = book.get('BID') if book.get(
+                    'DigitalID') is None else book.get('DigitalID')
+                bid = str(bid)
+
+                title = book.get("TitleName")
+                title = title if title is not None else ""
+                title = title.split(" / ")[0].strip()
+
+                # Enable disable button if book is already saved
+                disable = "disabled" if bid in bid_checks else ""
+
+                book['TitleName'] = title + " | " + bid
+                book['BID'] = disable + " | " + bid
+
+                final_response.append(book)
 
     return templates.TemplateResponse("search_table.html", {
         "request": request,
@@ -733,6 +817,10 @@ async def htmx_search_books(request: Request,
         "author": author,
         "username": username.get("UserName"),
         "api_data": final_response,
+        "total_records": total_records,
+        "more_records": more_records,
+        "offset": current_offset,
+        "offset_links": offset_links,
     })
 
 
@@ -865,26 +953,6 @@ async def show_events(request: Request,
 
 
 # Functions useful for pagination
-ITEMS_PER_PAGE = 15
-
-
-def calculate_total_pages(total_records: int) -> int:
-    # Ceiling division to get the total pages
-    return -(-total_records // ITEMS_PER_PAGE)
-
-
-def get_pagination_links(page: int, total_pages: int):
-    previous_page = max(page - 1, 1) if page > 1 else None
-    next_page = min(page + 1, total_pages) if page < total_pages else None
-
-    return {
-        "previous_page": previous_page,
-        "next_page": next_page,
-        "total_pages": total_pages,
-        "current_page": page,
-    }
-
-
 @app.get("/lib_events_base", response_class=HTMLResponse)
 async def show_library_events(request: Request,
                               page: int = 1,
@@ -906,14 +974,14 @@ async def show_library_events(request: Request,
 
     total_records = len(final_output)
     records = final_output[start_index: end_index]
-    total_pages = calculate_total_pages(len(final_output))
-    pagination_links = get_pagination_links(page, total_pages)
+    # total_pages = calculate_total_pages(len(final_output))
+    # pagination_links = get_page_links(page, total_pages)
 
     return templates.TemplateResponse("m_lib_events.html", {
         "request": request,
         "username": username.get("UserName"),
         "lib_events": records,
-        "pagination": pagination_links,
+        # "pagination": pagination_links,
         "total_records": total_records,
         'lib_locations': lib_locations,
         "selected_lib": lib
@@ -943,14 +1011,14 @@ async def show_lib_events(request: Request,
     total_records = len(final_output)
 
     records = final_output[start_index: end_index]
-    total_pages = calculate_total_pages(len(final_output))
-    pagination_links = get_pagination_links(page, total_pages)
+    # total_pages = calculate_total_pages(len(final_output))
+    # pagination_links = get_page_links(page, total_pages)
 
     return templates.TemplateResponse("m_lib_events_table.html", {
         "request": request,
         "username": username.get("UserName"),
         "lib_events": records,
-        "pagination": pagination_links,
+        # "pagination": pagination_links,
         "total_records": total_records,
         'lib_locations': lib_locations,
         "selected_lib": lib

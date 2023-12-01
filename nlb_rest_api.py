@@ -73,6 +73,9 @@ def get_rest_title(input_dict: Dict,
     """ Makes API call to GetTitles """
     headers = authenticate_into_nlb_rest(app_id, api_key)
     final_url = "https://openweb.nlb.gov.sg/api/v2/Catalogue/GetTitles"
+
+    input_dict.update({"limit": 30})
+
     if offset:
         input_dict.update({"Offset": offset})
 
