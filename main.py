@@ -633,13 +633,17 @@ def pg_links(offset, total):
 
 @app.get("/htmx_search", response_class=HTMLResponse)
 async def htmx_search_books(request: Request,
+                            e_resources: Optional[str] = None,
                             book_search: Optional[str] = None,
                             author: Optional[str] = None,
-                            e_resources: bool = Form(False),
                             db=Depends(get_db),
                             username=Depends(manager)):
 
     """ Calls new GetTitles Search and show results in search_table.html"""
+
+    print(e_resources)
+    print(book_search)
+    print(author)
 
     final_response = list()
     search_input = dict()
@@ -659,7 +663,6 @@ async def htmx_search_books(request: Request,
         more_records = titles.get("hasMoreRecords")
 
         offset_links = pg_links(0, total_records)
-        print(offset_links)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -690,8 +693,6 @@ async def htmx_search_books(request: Request,
             all_titles = nlb_rest_api.get_title_process(titles)
 
             # Only keep physical books for now
-            print(e_resources)
-            print(type(e_resources))
             if not e_resources:
                 print("I filter away ebooks")
                 all_titles = [t for t in all_titles if t['type'] == "Book"]
@@ -736,7 +737,7 @@ async def htmx_paginate_search_books(request: Request,
                                      book_search: Optional[str] = None,
                                      author: Optional[str] = None,
                                      offset: Optional[str] = None,
-                                     e_resources=Form(False),
+                                     e_resources: Optional[str] = Form(...),
                                      db=Depends(get_db),
                                      username=Depends(manager)):
 

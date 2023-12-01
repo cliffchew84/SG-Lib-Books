@@ -47,7 +47,7 @@
                     {% set disable, BID = data['BID'].split(' | ') %}
                     <td class="flex justify-center items-center">
                         {% if data['type'] == "Book" %}
-                        <div class="pt-1 flex items-center">
+                        <div class="flex items-center">
                             <label>
                                 <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
                                     name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
@@ -57,28 +57,31 @@
                     </td>
 
                     {% set TitleName, BID = data['TitleName'].split(' | ') %}
-                    <td>
-                        {% if data['type'] == "Book" %}
-                        <i class="fas fa-book text-sky-800"></i>
+                    {% if data['type'] == "Book" %}
 
+                    <td>
+                        <i class="fas fa-book text-sky-800"></i>
                         <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{BID}}"
                             class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
                                 noreferrer">{{ TitleName }}
                         </a>
+                    </td>
+                    <td>{{ data['Author']}}</td>
+                    <td>{{ data['PublishYear'] }}</td>
 
-                        <!-- Not showing this yet -->
-                        {% elif data['type'] == "Ebook" %}
+                    {% elif data['type'] == "Ebook" %}
 
+                    <td>
                         <i class="fas fa-tablet-alt"></i>
                         <a href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
                             class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
                                 noreferrer">{{ TitleName }}
                         </a>
-                        {% endif %}
-
                     </td>
                     <td>{{ data['Author']}}</td>
                     <td>{{ data['PublishYear'] }}</td>
+
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
