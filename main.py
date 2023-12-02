@@ -706,8 +706,7 @@ async def htmx_search_books(request: Request,
                     'DigitalID') is None else book.get('DigitalID')
                 bid = str(bid)
 
-                title = book.get("TitleName")
-                title = title if title is not None else ""
+                title = book.get("TitleName", "")
                 title = title.split(" / ", 1)[0].strip()
 
                 # Enable disable button if book is already saved
@@ -799,8 +798,7 @@ async def htmx_paginate_search_books(request: Request,
                     'DigitalID') is None else book.get('DigitalID')
                 bid = str(bid)
 
-                title = book.get("TitleName")
-                title = title if title is not None else ""
+                title = book.get("TitleName", "")
                 title = title.split(" / ", 1)[0].strip()
 
                 # Enable disable button if book is already saved
