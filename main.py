@@ -527,10 +527,9 @@ def update_all_user_books(db, username):
 
     m_db.mg_insert_status(db, username=username.get("UserName"))
 
-    if user_bids:
-        for ubid in user_bids:
-            bid_no = ubid.get("BID")
-            update_bk_avail_in_mongo(db, bid_no)
+    for ubid in user_bids:
+        bid_no = ubid.get("BID")
+        update_bk_avail_in_mongo(db, bid_no)
 
     m_db.mg_delete_status(db, username=username.get("UserName"))
 
