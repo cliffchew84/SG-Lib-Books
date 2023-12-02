@@ -108,7 +108,7 @@ def process_rest_single_lib_avail_v2(nlb_input: Dict):
     output['StatusDesc'] = nlb_input.get('transactionStatus').get("name")
     if output['StatusDesc'] == "On Loan":
         output['DueDate'] = nlb_input.get(
-            'transactionStatus').get("date").split("T")[0]
+            'transactionStatus').get("date").split("T", 1)[0]
     else:
         output['DueDate'] = None
 
@@ -126,7 +126,7 @@ def process_new_search(single_search_record: List[Dict]) -> List[Dict]:
     final_output = []
 
     # Get title and author of book
-    record_title = single_search_record.get("title").split(" | ")[0]
+    record_title = single_search_record.get("title").split(" | ", 1)[0]
     record_author = single_search_record.get("author")
 
     for record in single_search_record.get('records'):

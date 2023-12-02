@@ -32,12 +32,12 @@
                     <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                         class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline"
                         target="_blank" rel="noopener noreferrer">{{
-                        data['TitleName'].split(" | ")[0] }}</a>
+                        data['TitleName'].split(" | ", 1)[0] }}</a>
 
                     <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                         class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline"
                         target="_blank" rel="noopener noreferrer">{{
-                        data['TitleName'].split(" : ")[0] }}</a>
+                        data['TitleName'].split(" : ", 1)[0] }}</a>
                 </div>
             </td>
 
@@ -71,11 +71,11 @@
             <!-- Status -->
             <td class="w-1/12 px-3 py-1 text-xs">
                 {% if data["StatusDesc"] == "Available" %}
-                <span class="px-2 py-1 font-semibold leading-tight text-green-700 
+                <span class="px-2 py-1 font-semibold leading-tight text-green-700
                             bg-green-100 rounded-lg text-center">{{ data["StatusDesc"] }}
                 </span>
                 {% else %}
-                <span class="px-2 py-1 font-semibold leading-tight text-red-700 
+                <span class="px-2 py-1 font-semibold leading-tight text-red-700
                             bg-red-100 rounded-lg text-center">{{ data["StatusDesc"] }}
                 </span>
                 {% endif %}
@@ -85,7 +85,7 @@
 
             <td class="px-1">
                 <form action="/update_book/{{data[a]}}" method="POST">
-                    <button type="submit" class="hidden md:block bg-sky-700 px-3 py-1 rounded-lg 
+                    <button type="submit" class="hidden md:block bg-sky-700 px-3 py-1 rounded-lg
                         hover:text-white hover:bg-sky-500 text-white">
                         {{ data['UpdateTime'] }}</button>
                 </form>
@@ -96,7 +96,7 @@
             <!-- Update Button BID -->
             <td class="px-1">
                 <form action="/update_book/{{data['BID']}}" method="POST">
-                    <button type="submit" class="hidden md:block bg-sky-700 px-3 py-1 rounded-lg 
+                    <button type="submit" class="hidden md:block bg-sky-700 px-3 py-1 rounded-lg
                         hover:text-white hover:bg-sky-500 text-white">
                         {{ data['UpdateTime'] }}</button>
 
