@@ -390,14 +390,15 @@ def process_user_book_data(db, username: str):
         if due_date is not None:
             status = status + '[' + str(due_date) + ']'
 
-        if "Lifelong Learning" in a.get("BranchName"):
+        branch_name = a.get("BranchName")
+        if "Lifelong Learning" in branch_name:
             library = "Lifelong Learning Institute"
-        elif "Public Library" in a.get("BranchName"):
-            library = a.get("BranchName").split("Public Library")[0]
-        elif "Library" in a.get("BranchName"):
-            library = a.get("BranchName").split("Library")[0]
+        elif "Public Library" in branch_name:
+            library = branch_name.split("Public Library")[0]
+        elif "Library" in branch_name:
+            library = branch_name.split("Library")[0]
         else:
-            library = a.get("BranchName")
+            library = branch_name
 
         response.append({
             "TitleName": title + ' | ' + bid,
