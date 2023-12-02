@@ -1,16 +1,16 @@
 def process_all_unique_books(response):
-    return set([i["TitleName"] for i in response])
+    return set(i["TitleName"] for i in response)
 
 
 def process_all_avail_books(response):
-    return set([i['TitleName'] for i in response if i["StatusDesc"] ==
-                "Available"])
+    return set(i['TitleName'] for i in response if i["StatusDesc"] ==
+                "Available")
 
 
 def process_all_unique_lib(response):
-    output = sorted(list(set([i['BranchName'] for i in response])))
-    output = [i.split("Public Library")[0] for i in output]
-    output = [i.split("Library")[0] for i in output]
+    output = sorted(set(i['BranchName'] for i in response))
+    output = [i.split("Public Library", 1)[0] for i in output]
+    output = [i.split("Library", 1)[0] for i in output]
     return output
 
 

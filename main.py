@@ -335,9 +335,9 @@ async def m_current_books(request: Request,
             response = []
             for a in query:
                 response.append({
-                    "TitleName": a.get('TitleName').split("/")[0].strip(),
+                    "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
                     "BID": a.get("BID"),
-                    "CallNumber": a.get("CallNumber").split(" -")[0].strip()})
+                    "CallNumber": a.get("CallNumber").split(" -", 1)[0].strip()})
 
                 result = list({d['TitleName']: d for d in response}.values())
 
@@ -370,11 +370,11 @@ def process_user_book_data(db, username: str):
 
     for a in query:
         bid = a.get("BID")
-        title = a.get("TitleName").split("/")[0]
+        title = a.get("TitleName").split("/", 1)[0]
 
         due_date = None
         if a.get("DueDate"):
-            tmp_date = a.get("DueDate").split("T")[0]
+            tmp_date = a.get("DueDate").split("T", 1)[0]
             input_date = datetime.strptime(tmp_date, "%Y-%m-%d")
             due_date = input_date.strftime("%d/%m")
 
@@ -390,19 +390,20 @@ def process_user_book_data(db, username: str):
         if due_date is not None:
             status = status + '[' + str(due_date) + ']'
 
-        if "Lifelong Learning" in a.get("BranchName"):
+        branch_name = a.get("BranchName")
+        if "Lifelong Learning" in branch_name:
             library = "Lifelong Learning Institute"
-        elif "Public Library" in a.get("BranchName"):
-            library = a.get("BranchName").split("Public Library")[0]
-        elif "Library" in a.get("BranchName"):
-            library = a.get("BranchName").split("Library")[0]
+        elif "Public Library" in branch_name:
+            library = branch_name.split("Public Library", 1)[0]
+        elif "Library" in branch_name:
+            library = branch_name.split("Library", 1)[0]
         else:
-            library = a.get("BranchName")
+            library = branch_name
 
         response.append({
             "TitleName": title + ' | ' + bid,
             "BranchName": library,
-            "CallNumber": a.get("CallNumber").split(" -")[0],
+            "CallNumber": a.get("CallNumber").split(" -", 1)[0],
             "StatusDesc": status,
             "UpdateTime": update_time,
             "BID": a.get("BID")})
@@ -501,7 +502,7 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
     del book_title['PublishYear']
 
     # Need to clear up my title names now
-    book_title['TitleName'] = book_title['TitleName'].split("/")[0]
+    book_title['TitleName'] = book_title['TitleName'].split("/", 1)[0]
 
     m_db.mg_add_book_info(db=db, books_info_input=book_title)
 
@@ -526,10 +527,9 @@ def update_all_user_books(db, username):
 
     m_db.mg_insert_status(db, username=username.get("UserName"))
 
-    if user_bids:
-        for ubid in user_bids:
-            bid_no = ubid.get("BID")
-            update_bk_avail_in_mongo(db, bid_no)
+    for ubid in user_bids:
+        bid_no = ubid.get("BID")
+        update_bk_avail_in_mongo(db, bid_no)
 
     m_db.mg_delete_status(db, username=username.get("UserName"))
 
@@ -699,16 +699,15 @@ async def htmx_search_books(request: Request,
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
-            bid_checks = [i.get("BID") for i in user_books]
+            bid_checks = set(i.get("BID") for i in user_books)
 
             for book in all_titles:
                 bid = book.get('BID') if book.get(
                     'DigitalID') is None else book.get('DigitalID')
                 bid = str(bid)
 
-                title = book.get("TitleName")
-                title = title if title is not None else ""
-                title = title.split(" / ")[0].strip()
+                title = book.get("TitleName", "")
+                title = title.split(" / ", 1)[0].strip()
 
                 # Enable disable button if book is already saved
                 disable = "disabled" if bid in bid_checks else ""
@@ -791,7 +790,7 @@ async def htmx_paginate_search_books(request: Request,
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
-            bid_checks = [i.get("BID") for i in user_books]
+            bid_checks = set(i.get("BID") for i in user_books)
 
             for book in all_titles:
                 # Prep for eResources in the future
@@ -799,9 +798,8 @@ async def htmx_paginate_search_books(request: Request,
                     'DigitalID') is None else book.get('DigitalID')
                 bid = str(bid)
 
-                title = book.get("TitleName")
-                title = title if title is not None else ""
-                title = title.split(" / ")[0].strip()
+                title = book.get("TitleName", "")
+                title = title.split(" / ", 1)[0].strip()
 
                 # Enable disable button if book is already saved
                 disable = "disabled" if bid in bid_checks else ""
@@ -938,7 +936,7 @@ async def show_events(request: Request,
 
     final_output = list()
     for events in lib_events:
-        event_date = events.get('start').split("T")[0]
+        event_date = events.get('start').split("T", 1)[0]
         if event_date >= today:
             final_output.append(events)
 
@@ -965,7 +963,7 @@ async def show_library_events(request: Request,
 
     final_output = list()
     for events in lib_events:
-        event_date = events.get('start').split("T")[0]
+        event_date = events.get('start').split("T", 1)[0]
         if event_date >= today:
             final_output.append(events)
 
@@ -1001,7 +999,7 @@ async def show_lib_events(request: Request,
 
     final_output = list()
     for events in lib_events:
-        event_date = events.get('start').split("T")[0]
+        event_date = events.get('start').split("T", 1)[0]
         if event_date >= today:
             final_output.append(events)
 

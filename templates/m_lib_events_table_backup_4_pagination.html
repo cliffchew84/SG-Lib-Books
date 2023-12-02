@@ -21,7 +21,7 @@
                     class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pagination.previous_page == None else '' }}">First</button>
 
                 <button hx-indicator='#head-spinner' hx-target=" #lib_events_table"
-                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.previous_page}}" class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                    hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.previous_page}}" class="join-item btn bg-sky-700 hover:bg-sky-500 text-white
                 btn-sm {{ 'btn-disabled' if pagination.previous_page == None else '' }}">«</button>
 
                 <button class="join-item bg-sky-700 hover:bg-sky-500 text-white btn btn-sm" hx-indicator='#head-spinner'
@@ -29,11 +29,11 @@
                     hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.current_page }}">
                     {{ pagination.current_page }}</button>
 
-                <button hx-indicator='#head-spinner' class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                <button hx-indicator='#head-spinner' class="join-item btn bg-sky-700 hover:bg-sky-500 text-white
                 {{ 'btn-disabled' if pagination.next_page == None else '' }} btn-sm" hx-target="#lib_events_table"
                     hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.next_page }}">»</button>
 
-                <button hx-indicator='#head-spinner' class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                <button hx-indicator='#head-spinner' class="join-item btn bg-sky-700 hover:bg-sky-500 text-white
                 {{ 'btn-disabled' if pagination.next_page == None else '' }} btn-sm" hx-target="#lib_events_table"
                     hx-get="/lib_events/?lib={{selected_lib|safe}}&page={{ pagination.total_pages }}">Last</button>
             </div>
@@ -53,11 +53,11 @@
                 {% for events in lib_events %}
                 <tr>
                     <td>{{ events['lib_filter'] }}</td>
-                    <td>{{ events['start'].split("T")[0] }}</td>
+                    <td>{{ events['start'].split("T", 1)[0] }}</td>
                     <td>{{ events['end_day'] }}</td>
                     <td>
-                        {{ events['start'].split("T")[-1][:-3].replace(":", "") }}-{{
-                        events['end'].split("T")[-1][:-3].replace(":", "") }}
+                        {{ events['start'].rsplit("T", 1)[-1][:-3].replace(":", "") }}-{{
+                        events['end'].rsplit("T", 1)[-1][:-3].replace(":", "") }}
                     </td>
                     <td>{{ events['category'] }}</td>
                     <td>
