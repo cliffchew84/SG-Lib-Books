@@ -699,7 +699,7 @@ async def htmx_search_books(request: Request,
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
-            bid_checks = [i.get("BID") for i in user_books]
+            bid_checks = set(i.get("BID") for i in user_books)
 
             for book in all_titles:
                 bid = book.get('BID') if book.get(
@@ -791,7 +791,7 @@ async def htmx_paginate_search_books(request: Request,
             user_books = m_db.mg_query_user_bookmarked_books(
                 db=db, username=username.get("UserName"))
 
-            bid_checks = [i.get("BID") for i in user_books]
+            bid_checks = set(i.get("BID") for i in user_books)
 
             for book in all_titles:
                 # Prep for eResources in the future
