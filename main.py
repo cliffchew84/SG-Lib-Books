@@ -616,31 +616,32 @@ async def delete_books(bids: list = Form(...),
 
 # Items per page for searched books
 ITEMS_PER_PAGE = 1
-items = 30
 
 
-def get_offsets(current: int, next: int, total: int):
-    previous = max(current - items, items) if current > items else None
-    next = next if next != total else None
-    last = items * (total // items)
+def pg_links(offset, total):
+    items = 30
+    previous = offset - items if offset != 0 else None
+    current = offset
+    next = offset + items if (offset + items < total) else None
+    last = items * (total // items) if next is not None else None
 
-    return {
-        "previous": previous,
-        "next": next,
-        "last": last,
-        "current": current,
-    }
+    return {"previous": previous,
+            "current": current,
+            "next": next,
+            "last": last}
 
 
 @app.get("/htmx_search", response_class=HTMLResponse)
 async def htmx_search_books(request: Request,
+                            e_resources: Optional[str] = None,
                             book_search: Optional[str] = None,
                             author: Optional[str] = None,
-                            books_only=True,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
     """ Calls new GetTitles Search and show results in search_table.html"""
+
+    print(e_resources)
 
     final_response = list()
     search_input = dict()
@@ -654,13 +655,12 @@ async def htmx_search_books(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = nlb_rest_api.get_rest_title(input_dict=search_input)
+        titles = nlb_rest_api.get_rest_title(
+            input_dict=search_input, offset=0)
         total_records = titles.get("totalRecords")
-        next_offset = titles.get("nextRecordsOffset")
-        current_offset = titles.get('count')
+        more_records = titles.get("hasMoreRecords")
 
-        offset_links = get_offsets(current_offset, next_offset, total_records)
-        print(offset_links)
+        offset_links = pg_links(0, total_records)
 
         search_params = dict()
         search_params['title'] = book_search
@@ -689,11 +689,18 @@ async def htmx_search_books(request: Request,
 
         else:
             all_titles = nlb_rest_api.get_title_process(titles)
-            more_records = titles.get("hasMoreRecords")
 
             # Only keep physical books for now
-            if books_only:
-                all_titles = [t for t in all_titles if t['type'] == "Book"]
+            books = [t for t in all_titles if t['type'] == "Book"]
+
+            if e_resources:
+                print("I am including ebooks")
+                ebooks = [t for t in all_titles if t['type'] == "Ebook"]
+
+                final_titles = books + ebooks
+
+            else:
+                final_titles = books
 
             # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -701,7 +708,7 @@ async def htmx_search_books(request: Request,
 
             bid_checks = set(i.get("BID") for i in user_books)
 
-            for book in all_titles:
+            for book in final_titles:
                 bid = book.get('BID') if book.get(
                     'DigitalID') is None else book.get('DigitalID')
                 bid = str(bid)
@@ -725,8 +732,8 @@ async def htmx_search_books(request: Request,
         "api_data": final_response,
         "total_records": total_records,
         "more_records": more_records,
-        "offset": current_offset,
         "offset_links": offset_links,
+        "e_resources": e_resources
     })
 
 
@@ -735,7 +742,7 @@ async def htmx_paginate_search_books(request: Request,
                                      book_search: Optional[str] = None,
                                      author: Optional[str] = None,
                                      offset: Optional[str] = None,
-                                     books_only=True,
+                                     e_resources: Optional[str] = None,
                                      db=Depends(get_db),
                                      username=Depends(manager)):
 
@@ -756,10 +763,8 @@ async def htmx_paginate_search_books(request: Request,
         titles = nlb_rest_api.get_rest_title(input_dict=search_input,
                                              offset=offset)
         total_records = titles.get("totalRecords")
-        next_offset = titles.get("nextRecordsOffset")
-        current_offset = int(offset)
 
-        offset_links = get_offsets(current_offset, next_offset, total_records)
+        offset_links = pg_links(int(offset), total_records)
         print(offset_links)
 
         empty_table_result = templates.TemplateResponse("search_table.html", {
@@ -783,8 +788,16 @@ async def htmx_paginate_search_books(request: Request,
             more_records = titles.get("hasMoreRecords")
 
             # Only keep physical books for now
-            if books_only:
-                all_titles = [t for t in all_titles if t['type'] == "Book"]
+            books = [t for t in all_titles if t['type'] == "Book"]
+
+            if e_resources:
+                print("I am including ebooks")
+                ebooks = [t for t in all_titles if t['type'] == "Ebook"]
+
+                final_titles = books + ebooks
+
+            else:
+                final_titles = books
 
             # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.mg_query_user_bookmarked_books(
@@ -792,7 +805,7 @@ async def htmx_paginate_search_books(request: Request,
 
             bid_checks = set(i.get("BID") for i in user_books)
 
-            for book in all_titles:
+            for book in final_titles:
                 # Prep for eResources in the future
                 bid = book.get('BID') if book.get(
                     'DigitalID') is None else book.get('DigitalID')
@@ -817,8 +830,8 @@ async def htmx_paginate_search_books(request: Request,
         "api_data": final_response,
         "total_records": total_records,
         "more_records": more_records,
-        "offset": current_offset,
         "offset_links": offset_links,
+        "e_resources": e_resources
     })
 
 
