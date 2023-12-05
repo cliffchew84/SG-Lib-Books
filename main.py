@@ -337,7 +337,8 @@ async def m_current_books(request: Request,
                 response.append({
                     "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
                     "BID": a.get("BID"),
-                    "CallNumber": a.get("CallNumber").split(" -", 1)[0].strip()})
+                    "CallNumber": a.get("CallNumber").split(
+                        " -", 1)[0].strip()})
 
                 result = list({d['TitleName']: d for d in response}.values())
 
@@ -585,7 +586,8 @@ async def ingest_books_navbar(request: Request,
 
 
 @app.post("/delete_books", response_class=HTMLResponse)
-async def delete_books(bids: list = Form(...),
+async def delete_books(request: Request,
+                       bids: list = Form(...),
                        db=Depends(get_db),
                        username=Depends(manager)):
     for bid in bids:
@@ -607,18 +609,40 @@ async def delete_books(bids: list = Form(...),
         m_db.mg_delete_bk_user_records(
             db=db, username=username.get("UserName"), bid_no=BID)
 
-    # WIP - To include code to recalculate the book count
-    # And then render the new template
+    output = []
+    if username:
+        # Get all the books linked to the user.
+        # This is the complicated query
+        query = m_db.mg_query_user_bookmarked_books(
+            db=db, username=username.get("UserName"))
 
-    return RedirectResponse(f"/{username.get('UserName')}/main",
-                            status_code=status.HTTP_302_FOUND)
+        response = []
+        for a in query:
+            response.append({
+                "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
+                "BID": a.get("BID"),
+                "CallNumber": a.get("CallNumber").split(
+                    " -", 1)[0].strip()})
 
+            result = list({d['TitleName']: d for d in response}.values())
 
-# Items per page for searched books
-ITEMS_PER_PAGE = 1
+            output = []
+            for r in result:
+                output.append({
+                    "CallNumber": r.get('CallNumber'),
+                    "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
+                    "BID": r.get("BID")
+                })
+
+        return templates.TemplateResponse("m_yourbooks_table.html", {
+            "request": request,
+            "username": username.get("UserName"),
+            "api_data": output,
+        })
 
 
 def pg_links(offset, total):
+    """ Create pagination for NLB Search function """
     items = 30
     previous = offset - items if offset != 0 else None
     current = offset
@@ -640,9 +664,6 @@ async def htmx_search_books(request: Request,
                             username=Depends(manager)):
 
     """ Calls new GetTitles Search and show results in search_table.html"""
-
-    print(e_resources)
-
     final_response = list()
     search_input = dict()
 
@@ -958,79 +979,6 @@ async def show_events(request: Request,
         "username": username.get("UserName"),
         "lib_events": final_output,
         "total_records": len(final_output),
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
-
-
-# Functions useful for pagination
-@app.get("/lib_events_base", response_class=HTMLResponse)
-async def show_library_events(request: Request,
-                              page: int = 1,
-                              lib: str = "Online",
-                              db=Depends(get_db),
-                              username=Depends(manager)):
-
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
-
-    start_index = (page - 1) * ITEMS_PER_PAGE
-    end_index = start_index + ITEMS_PER_PAGE
-
-    total_records = len(final_output)
-    records = final_output[start_index: end_index]
-    # total_pages = calculate_total_pages(len(final_output))
-    # pagination_links = get_page_links(page, total_pages)
-
-    return templates.TemplateResponse("m_lib_events.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": records,
-        # "pagination": pagination_links,
-        "total_records": total_records,
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
-
-
-@app.get("/lib_events", response_class=HTMLResponse)
-async def show_lib_events(request: Request,
-                          lib: str,
-                          page: int = 1,
-                          db=Depends(get_db),
-                          username=Depends(manager)):
-
-    # Filter for online events first
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
-
-    start_index = (page - 1) * ITEMS_PER_PAGE
-    end_index = start_index + ITEMS_PER_PAGE
-
-    total_records = len(final_output)
-
-    records = final_output[start_index: end_index]
-    # total_pages = calculate_total_pages(len(final_output))
-    # pagination_links = get_page_links(page, total_pages)
-
-    return templates.TemplateResponse("m_lib_events_table.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": records,
-        # "pagination": pagination_links,
-        "total_records": total_records,
         'lib_locations': lib_locations,
         "selected_lib": lib
     })
