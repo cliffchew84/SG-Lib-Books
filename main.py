@@ -327,28 +327,8 @@ async def m_current_books(request: Request,
 
         output = []
         if username:
-            # Get all the books linked to the user.
-            # This is the complicated query
-            query = m_db.mg_query_user_bookmarked_books(
+            output = m_db.get_user_saved_books(
                 db=db, username=username.get("UserName"))
-
-            response = []
-            for a in query:
-                response.append({
-                    "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
-                    "BID": a.get("BID"),
-                    "CallNumber": a.get("CallNumber").split(
-                        " -", 1)[0].strip()})
-
-                result = list({d['TitleName']: d for d in response}.values())
-
-                output = []
-                for r in result:
-                    output.append({
-                        "CallNumber": r.get('CallNumber'),
-                        "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
-                        "BID": r.get("BID")
-                    })
 
             return templates.TemplateResponse("m_yourbooks.html", {
                 "request": request,
@@ -419,15 +399,16 @@ async def show_avail_m_books(request: Request,
                              username=Depends(manager)):
     try:
         if username:
+            update_status = None
+            if m_db.mg_query_status(db=db, username=username.get("UserName")):
+                update_status = "Updating In Progress!"
+
+            # Query entire user books - Inefficient
             response = process_user_book_data(
                 db=db, username=username.get("UserName"))
 
             all_unique_books = process.process_all_unique_books(response)
             all_avail_books = process.process_all_avail_books(response)
-
-            update_status = None
-            if m_db.mg_query_status(db=db, username=username.get("UserName")):
-                update_status = "Updating In Progress!"
 
             if library != 'all':
                 output = []
@@ -613,28 +594,10 @@ async def delete_books(request: Request,
     if username:
         # Get all the books linked to the user.
         # This is the complicated query
-        query = m_db.mg_query_user_bookmarked_books(
+        output = m_db.get_user_saved_books(
             db=db, username=username.get("UserName"))
 
-        response = []
-        for a in query:
-            response.append({
-                "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
-                "BID": a.get("BID"),
-                "CallNumber": a.get("CallNumber").split(
-                    " -", 1)[0].strip()})
-
-            result = list({d['TitleName']: d for d in response}.values())
-
-            output = []
-            for r in result:
-                output.append({
-                    "CallNumber": r.get('CallNumber'),
-                    "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
-                    "BID": r.get("BID")
-                })
-
-        # Update the books calculation on the navbar
+        # Update books available calculation in navbar
         response = process_user_book_data(
             db=db, username=username.get("UserName"))
 
@@ -678,7 +641,7 @@ async def htmx_search_books(request: Request,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
-    """ Calls new GetTitles Search and show results in search_table.html"""
+    """ Calls NLB API GetTitles Search and show results in search_table.html"""
     final_response = list()
     search_input = dict()
 
@@ -980,77 +943,13 @@ async def show_events(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
+    final_output = m_db.get_lib_events(db, lib)
 
     return templates.TemplateResponse("m_lib_events.html", {
         "request": request,
         "username": username.get("UserName"),
         "lib_events": final_output,
         "total_records": len(final_output),
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
-
-
-@app.get("/lib_events_base", response_class=HTMLResponse)
-async def show_library_events(request: Request,
-                              page: int = 1,
-                              lib: str = "Online",
-                              db=Depends(get_db),
-                              username=Depends(manager)):
-
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
-
-    total_records = len(final_output)
-
-    return templates.TemplateResponse("m_lib_events.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": final_output,
-        "total_records": total_records,
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
-
-
-@app.get("/lib_events", response_class=HTMLResponse)
-async def show_lib_events(request: Request,
-                          lib: str,
-                          page: int = 1,
-                          db=Depends(get_db),
-                          username=Depends(manager)):
-
-    # Filter for online events first
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
-
-    total_records = len(final_output)
-
-    return templates.TemplateResponse("m_lib_events_table.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": final_output,
-        "total_records": total_records,
         'lib_locations': lib_locations,
         "selected_lib": lib
     })

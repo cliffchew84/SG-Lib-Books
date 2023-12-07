@@ -185,8 +185,79 @@ def mg_query_user_books(db, username: str):
     return [i for i in user_books]
 
 
-def mg_query_lib_events_by_lib(db, library: str):
-    return db.lib_events.find({"lib_filter": library}, {"_id": 0})
+def get_user_saved_books(db, username: str):
+    """ Query books that a user saved from MongoDB"""
+
+    output = db.user_books.aggregate([
+        {"$lookup": {
+            "from": "books_info",
+            "localField": "BID",
+            "foreignField": "BID",
+            "as": "books_info"
+        }},
+        {"$unwind": '$books_info'},
+
+        {"$lookup": {
+            "from": "books_avail",
+            "localField": "BID",
+            "foreignField": "BID",
+            "as": "books_avail"
+        }},
+        {"$unwind": '$books_avail'},
+
+        {"$match": {"UserName": username}},
+
+        {"$project": {
+            "_id": 0,
+            "CallNumber": "$books_avail.CallNumber",
+            "TitleName": "$books_info.TitleName",
+            "BID": "$books_info.BID"
+        }}
+    ])
+
+    return list({dic['TitleName']: dic for dic in output}.values())
+
+
+# Query NLB library events
+def get_lib_events(db, library: str):
+    """ Refactor query logic to focus on the library events that I need
+
+    Note: Events datetime format are "%Y-%m-%dT%H:%M:%S"
+
+    """
+    today = datetime.today()
+    output = db.lib_events.aggregate([{
+        '$addFields': {
+            'new_date': {
+                '$dateFromString': {
+                    'dateString': '$end',
+                    'format': '%Y-%m-%dT%H:%M:%S'
+                }},
+            "end_date": {"$arrayElemAt": [{"$split": ["$end", "T"]}, 0]},
+            "start_time": {"$arrayElemAt": [{"$split": ["$start", "T"]}, 1]},
+            "end_time": {"$arrayElemAt": [{"$split": ["$end", "T"]}, 1]}
+        }},
+        {
+            '$match': {
+                'new_date': {'$gte': today},
+                "lib_filter": library,
+                "available": True
+
+            }
+    },
+        {"$project": {
+            "_id": 0,
+            "end_day": "$end_day",
+            "end_date": "$end_date",
+            "start_time": "$start_time",
+            "end_time": "$end_time",
+            "category": "$category",
+            "url": "$url",
+            "name": "$name"
+        }},
+    ])
+
+    return [i for i in output]
 
 
 # EventTracking
