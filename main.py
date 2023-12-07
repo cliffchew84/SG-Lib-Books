@@ -943,77 +943,13 @@ async def show_events(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
+    final_output = m_db.get_lib_events(db, lib)
 
     return templates.TemplateResponse("m_lib_events.html", {
         "request": request,
         "username": username.get("UserName"),
         "lib_events": final_output,
         "total_records": len(final_output),
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
-
-
-@app.get("/lib_events_base", response_class=HTMLResponse)
-async def show_library_events(request: Request,
-                              page: int = 1,
-                              lib: str = "Online",
-                              db=Depends(get_db),
-                              username=Depends(manager)):
-
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
-
-    total_records = len(final_output)
-
-    return templates.TemplateResponse("m_lib_events.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": final_output,
-        "total_records": total_records,
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
-
-
-@app.get("/lib_events", response_class=HTMLResponse)
-async def show_lib_events(request: Request,
-                          lib: str,
-                          page: int = 1,
-                          db=Depends(get_db),
-                          username=Depends(manager)):
-
-    # Filter for online events first
-    lib_events = m_db.mg_query_lib_events_by_lib(db, lib)
-    today = str(datetime.now().date())
-
-    final_output = list()
-    for events in lib_events:
-        event_date = events.get('start').split("T", 1)[0]
-        if event_date >= today:
-            final_output.append(events)
-
-    total_records = len(final_output)
-
-    return templates.TemplateResponse("m_lib_events_table.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": final_output,
-        "total_records": total_records,
         'lib_locations': lib_locations,
         "selected_lib": lib
     })

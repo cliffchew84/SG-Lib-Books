@@ -219,8 +219,41 @@ def get_user_saved_books(db, username: str):
 
 
 # Query NLB library events
-def mg_query_lib_events_by_lib(db, library: str):
-    return db.lib_events.find({"lib_filter": library}, {"_id": 0})
+def get_lib_events(db, library: str):
+    """ Refactor query logic to focus on the library events that I need"""
+    today = datetime.today()
+    output = db.lib_events.aggregate([{
+        '$addFields': {
+            'new_date': {
+                '$dateFromString': {
+                    'dateString': '$end',
+                    'format': '%Y-%m-%dT%H:%M:%S'
+                }},
+            "end_date": {"$arrayElemAt": [{"$split": ["$end", "T"]}, 0]},
+            "start_time": {"$arrayElemAt": [{"$split": ["$start", "T"]}, 1]},
+            "end_time": {"$arrayElemAt": [{"$split": ["$end", "T"]}, 1]}
+        }},
+        {
+            '$match': {
+                'new_date': {'$gte': today},
+                "lib_filter": library,
+                "available": True
+
+            }
+    },
+        {"$project": {
+            "_id": 0,
+            "end_day": "$end_day",
+            "end_date": "$end_date",
+            "start_time": "$start_time",
+            "end_time": "$end_time",
+            "category": "$category",
+            "url": "$url",
+            "name": "$name"
+        }},
+    ])
+
+    return [i for i in output]
 
 
 # EventTracking
