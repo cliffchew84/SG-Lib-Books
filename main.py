@@ -399,15 +399,16 @@ async def show_avail_m_books(request: Request,
                              username=Depends(manager)):
     try:
         if username:
+            update_status = None
+            if m_db.mg_query_status(db=db, username=username.get("UserName")):
+                update_status = "Updating In Progress!"
+
+            # Query entire user books - Inefficient
             response = process_user_book_data(
                 db=db, username=username.get("UserName"))
 
             all_unique_books = process.process_all_unique_books(response)
             all_avail_books = process.process_all_avail_books(response)
-
-            update_status = None
-            if m_db.mg_query_status(db=db, username=username.get("UserName")):
-                update_status = "Updating In Progress!"
 
             if library != 'all':
                 output = []
@@ -593,28 +594,10 @@ async def delete_books(request: Request,
     if username:
         # Get all the books linked to the user.
         # This is the complicated query
-        query = m_db.mg_query_user_bookmarked_books(
+        output = m_db.get_user_saved_books(
             db=db, username=username.get("UserName"))
 
-        response = []
-        for a in query:
-            response.append({
-                "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
-                "BID": a.get("BID"),
-                "CallNumber": a.get("CallNumber").split(
-                    " -", 1)[0].strip()})
-
-            result = list({d['TitleName']: d for d in response}.values())
-
-            output = []
-            for r in result:
-                output.append({
-                    "CallNumber": r.get('CallNumber'),
-                    "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
-                    "BID": r.get("BID")
-                })
-
-        # Update the books calculation on the navbar
+        # Update books available calculation in navbar
         response = process_user_book_data(
             db=db, username=username.get("UserName"))
 
@@ -658,7 +641,7 @@ async def htmx_search_books(request: Request,
                             db=Depends(get_db),
                             username=Depends(manager)):
 
-    """ Calls new GetTitles Search and show results in search_table.html"""
+    """ Calls NLB API GetTitles Search and show results in search_table.html"""
     final_response = list()
     search_input = dict()
 
