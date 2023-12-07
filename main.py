@@ -327,28 +327,8 @@ async def m_current_books(request: Request,
 
         output = []
         if username:
-            # Get all the books linked to the user.
-            # This is the complicated query
-            query = m_db.mg_query_user_bookmarked_books(
+            output = m_db.get_user_saved_books(
                 db=db, username=username.get("UserName"))
-
-            response = []
-            for a in query:
-                response.append({
-                    "TitleName": a.get('TitleName').split("/", 1)[0].strip(),
-                    "BID": a.get("BID"),
-                    "CallNumber": a.get("CallNumber").split(
-                        " -", 1)[0].strip()})
-
-                result = list({d['TitleName']: d for d in response}.values())
-
-                output = []
-                for r in result:
-                    output.append({
-                        "CallNumber": r.get('CallNumber'),
-                        "TitleName": r.get('TitleName') + ' | ' + r.get("BID"),
-                        "BID": r.get("BID")
-                    })
 
             return templates.TemplateResponse("m_yourbooks.html", {
                 "request": request,

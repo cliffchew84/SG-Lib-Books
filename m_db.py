@@ -185,6 +185,40 @@ def mg_query_user_books(db, username: str):
     return [i for i in user_books]
 
 
+def get_user_saved_books(db, username: str):
+    """ Query books that a user saved from MongoDB"""
+
+    output = db.user_books.aggregate([
+        {"$lookup": {
+            "from": "books_info",
+            "localField": "BID",
+            "foreignField": "BID",
+            "as": "books_info"
+        }},
+        {"$unwind": '$books_info'},
+
+        {"$lookup": {
+            "from": "books_avail",
+            "localField": "BID",
+            "foreignField": "BID",
+            "as": "books_avail"
+        }},
+        {"$unwind": '$books_avail'},
+
+        {"$match": {"UserName": username}},
+
+        {"$project": {
+            "_id": 0,
+            "CallNumber": "$books_avail.CallNumber",
+            "TitleName": "$books_info.TitleName",
+            "BID": "$books_info.BID"
+        }}
+    ])
+
+    return list({dic['TitleName']: dic for dic in output}.values())
+
+
+# Query NLB library events
 def mg_query_lib_events_by_lib(db, library: str):
     return db.lib_events.find({"lib_filter": library}, {"_id": 0})
 
