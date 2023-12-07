@@ -220,7 +220,11 @@ def get_user_saved_books(db, username: str):
 
 # Query NLB library events
 def get_lib_events(db, library: str):
-    """ Refactor query logic to focus on the library events that I need"""
+    """ Refactor query logic to focus on the library events that I need
+
+    Note: Events datetime format are "%Y-%m-%dT%H:%M:%S"
+
+    """
     today = datetime.today()
     output = db.lib_events.aggregate([{
         '$addFields': {
