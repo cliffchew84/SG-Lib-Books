@@ -23,7 +23,7 @@ import m_db
 
 # Load environment variables
 SECRET_KEY = os.environ["mongo_secret_key"]
-ACCESS_TOKEN_EXPIRY = 60
+ACCESS_TOKEN_EXPIRY = 240
 
 APPLICATION_ID = os.environ['nlb_rest_app_id']
 API_KEY = os.environ['nlb_rest_api_key']
@@ -261,10 +261,6 @@ async def htmx_main(request: Request,
         response = process_user_book_data(
             db=db, username=username.get("UserName"))
 
-        update_status = None
-        if m_db.mg_query_status(db=db, username=username.get("UserName")):
-            update_status = "Updating In Progress... Please refresh to update!"
-
         # Processing necessary statistics
         all_unique_books = process.process_all_unique_books(response)
         all_avail_books = process.process_all_avail_books(response)
@@ -382,12 +378,12 @@ def process_user_book_data(db, username: str):
             library = branch_name
 
         response.append({
-            "TitleName": title + ' | ' + bid,
+            "TitleName": title,
             "BranchName": library,
             "CallNumber": a.get("CallNumber").split(" -", 1)[0],
             "StatusDesc": status,
             "UpdateTime": update_time,
-            "BID": a.get("BID")})
+            "BID": bid})
 
     return response
 
@@ -502,16 +498,23 @@ async def update_book(BID: str,
 
 
 def update_all_user_books(db, username):
-    """ Update all books linked to user. No NLB password needed """
+    """ Update all books linked to user."""
 
     user_bids = m_db.mg_query_user_books_w_bid(
         db=db, username=username.get("UserName"))
 
     m_db.mg_insert_status(db, username=username.get("UserName"))
 
-    for ubid in user_bids:
+    m_db.mg_update_user_info(db,
+                             username=username.get("UserName"),
+                             dict_values_to_add={'books_updated': 0})
+
+    for i, ubid in enumerate(user_bids):
         bid_no = ubid.get("BID")
         update_bk_avail_in_mongo(db, bid_no)
+        m_db.mg_update_user_info(db,
+                                 username=username.get("UserName"),
+                                 dict_values_to_add={'books_updated': i+1})
 
     m_db.mg_delete_status(db, username=username.get("UserName"))
 
@@ -524,8 +527,28 @@ async def m_update_user_current_books(background_tasks: BackgroundTasks,
                                       username=Depends(manager)):
     """ Updates availability of all user's saved books """
     background_tasks.add_task(update_all_user_books, db, username)
+
     return RedirectResponse(f"/{username.get('UserName')}/m_lib/all",
                             status_code=status.HTTP_302_FOUND)
+
+
+@app.get("/book_status/{book_saved}")
+async def book_status_progress_bar(request: Request,
+                                   book_saved: int,
+                                   db=Depends(get_db),
+                                   username=Depends(manager)):
+
+    books_updated = m_db.mg_query_user_info(
+        db=db, username=username.get("UserName")).get("books_updated")
+
+    progress = 0
+    if books_updated > 0:
+        progress = (books_updated / book_saved) * 100
+
+    return templates.TemplateResponse("book_updates.html", {
+        "request": request,
+        "progress": progress,
+    })
 
 
 # Experimental navbar updates
