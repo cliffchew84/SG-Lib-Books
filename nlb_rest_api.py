@@ -60,7 +60,7 @@ def get_rest_nlb_api_v2(extension_url: str,
             payload.update({"Offset": offset})
 
     else:
-        payload = {'BRN': input}
+        payload = {'BRN': input, "Limit": 100}
 
     return requests.get(final_url, headers=headers, params=payload).json()
 
