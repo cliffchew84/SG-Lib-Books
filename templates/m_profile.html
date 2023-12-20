@@ -8,12 +8,6 @@
             </div>
         </div>
 
-        {% if status %}
-
-        {% include 'update_status.html' %}
-
-        {% endif %}
-
         <div>
             <form hx-post="/update_user/{{username}}" hx-target=".main_content" hx-indicator='.update_status'>
                 <label class="italic">Username</label>

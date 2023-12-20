@@ -545,9 +545,16 @@ async def book_status_progress_bar(request: Request,
     if books_updated > 0:
         progress = (books_updated / book_saved) * 100
 
+    update_status = None
+    if m_db.mg_query_status(db=db, username=username.get("UserName")):
+        update_status = "Updating! Please Refresh when Done"
+
+    print(update_status)
+
     return templates.TemplateResponse("book_updates.html", {
         "request": request,
         "progress": progress,
+        "status": update_status
     })
 
 
