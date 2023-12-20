@@ -1,5 +1,10 @@
-<div class="flex items-center justify-center">
-    <div class='mx-auto justify-center items-center text-blue-700'>
-        {{ status }}
+<div hx-get="/book_status/{{all_unique_books|length}}" hx-trigger="every 1s" hx-target='.progress'>
+    {% if status %}
+    <div class="flex items-center justify-center">
+        <div class='mx-auto justify-center items-center text-blue-700 w-3/4'>
+            {{ status }}
+            <div class="progress"></div>
+        </div>
     </div>
+    {% endif %}
 </div>

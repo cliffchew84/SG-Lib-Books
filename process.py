@@ -4,7 +4,7 @@ def process_all_unique_books(response):
 
 def process_all_avail_books(response):
     return set(i['TitleName'] for i in response if i["StatusDesc"] ==
-                "Available")
+               "Available")
 
 
 def process_all_unique_lib(response):
