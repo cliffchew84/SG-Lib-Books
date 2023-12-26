@@ -558,6 +558,59 @@ async def book_status_progress_bar(request: Request,
     })
 
 
+@app.get("/update_header", response_class=HTMLResponse)
+async def update_header(request: Request,
+                        db=Depends(get_db),
+                        username=Depends(manager)):
+
+    response = process_user_book_data(
+        db=db, username=username.get("UserName"))
+
+    # Processing necessary statistics
+    all_unique_books = process.process_all_unique_books(response)
+    all_avail_books = process.process_all_avail_books(response)
+    all_unique_lib = process.process_all_unique_lib(response)
+    all_avail_bks_by_lib = process.process_all_avail_bks_by_lib(response)
+    lib_book_summary = process.process_lib_book_summary(
+        all_unique_lib, all_avail_bks_by_lib)
+
+    update_status = None
+    if m_db.mg_query_status(db=db, username=username.get("UserName")):
+        update_status = "Updating In Progress!"
+
+    # Check if user has a default library
+    user_info = m_db.mg_query_user_info(db, username.get("UserName"))
+    preferred_lib = user_info.get("preferred_lib")
+
+    if preferred_lib:
+        preferred_lib = preferred_lib.lower()
+        output = []
+        for book in response:
+            if preferred_lib in book['BranchName'].lower():
+                output.append(book)
+
+    else:
+        preferred_lib = 'all'
+        output = response
+
+    lib_avail = len(process.process_all_avail_books(output))
+    lib_all = len(process.process_all_unique_books(output))
+
+    return templates.TemplateResponse("m_navbar.html", {
+        "request": request,
+        "username": username.get("UserName"),
+        "api_data": output,
+        'all_avail_books': all_avail_books,
+        'all_unique_books': all_unique_books,
+        'avail_books': all_avail_bks_by_lib,
+        'lib_book_summary': lib_book_summary,
+        'lib_avail': lib_avail,
+        'lib_all': lib_all,
+        "library": preferred_lib,
+        "status": update_status
+    })
+
+
 # Experimental navbar updates
 @app.post("/ingest_books_navbar", response_class=HTMLResponse)
 async def ingest_books_navbar(request: Request,
