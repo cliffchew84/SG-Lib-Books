@@ -12,6 +12,7 @@ from datetime import timedelta, datetime
 from typing import Optional
 import urllib.parse
 import pendulum
+import time
 import os
 import re
 
@@ -480,8 +481,12 @@ def bk_info_api_call_n_db_ingest(db, bid_no):
     del book_title['PublishYear']
 
     # Need to clear up my title names now
-    book_title['TitleName'] = book_title['TitleName'].split("/", 1)[0]
+    try:
+        book_title['TitleName'] = book_title['TitleName'].split("/", 1)[0]
+    except Exception:
+        pass
 
+    print(book_title)
     m_db.mg_add_book_info(db=db, books_info_input=book_title)
 
 
@@ -620,6 +625,7 @@ async def ingest_books_navbar(request: Request,
 
     for bid in bids:
         BID = str(bid)
+        print(BID)
         # Makes API to bk info and bk avail and ingest the data into DB
         m_db.mg_add_user_book(db=db,
                               username=username.get("UserName"),
@@ -627,6 +633,7 @@ async def ingest_books_navbar(request: Request,
 
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
         update_bk_avail_in_mongo(db, BID)
+        time.sleep(2)
 
     # Update the books calculation on the navbar
     response = process_user_book_data(
