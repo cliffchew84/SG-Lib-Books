@@ -632,8 +632,9 @@ async def ingest_books_navbar(request: Request,
                               bid_no=BID)
 
         bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
-        update_bk_avail_in_mongo(db, BID)
         time.sleep(2)
+        update_bk_avail_in_mongo(db, BID)
+        print("print started book_available update")
 
     # Update the books calculation on the navbar
     response = process_user_book_data(
