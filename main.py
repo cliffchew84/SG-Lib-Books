@@ -1014,36 +1014,3 @@ async def delete_user(request: Request,
 
     m_db.mg_delete_user(db, username=username.get("UserName"))
     return RedirectResponse("/logout", status_code=status.HTTP_302_FOUND)
-
-
-lib_locations = ['Ang Mo Kio Public Library', 'Bedok Public Library',
-                 'Bishan Public Library', 'Bukit Panjang Public Library',
-                 'Cheng San Public Library', 'Choa Chu Kang Public Library',
-                 'Clementi Public Library', 'Geylang East Public Library',
-                 'Jurong Regional Library', 'Jurong West Public Library',
-                 'National Library', 'Online',
-                 'Pasir Ris Public Library', 'Punggol Regional Library',
-                 'Queenstown Public Library', 'Sengkang Public Library',
-                 'Serangoon Public Library', 'Tampines Regional Library',
-                 'The LLiBrary', 'Toa Payoh Public Library',
-                 'Woodlands Regional Library', 'Yishun Public Library',
-                 'library@chinatown', 'library@harbourfront',
-                 'library@orchard']
-
-
-@app.get("/events", response_class=HTMLResponse)
-async def show_events(request: Request,
-                      lib: str = "Online",
-                      db=Depends(get_db),
-                      username=Depends(manager)):
-
-    final_output = m_db.get_lib_events(db, lib)
-
-    return templates.TemplateResponse("m_lib_events.html", {
-        "request": request,
-        "username": username.get("UserName"),
-        "lib_events": final_output,
-        "total_records": len(final_output),
-        'lib_locations': lib_locations,
-        "selected_lib": lib
-    })
