@@ -508,7 +508,6 @@ def update_all_user_books(db, username):
         db=db, username=username.get("UserName"))
 
     m_db.mg_insert_status(db, username=username.get("UserName"))
-
     m_db.mg_update_user_info(db,
                              username=username.get("UserName"),
                              dict_values_to_add={'books_updated': 0})
@@ -516,7 +515,7 @@ def update_all_user_books(db, username):
     for i, ubid in enumerate(user_bids):
         bid_no = ubid.get("BID")
         print(bid_no)
-        time.sleep(1)
+        time.sleep(2)
         update_bk_avail_in_mongo(db, bid_no)
         m_db.mg_update_user_info(db,
                                  username=username.get("UserName"),
