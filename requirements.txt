@@ -5,7 +5,7 @@ certifi==2023.7.22
 charset-normalizer==2.0.12
 click==8.1.6
 exceptiongroup==1.1.2
-fastapi==0.111.1
+fastapi==0.89.1
 fastapi-login
 h11==0.14.0
 httpcore==0.17.3
