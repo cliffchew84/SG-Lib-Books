@@ -2,7 +2,6 @@ from dash import Dash, html, dcc, Input, Output, callback, State
 import dash_bootstrap_components as dbc
 from utils import data_process as dp
 import plotly.graph_objects as go
-from dotenv import load_dotenv
 from datetime import datetime
 import dash_ag_grid as dag
 import pandas as pd
@@ -13,8 +12,7 @@ import json
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 # Simple parameter to trigger mongoDB instead of using local storage
-load_dotenv()
-api_calls = False
+api_calls = True
 if api_calls:
     current_mth = datetime.now().date().strftime("%Y-%m")
     total_periods = [str(i)[:7] for i in pd.date_range(
