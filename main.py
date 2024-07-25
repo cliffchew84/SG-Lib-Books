@@ -6,6 +6,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
+from fastapi.middleware.wsgi import WSGIMiddleware
+from public_housing import app as public_housing
+
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
@@ -83,6 +86,7 @@ def not_authenticated_exception_handler(request, exception):
 # Application code
 app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
+app.mount("/public_housing", WSGIMiddleware(public_housing.server))
 templates = Jinja2Templates(directory='templates')
 
 
