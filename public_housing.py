@@ -156,7 +156,7 @@ def df_filter(month, town, flat, area_type, max_area, min_area, price_type,
     return fdf
 
 
-app.layout = [
+app.layout = (
     html.Div(
         id="data-store",
         style={"display": "none"},
@@ -376,7 +376,7 @@ app.layout = [
                "textAlign": "center",
                },
     ),
-]
+)
 
 
 # Standardised Dash Input-Output states
