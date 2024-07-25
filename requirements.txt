@@ -34,11 +34,6 @@ pyasn1
 dash==2.4.1
 dash_ag_grid==31.2.0
 dash_bootstrap_components==1.1.0
-dash_leaflet==1.0.15
-spacy>=3.0.0,<4.0.0
-en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
-geopy==2.2.0
 numpy==1.22.2
 pandas==1.4.1
 plotly==5.6.0
-polyline==2.0.2
