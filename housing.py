@@ -79,7 +79,7 @@ else:
 app = Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    requests_pathname_prefix="/public_housing/",
+    requests_pathname_prefix="/housing/",
 )
 
 towns = df.town.unique().tolist()
