@@ -171,45 +171,40 @@ app.layout = html.Div([
                "padding-right": "10px", "padding-left": "10px",
                "color": "#555"},
     ),
-    html.P(
+    dcc.Markdown(
         """
         Explore Singapore's most recent past public housing transactions
         effortlessly with our site! Updated daily with data from data.gov.sg
         through their API service, our tool allows you access to the latest
         information public housing resale data provided by HDB. Currently,
         the data is taken as is, and may not reflect the latest public housing
-        transactions reported by the media.""",
-        style={"textAlign": "left", "color": "#555", "padding": "5px"},
-    ),
-    html.P(
-        """
+        transactions reported by the media.
+
         We built this tool to help you conduct research on the Singapore public
         housing resale market for any purpose, whether you're a prospective
         buyer, seller, or someone just curious about how much your neighbours
         are selling their public homes! Beyond a table of transactions, we have
-        also included some charts to allow you to quickly compare different
-        prices and price / areas. Best view on a desktop, because doing
-        property research on your phone will be such a pain!""",
-        style={"textAlign": "left", "color": "#555", "padding": "5px"},
-    ),
-    html.P([
-        """
+        included a scatter plot to compare home prices with their price per
+        area ( sq metre / sq feet ) and a boxplot distribution of home prices
+        or price per area.
+
+        This website is best view on a desktop. Doing property research on
+        your phone will be such a pain!
+
         Also, if you are interested in how our Singapore public housing resale
         market has been trending in the past few years, visit my other
-        dashboard, """,
-        html.A("SG Public Housing Dashboard",
-               href="https://cliffchew84.github.io/profile/hdb-housing.html"),
-        """ where I cover share broader public housing resale trends, outliers
-        and price category breakdowns."""
-    ], style={"textAlign": "left", "color": "#555", "padding": "5px"},
+        dashboard, [SG Public Housing Dashboard](https://cliffchew84.github.io/profile/hdb-housing.html"),
+        where I cover share broader public housing resale trends, outliers
+        and price category breakdowns.""",
+        style={"textAlign": "left", "color": "#555", "padding": "5px"},
     ),
     dbc.Row([
         dbc.Col(
             dbc.Button(
-                "Open / Close Search",
+                "Filters",
                 id="collapse-button",
                 className="mb-3",
-                color="primary",
+                color="danger",
                 n_clicks=0,
                 style={"verticalAlign": "top"}
             ),
@@ -218,11 +213,39 @@ app.layout = html.Div([
         dbc.Col(
             html.P(
                 id="dynamic-text",
-                style={"textAlign": "center", "padding-top": "15px"}
+                style={"textAlign": "center", "padding-top": "10px"}
             ),
             width="auto"
         ),
-    ]),
+        dbc.Col(
+            dbc.Button(
+                "Caveats",
+                id="collapse-caveats",
+                className="mb-3",
+                color="danger",
+                n_clicks=0,
+                style={"verticalAlign": "top"}
+            ),
+            width="auto"
+        ),
+    ], justify="center"),
+    dbc.Collapse(
+        dbc.Card(
+            dbc.CardBody([
+                dcc.Markdown("""
+                1. Area provided by HDB is in square metres. Calculations for
+                square feet are done by taking square metres by 10.7639.
+                2. Lease left is calculated from remaining lease provided by
+                HDB.
+                3. Data is taken from HDB as is. This data source seems
+                slower that transactions reported in the media.
+                4. Information provided here is only meant for research, and
+                shouldn't be seen as financial advice.""")
+            ], style={"textAlign": "left", "color": "#555", "padding": "5px"}),
+        ),
+        id="caveats",
+        is_open=False,
+    ),
     dbc.Collapse(
         dbc.Card(dbc.CardBody([
             html.Div([
@@ -526,15 +549,27 @@ def update_g0(n_clicks, month, town, flat, area_type, max_area, min_area,
     price_area = 'price_sq_m'
     price_label = 'Sq M'
 
+    customdata_set = list(fdf[['town', 'street_name', 'lease_mths', 'area_sqm']
+                              ].to_numpy())
+
     if area_type != "Sq M":
         price_area = 'price_sq_ft'
         price_label = 'Sq Ft'
+        customdata_set = list(fdf[['town', 'street_name', 'lease_mths',
+                                   'area_sq_ft']].to_numpy())
 
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
             y=fdf['price'],  # unchanged
             x=fdf[price_area],
+            customdata=customdata_set,
+            hovertemplate='<i>Price:</i> %{y:$,}<br>' +
+            '<i>Area:</i> %{customdata[3]:,}<br>' +
+            '<i>Price/Area:</i> %{x:$,}<br>' +
+            '<i>Town :</i> %{customdata[0]}<br>' +
+            '<i>Street Name:</i> %{customdata[1]}<br>' +
+            '<i>Lease Left:</i> %{customdata[2]}',
             mode='markers',
             marker_color="rgb(8,81,156)",
         )
@@ -592,6 +627,17 @@ def update_g1(n_clicks, month, town, flat, area_type, max_area, min_area,
     [State("collapse", "is_open")],
 )
 def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+
+@app.callback(
+    Output("caveats", "is_open"),
+    [Input("collapse-caveats", "n_clicks")],
+    [State("caveats", "is_open")],
+)
+def toggle_caveat(n, is_open):
     if n:
         return not is_open
     return is_open
