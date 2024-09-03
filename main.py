@@ -6,9 +6,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi_login import LoginManager
 
-from fastapi.middleware.wsgi import WSGIMiddleware
-from housing import app as housing
-
 # Set up user authentication flows
 from passlib.context import CryptContext
 from datetime import timedelta, datetime
@@ -21,7 +18,7 @@ import re
 
 # My own packages
 import process
-import nlb_rest_api
+import nlb_rest_api as n_api
 import m_db
 
 # Load environment variables
@@ -86,7 +83,6 @@ def not_authenticated_exception_handler(request, exception):
 # Application code
 app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
-app.mount("/housing", WSGIMiddleware(housing.server))
 templates = Jinja2Templates(directory='templates')
 
 
@@ -450,10 +446,8 @@ def update_bk_avail_in_mongo(db, bid_no):
     """
     try:
         # Make API call on book availability
-        bk = nlb_rest_api.get_rest_nlb_api_v2(
-            "GetAvailabilityInfo", input=bid_no)
-
-        all_books_avail = nlb_rest_api.process_rest_all_lib_avail_v2(bk)
+        bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
+        all_books_avail = [n_api.process_bk_avail(i) for i in bk.get("items")]
 
         if len(all_books_avail) > 0:
             # Delete existing MongoDB records
@@ -463,7 +457,6 @@ def update_bk_avail_in_mongo(db, bid_no):
             m_db.mg_add_entire_book_avail(db=db, books_avail=all_books_avail)
 
             return {"API call": True}
-
         else:
             # Something wrong with the NLB API and nothing is updated...
             return {"API call": False}
@@ -475,9 +468,8 @@ def update_bk_avail_in_mongo(db, bid_no):
 def bk_info_api_call_n_db_ingest(db, bid_no):
     # Make API calls to book info and ingest into DB
 
-    book_title_rest_api = nlb_rest_api.get_rest_nlb_api_v2(
-        "GetTitleDetails", input=bid_no)
-    book_title = nlb_rest_api.process_rest_bk_info(book_title_rest_api)
+    book_title_rest_api = n_api.get_bk_data("GetTitleDetails", input=bid_no)
+    book_title = n_api.process_bk_info(book_title_rest_api)
     book_title.update({"BID": str(bid_no)})
 
     # Consider keeping this so that I can show this as well
@@ -499,7 +491,6 @@ async def update_book(BID: str,
                       username=Depends(manager)):
 
     api_result = update_bk_avail_in_mongo(db, BID)
-
     if api_result.get("API call"):
         return RedirectResponse(f"/{username.get('UserName')}/main",
                                 status_code=status.HTTP_302_FOUND)
@@ -507,7 +498,6 @@ async def update_book(BID: str,
 
 def update_all_user_books(db, username):
     """ Update all books linked to user."""
-
     user_bids = m_db.mg_query_user_books_w_bid(
         db=db, username=username.get("UserName"))
 
@@ -749,8 +739,7 @@ async def htmx_search_books(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = nlb_rest_api.get_rest_title(
-            input_dict=search_input, offset=0)
+        titles = n_api.get_title(input_dict=search_input, offset=0)
         total_records = titles.get("totalRecords")
         more_records = titles.get("hasMoreRecords")
 
@@ -782,7 +771,7 @@ async def htmx_search_books(request: Request,
             return empty_table_result
 
         else:
-            all_titles = nlb_rest_api.get_title_process(titles)
+            all_titles = n_api.process_title(titles)
 
             # Only keep physical books for now
             books = [t for t in all_titles if t['type'] == "Book"]
@@ -854,8 +843,7 @@ async def htmx_paginate_search_books(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = nlb_rest_api.get_rest_title(input_dict=search_input,
-                                             offset=offset)
+        titles = n_api.get_title(input_dict=search_input, offset=offset)
         total_records = titles.get("totalRecords")
 
         offset_links = pg_links(int(offset), total_records)
@@ -878,7 +866,7 @@ async def htmx_paginate_search_books(request: Request,
             return empty_table_result
 
         else:
-            all_titles = nlb_rest_api.get_title_process(titles)
+            all_titles = n_api.process_title(titles)
             more_records = titles.get("hasMoreRecords")
 
             # Only keep physical books for now
@@ -1003,7 +991,6 @@ async def update_user(request: Request,
         new_dict.update({"HashedPassword": hashed_password})
 
     m_db.mg_update_user_info(db, username.get("UserName"), new_dict)
-
     return RedirectResponse(f"/profile/{username.get('UserName')}",
                             status_code=status.HTTP_302_FOUND)
 
@@ -1015,9 +1002,3 @@ async def delete_user(request: Request,
 
     m_db.mg_delete_user(db, username=username.get("UserName"))
     return RedirectResponse("/logout", status_code=status.HTTP_302_FOUND)
-
-
-@app.get("/public_housing", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("house_dash.html",
-                                      {"request": request})
