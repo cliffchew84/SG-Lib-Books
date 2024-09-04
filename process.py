@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from typing import Dict, List
 import pendulum
 import re
 
@@ -61,11 +62,24 @@ def process_user_bks(query: str):
     """ Process db result for frontpage """
     response = []
     for a in query:
-        due_date = None
-        if a.get("DueDate"):
-            tmp_date = a.get("DueDate").split("T", 1)[0]
-            input_date = datetime.strptime(tmp_date, "%Y-%m-%d")
-            due_date = input_date.strftime("%d/%m")
+        title = a.get("TitleName", None)
+        if title is not None:
+            try:
+                title = title.split("/", 1)[0]
+            except:
+                pass
+
+        call_no = a.get("CallNumber", None)
+        if call_no is not None:
+            try:
+                call_no = call_no.split(" -", 1)[0]
+            except:
+                pass
+
+        due_date = a.get("DueDate", None)
+        if due_date:
+            due_date = datetime.strptime(
+                due_date.split("T", 1)[0], "%Y-%m-%d").strftime("%d/%m")
 
         update_time = datetime.fromtimestamp(
             a.get("InsertTime"), pendulum.timezone("Asia/Singapore")
@@ -90,12 +104,45 @@ def process_user_bks(query: str):
             library = branch_name
 
         response.append({
-            "TitleName": a.get("TitleName").split("/", 1)[0],
+            "TitleName": title,
             "BranchName": library,
-            "CallNumber": a.get("CallNumber").split(" -", 1)[0],
+            "CallNumber": call_no,
             "StatusDesc": status,
             "UpdateTime": update_time,
             "BID": a.get("BID", None)
         })
 
     return response
+
+
+def process_title(api_input) -> List[Dict]:
+    """ Processes GetTitles API data to fit my origin data structure"""
+    main_list = []
+    for i in api_input.get("titles"):
+        tmp_dict = dict()
+        tmp_dict['TitleName'] = i.get('title', None)
+        tmp_dict['Author'] = i.get('author', None)
+        tmp_dict['BID'] = i.get('brn', None)
+        tmp_dict['DigitalID'] = i.get('digitalId', None)
+        tmp_dict['PublishYear'] = i.get('publishDate', None)
+        tmp_dict["type"] = i.get('format', None).get('name', None)
+        main_list.append(tmp_dict)
+    return main_list
+
+
+def process_bk_avail(nlb_input: Dict):
+    """ Process a single book availability from NLB rest API """
+    output = {
+        "ItemNo": nlb_input.get('itemId', None),
+        "CallNumber": nlb_input.get('callNumber', None),
+        "BranchName": nlb_input.get('location', None).get("name", None),
+        "StatusDesc": nlb_input.get('transactionStatus', None).get("name", None),
+        "DueDate": None,
+        "InsertTime": pendulum.now().int_timestamp,
+        "BID": str(nlb_input.get('brn'))
+    }
+    if output['StatusDesc'] == "On Loan":
+        output.update({'DueDate': nlb_input.get(
+            'transactionStatus', None).get("date", None).split("T", 1)[0]})
+    return output
+

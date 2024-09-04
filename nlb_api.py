@@ -12,16 +12,6 @@ def auth_nlb(app_id, api_key):
     return {'X-App-Code': app_id, 'X-API-KEY': api_key}
 
 
-def process_bk_info(nlb_input: Dict) -> Dict:
-    """ Process book info output from NLB rest API """
-    output = dict()
-    output['BID'] = nlb_input.get('brn')
-    output['TitleName'] = nlb_input.get('title')
-    output['Author'] = nlb_input.get('author')
-    output['PublishYear'] = nlb_input.get('publishDate')
-    return output
-
-
 def get_bk_data(ext_url: str,
                 input: str,
                 offset=None,
@@ -41,7 +31,31 @@ def get_bk_data(ext_url: str,
     return requests.get(final_url, headers=headers, params=payload).json()
 
 
-def get_title(input_dict: Dict,
+def process_bk_info(nlb_input: Dict) -> Dict:
+    """ Process book info output from NLB rest API """
+
+    return {
+        'BID' : nlb_input.get('brn', None),
+        'TitleName': nlb_input.get('title', None),
+        'Author': nlb_input.get('author', None), 
+        'PublishYear' : nlb_input.get('publishDate', None)
+    }
+
+
+def get_process_bk_info(db, bid_no):
+    """ Make API calls to book info and ingest into DB """
+    raw_bk_title = get_bk_data("GetTitleDetails", input=bid_no)
+    bk_title = process_bk_info(raw_bk_title) 
+    bk_title.update({"BID": str(bid_no)})
+    del bk_title['PublishYear']
+
+    title = bk_title.get("TitleName", None)
+    if title:
+        bk_title['TitleName'] = title.split("/", 1)[0]
+    return bk_title
+
+
+def bk_search(input_dict: Dict,
               offset=None,
               app_id: str = APPLICATION_ID,
               api_key: str = API_KEY) -> Dict:
@@ -51,43 +65,8 @@ def get_title(input_dict: Dict,
     input_dict.update({"limit": 30})
     if offset:
         input_dict.update({"Offset": offset})
-
     return requests.get(final_url, headers=headers, params=input_dict).json()
 
-
-def process_title(api_input) -> List[Dict]:
-    """ Processes GetTitles API data to fit my origin data structure"""
-    main_list = []
-    for i in api_input.get("titles"):
-        tmp_dict = dict()
-        tmp_dict['TitleName'] = i.get('title', None)
-        tmp_dict['Author'] = i.get('author', None)
-        tmp_dict['BID'] = i.get('brn', None)
-        tmp_dict['DigitalID'] = i.get('digitalId', None)
-        tmp_dict['PublishYear'] = i.get('publishDate', None)
-        tmp_dict["type"] = i.get('format', None).get('name', None)
-        main_list.append(tmp_dict)
-
-    return main_list
-
-
-def process_bk_avail(nlb_input: Dict):
-    """ Process a single book availability from NLB rest API """
-    output = dict()
-    output['ItemNo'] = nlb_input.get('itemId', None)
-    output['CallNumber'] = nlb_input.get('callNumber', None)
-    output['BranchName'] = nlb_input.get('location', None).get("name", None)
-    output['StatusDesc'] = nlb_input.get('transactionStatus', None).get("name",
-                                                                        None)
-    if output['StatusDesc'] == "On Loan":
-        output['DueDate'] = nlb_input.get(
-            'transactionStatus', None).get("date", None).split("T", 1)[0]
-    else:
-        output['DueDate'] = None
-
-    output.update({"InsertTime": pendulum.now().int_timestamp})
-    output['BID'] = str(nlb_input.get('brn'))
-    return output
 
 # eResource
 def get_eresource_info(input_dict: Dict) -> List[Dict]:
@@ -108,18 +87,14 @@ def process_single_eresource_info(raw_bk: Dict) -> Dict:
     - isbns are needed to make extra API calls to get eResource availabilities
     - Need to keep other details as I found records with missing isbns
     """
-
-    # Single book process
-    single_bk = dict()
-    single_bk['title'] = raw_bk['title'].replace(
-        " [electronic resource] ", " ")
-    single_bk['url'] = raw_bk['resourceUrlExt']
-    single_bk['authors'] = " | ".join(raw_bk['authors'])
-    single_bk['isbns'] = " | ".join(
-        [''.join(filter(str.isdigit, i)) for i in raw_bk["isbns"]])
+    bk = dict()
+    bk['title'] = raw_bk['title'].replace(" [electronic resource] ", " ")
+    bk['url'] = raw_bk['resourceUrlExt']
+    bk['authors'] = " | ".join(raw_bk['authors'])
+    bk['isbns'] = " | ".join([''.join(filter(str.isdigit, i)) for i in raw_bk["isbns"]])
 
     # Combine all book results into a single list
-    return single_bk
+    return bk
 
 
 def get_eresource_avail(isbn: str):

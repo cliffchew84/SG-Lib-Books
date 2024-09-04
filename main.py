@@ -370,7 +370,7 @@ def update_bk_avail_in_mongo(db, bid_no):
     try:
         # Make API call on book availability
         bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
-        all_avail_bks = [n_api.process_bk_avail(i) for i in bk.get("items")]
+        all_avail_bks = [p.process_bk_avail(i) for i in bk.get("items")]
 
         if len(all_avail_bks) > 0:
             m_db.delete_bk_avail(db=db, bid_no=bid_no)
@@ -385,23 +385,6 @@ def update_bk_avail_in_mongo(db, bid_no):
         return {"API call": False}
 
 
-def bk_info_api_call_n_db_ingest(db, bid_no):
-    # Make API calls to book info and ingest into DB
-    book_title_rest_api = n_api.get_bk_data("GetTitleDetails", input=bid_no)
-    book_title = n_api.process_bk_info(book_title_rest_api)
-    book_title.update({"BID": str(bid_no)})
-
-    # Consider keeping this so that I can show this as well
-    del book_title['PublishYear']
-
-    # Need to clear up my title names now
-    try:
-        book_title['TitleName'] = book_title['TitleName'].split("/", 1)[0]
-    except Exception:
-        pass
-
-    print(book_title)
-    m_db.add_book_info(db=db, books_info_input=book_title)
 
 
 @app.post("/update_book/{BID}", response_class=HTMLResponse)
@@ -426,8 +409,10 @@ def update_all_user_books(db, username):
     for i, ubid in enumerate(user_bids):
         bid_no = ubid.get("BID")
         print(bid_no)
+
         time.sleep(2)
         update_bk_avail_in_mongo(db, bid_no)
+
         m_db.update_user_info(db, username=username,
                               dict_values_to_add={'books_updated': i+1})
     m_db.delete_status(db, username=username)
@@ -532,10 +517,16 @@ async def ingest_books_navbar(request: Request,
         BID = str(bid)
         print(BID)
         # Makes API to bk info and bk avail and ingest the data into DB
-        m_db.add_user_book(db=db, username=username, bid_no=BID)
-        bk_info_api_call_n_db_ingest(db=db, bid_no=BID)
+        bk_title = n_api.get_process_bk_info(db=db, bid_no=BID)
+
         time.sleep(2)
         update_bk_avail_in_mongo(db, BID)
+
+        # Do all the adding at the end, after everything is confirmed
+        # This also doesn't require any time.sleep() as this is with my own DB
+        m_db.add_user_book(db=db, username=username, bid_no=BID)
+        m_db.add_book_info(db=db, books_info_input=bk_title)
+
         print("print started book_available update")
 
     # Update the books calculation on the navbar
@@ -583,12 +574,7 @@ async def delete_books(request: Request,
 
     output = []
     if username:
-        # Get all the books linked to the user.
-        # This is the complicated query
-        output = m_db.q_user_bks_subset(
-            db=db, username=username.get("UserName"))
-
-        # Update books available calculation in navbar
+        output = m_db.q_user_bks_subset(db=db, username=username)
         query = m_db.q_user_bks_full(db=db, username=username)
         response = p.process_user_bks(query)
 
@@ -617,7 +603,7 @@ async def htmx_bk_search(request: Request,
                          db=Depends(get_db),
                          username=Depends(manager)):
     """ Calls NLB API GetTitles Search and show results in search_table.html"""
-    final_response, search_input = list(), dict()
+    bk_output, search_input = [], dict()
     username = username.get("UserName")
 
     if book_search:
@@ -629,7 +615,7 @@ async def htmx_bk_search(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = n_api.get_title(input_dict=search_input, offset=0)
+        titles = n_api.bk_search(input_dict=search_input, offset=0)
         total_records = titles.get("totalRecords", None)
         more_records = titles.get("hasMoreRecords", None)
         offset_links = p.pg_links(0, total_records)
@@ -642,14 +628,14 @@ async def htmx_bk_search(request: Request,
             "keyword": book_search,
             "author": author,
             "username": username,
-            "api_data": final_response,
+            "api_data": bk_output,
         })
 
-        elist = [400, 404, 500, 401, 405, 429]
-        if titles.get("statusCode") in elist or titles.get("totalRecords") == 0:
+        errors = [400, 404, 500, 401, 405, 429]
+        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
             return empty_table_result
         else:
-            all_titles = n_api.process_title(titles)
+            all_titles = p.process_title(titles)
             # Only keep physical books for now
             final_titles = [t for t in all_titles if t['type'] == "Book"]
             if e_resources:
@@ -660,28 +646,27 @@ async def htmx_bk_search(request: Request,
             # Search user book BIDs and disable add book if user saved the book
             user_books = m_db.q_user_bks_full(db=db, username=username)
             bid_checks = set(i.get("BID") for i in user_books)
-            for book in final_titles:
-                bid = book.get('BID') if book.get(
-                    'DigitalID') is None else book.get('DigitalID')
+            for bk in final_titles:
+                bid = bk.get('BID') if bk.get(
+                    'DigitalID') is None else bk.get('DigitalID')
                 bid = str(bid)
 
-                title = book.get("TitleName", "")
-                title = title.split(" / ", 1)[0].strip()
+                title = bk.get("TitleName", " / ").split(" / ", 1)[0].strip()
 
                 # Enable disable button if book is already saved
                 disable = "disabled" if bid in bid_checks else ""
 
-                book['TitleName'] = title + " | " + bid
-                book['BID'] = disable + " | " + bid
+                bk['TitleName'] = title + " | " + bid
+                bk['BID'] = disable + " | " + bid
 
-                final_response.append(book)
+                bk_output.append(bk)
 
     return templates.TemplateResponse("search_table.html", {
         "request": request,
         "keyword": book_search,
         "author": author,
         "username": username,
-        "api_data": final_response,
+        "api_data": bk_output,
         "total_records": total_records,
         "more_records": more_records,
         "offset_links": offset_links,
@@ -710,7 +695,7 @@ async def htmx_paginate_bk_search(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = n_api.get_title(input_dict=search_input, offset=offset)
+        titles = n_api.bk_search(input_dict=search_input, offset=offset)
         total_records = titles.get("totalRecords")
         offset_links = p.pg_links(int(offset), total_records)
 
@@ -722,11 +707,11 @@ async def htmx_paginate_bk_search(request: Request,
             "api_data": final_response,
         })
 
-        elist = [400, 404, 500, 401, 405, 429]
-        if titles.get("statusCode") in elist | titles.get("totalRecords") == 0:
+        errors = [400, 404, 500, 401, 405, 429]
+        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
             return empty_table_result
         else:
-            all_titles = n_api.process_title(titles)
+            all_titles = p.process_title(titles)
             more_records = titles.get("hasMoreRecords")
 
             # Only keep physical books for now
@@ -832,7 +817,6 @@ async def update_user(request: Request,
                 "preferred_lib": preferred_lib,
                 "pw_qn": pw_qn,
                 "pw_ans": pw_ans}
-
     if password:
         hashed_password = get_hashed_password(password)
         new_dict.update({"HashedPassword": hashed_password})
