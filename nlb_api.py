@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import pendulum
 from typing import Dict, List
@@ -28,8 +29,15 @@ def get_bk_data(ext_url: str,
         payload = {'Keywords': input}
         if offset:
             payload.update({"Offset": offset})
-    return requests.get(final_url, headers=headers, params=payload).json()
+    
+    json_output = requests.get(final_url, headers=headers, params=payload).json() 
 
+    while json_output.get('statusCode') == 429:
+        print("Please wait for awhile. We are hitting NLB too hard!")
+        time.sleep(2)
+        json_output = requests.get(final_url, headers=headers, params=payload).json() 
+    
+    return json_output
 
 def process_bk_info(nlb_input: Dict) -> Dict:
     """ Process book info output from NLB rest API """
@@ -65,7 +73,17 @@ def bk_search(input_dict: Dict,
     input_dict.update({"limit": 30})
     if offset:
         input_dict.update({"Offset": offset})
-    return requests.get(final_url, headers=headers, params=input_dict).json()
+
+    json_output = requests.get(
+        final_url, headers=headers, params=input_dict).json()
+
+    while json_output.get('statusCode') == 429:
+        print("Please wait for awhile. We are hitting NLB too hard!")
+        time.sleep(2)
+        json_output = requests.get(
+            final_url, headers=headers, params=input_dict).json()
+
+    return json_output
 
 
 # eResource
