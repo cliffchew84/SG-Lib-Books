@@ -4,6 +4,13 @@ import requests
 import pendulum
 from typing import Dict, List
 
+# This script focuses on functions that interacts with the NLB API. I have added
+# a bit more robust code by checking if the code hits any statusCode 429 issue,
+# which is the rate limiting error from NLB. I also tried to make sure that all
+# dictionary convrsions from NLB uses .get("var_name", None), to ensure
+# that I at least always have that parameter as a None if it is missing.
+# Hopefully this helps with reducing any error at the ingestion into MongoDB.
+
 # Add os.environ for authentication
 APPLICATION_ID = os.environ['nlb_rest_app_id']
 API_KEY = os.environ['nlb_rest_api_key']

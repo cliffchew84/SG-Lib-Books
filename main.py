@@ -361,11 +361,11 @@ async def show_avail_m_books(request: Request,
 
 def update_bk_avail_in_mongo(db, bid_no: str):
     """ 
-    Takes in a single BID to get its avail info
-    Processes data to load into mongoDB
+    Takes in single BID to get its avail info
+    Processes data for mongoDB
 
     # Should separate these functions!
-    Existing MongoDB data is cleared
+    Delete existing MongoDB data if found
     Inject new data into MongoDB
     """
     try:
