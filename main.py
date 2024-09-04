@@ -18,7 +18,7 @@ import re
 
 # My own packages
 import process as p
-import nlb_rest_api as n_api
+import nlb_api as n_api
 import m_db
 
 # Load environment variables

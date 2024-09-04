@@ -1,5 +1,5 @@
 import os
-from nlb_rest_api import get_bk_data 
+from nlb_api import get_bk_data 
 
 APPLICATION_ID = os.environ['nlb_rest_app_id']
 API_KEY = os.environ['nlb_rest_api_key']
