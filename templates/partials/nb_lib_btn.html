@@ -1,5 +1,5 @@
 <li>
-    <details>
+    <details class='dropdown'>
         <summary class="hover:text-white hover:bg-sky-500">
             <i class="fas fa-city"></i>Libraries
         </summary>
@@ -30,3 +30,14 @@
         </ul>
     </details>
 </li>
+
+<script>
+    window.addEventListener('click', function (e) {
+        document.querySelectorAll('.dropdown').forEach(function (dropdown) {
+            if (!dropdown.contains(e.target)) {
+                // Click was outside the dropdown, close it
+                dropdown.open = false;
+            }
+        });
+    });
+</script>
