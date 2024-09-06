@@ -33,9 +33,10 @@ Test GetAvail API
 ```{python}
 # Note that I already have to put a time.sleep(2) here just so that my API calls
 # can work
-# time.sleep(1)
-# bid_no = 14484799
-# bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
+time.sleep(1)
+bid_no = 14484799
+bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
+print(bk)
 # all_avail_bks = pl.DataFrame([p.process_bk_avail(i) for i in bk.get("items")])
 # print(all_avail_bks)
 ```
@@ -43,10 +44,10 @@ Test GetAvail API
 Test GetTitleDetails API
 ```{python}
 # Already putting time.sleep(2) for single API calls 
-# time.sleep(1)
-# bid_no = 14484799
-# bk = n_api.get_bk_data("GetTitleDetails", input=bid_no)
-# print(bk)
+time.sleep(1)
+bid_no = 14484799
+bk = n_api.get_bk_data("GetTitleDetails", input=bid_no)
+print(bk)
 ```
 
 Test bk_search API
