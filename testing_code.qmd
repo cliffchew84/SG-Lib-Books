@@ -44,25 +44,25 @@ print(bk)
 Test GetTitleDetails API
 ```{python}
 # Already putting time.sleep(2) for single API calls 
-time.sleep(1)
-bid_no = 14484799
-bk = n_api.get_bk_data("GetTitleDetails", input=bid_no)
-print(bk)
+# time.sleep(1)
+# bid_no = 14484799
+# bk = n_api.get_bk_data("GetTitleDetails", input=bid_no)
+# print(bk)
 ```
 
 Test bk_search API
 ```{python}
 # Already putting time.sleep(2) for single API calls 
-# time.sleep(1)
-# bk = n_api.bk_search(input_dict={"Title": "Python"})
-# print(bk)
+time.sleep(1)
+bk = n_api.bk_search(input_dict={"Title": "Python"})
+print(bk)
 ```
 
 ```{python}
-# time.sleep(1)
-# wrong_data = "xxssyrtarar"
-# bk = n_api.get_bk_data("GetAvailabilityInfo", input=wrong_data)
-# print(bk)
+time.sleep(1)
+wrong_data = "xxssyrtarar"
+bk = n_api.get_bk_data("GetAvailabilityInfo", input=wrong_data)
+print(bk)
 
 ```
 StatusCode 400 is the bad request
