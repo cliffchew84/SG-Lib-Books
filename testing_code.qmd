@@ -1,0 +1,103 @@
+---
+title: "Testing My Code"
+format:
+  html:
+    code-fold: true
+    grid:
+      body-width: 1400px
+      sidebar-width: 0px
+      margin-width: 0px
+      gutter-width: 1em
+jupyter: python3
+---
+
+```{python}
+import os
+import nlb_api as n_api
+import process as p
+import polars as pl
+import time
+import json
+
+APPLICATION_ID = os.environ['nlb_rest_app_id']
+API_KEY = os.environ['nlb_rest_api_key']
+
+```
+Test SearchTitles API
+```{python}
+# output = n_api.get_bk_data("SearchTitles", input="Python")
+# print(output.get('hasMoreRecords'))
+```
+
+Test GetAvail API
+```{python}
+# Note that I already have to put a time.sleep(2) here just so that my API calls
+# can work
+# time.sleep(1)
+# bid_no = 14484799
+# bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
+# all_avail_bks = pl.DataFrame([p.process_bk_avail(i) for i in bk.get("items")])
+# print(all_avail_bks)
+```
+
+Test GetTitleDetails API
+```{python}
+# Already putting time.sleep(2) for single API calls 
+# time.sleep(1)
+# bid_no = 14484799
+# bk = n_api.get_bk_data("GetTitleDetails", input=bid_no)
+# print(bk)
+```
+
+Test bk_search API
+```{python}
+# Already putting time.sleep(2) for single API calls 
+# time.sleep(1)
+# bk = n_api.bk_search(input_dict={"Title": "Python"})
+# print(bk)
+```
+
+```{python}
+# time.sleep(1)
+# wrong_data = "xxssyrtarar"
+# bk = n_api.get_bk_data("GetAvailabilityInfo", input=wrong_data)
+# print(bk)
+
+```
+StatusCode 400 is the bad request
+```{python}
+# time.sleep(1)
+# right_data = 14484799
+# bk = n_api.get_bk_data("GetAvailabilityInfo", input=right_data)
+# print(bk)
+
+# wrong_data = "xxssyrtarar"
+# bk = n_api.get_bk_data("GetAvailabilityInfo", input=wrong_data)
+# print(bk)
+# all_avail_bks = pl.DataFrame([p.process_bk_avail(i) for i in bk.get("items")])
+# print(all_avail_bks)
+```
+
+Test results from "SPSS for dummies"
+```{python}
+time.sleep(1)
+search_input={"Title": "SPSS for dummies"}
+titles = n_api.bk_search(input_dict=search_input)
+total_records = titles.get("totalRecords")
+
+for i in titles.get('titles'): 
+    if i.get('format', None).get('name', None) == "Book":
+        print(
+            i.get("availability"), "|",
+            i.get("brn"), "|",
+            i.get("title").split(" : ")[0].split(" / ")[0], "|",
+        )
+```
+
+```{python}
+time.sleep(1)
+bid_no = 13706621
+bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
+bk_count = bk.get("count")
+print(f"{bid_no} | {bk_count}")
+```

@@ -93,8 +93,19 @@ def bk_search(input_dict: Dict,
     return json_output
 
 
+def check_bk_avail(bid_no: int):
+    """ To check the availability of book by count 
+        if bk.get('count') == 0, this means that this
+        book isn't searchable on the actual NLB app!
+    """
+    bk = get_bk_data("GetAvailabilityInfo", input=bid_no)
+    return bk.get("count")
+
+
 # eResource
-def get_eresource_info(input_dict: Dict) -> List[Dict]:
+# None of these functions are used, because the API results from the original
+# books already provide eBooks data as well that I am using
+def get_ebk_info(input_dict: Dict) -> List[Dict]:
     """ Get eResource book info, using dictionary
         with keys of either 'title', 'creator' or both
 
@@ -107,7 +118,7 @@ def get_eresource_info(input_dict: Dict) -> List[Dict]:
     return requests.get(url, headers=headers, params=input_dict).json()
 
 
-def process_single_eresource_info(raw_bk: Dict) -> Dict:
+def process_ebk_info(raw_bk: Dict) -> Dict:
     """ Process required eResource book data to get a list of isbns
     - isbns are needed to make extra API calls to get eResource availabilities
     - Need to keep other details as I found records with missing isbns
@@ -117,12 +128,10 @@ def process_single_eresource_info(raw_bk: Dict) -> Dict:
     bk['url'] = raw_bk['resourceUrlExt']
     bk['authors'] = " | ".join(raw_bk['authors'])
     bk['isbns'] = " | ".join([''.join(filter(str.isdigit, i)) for i in raw_bk["isbns"]])
-
-    # Combine all book results into a single list
     return bk
 
 
-def get_eresource_avail(isbn: str):
+def get_ebk_avail(isbn: str):
     """ Get eResource availability by ISBN """
     url = "https://openweb.nlb.gov.sg/api/v1/EResource/GetAvailabilityInfo"
     headers = auth_nlb(APPLICATION_ID, API_KEY)
@@ -130,7 +139,7 @@ def get_eresource_avail(isbn: str):
     return requests.get(url, headers=headers, params=payload).json()
 
 
-def process_single_eresource_avail(raw_bk: Dict) -> Dict:
+def process_ebk_avail(raw_bk: Dict) -> Dict:
     " Additional eResource availability data to include into eResource info "
     output_bk = dict()
     output_bk['total'] = raw_bk.get('totalCopies')
