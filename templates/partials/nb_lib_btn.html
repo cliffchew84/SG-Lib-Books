@@ -11,7 +11,7 @@
                 </a>
             </li>
             <li>
-                <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-get="/{{username}}/m_lib/all"
+                <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-get="/{{username}}/lib/all"
                     hx-target=".main_content" hx-indicator="#head-spinner">
                     <i class="fas fa-city"></i>
                     All Libraries - {{all_avail_books|length}}
@@ -21,7 +21,7 @@
             {% for lib in lib_book_summary %}
             <li>
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-target=".main_content"
-                    hx-get="/{{username}}/m_lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
+                    hx-get="/{{username}}/lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
                     {{lib.keys()|list|first}} -
                     {{lib.values()|list|first}}
                 </a>

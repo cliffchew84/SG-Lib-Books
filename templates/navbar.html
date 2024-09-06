@@ -3,8 +3,6 @@
 
     <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
         <a class="text-white text-2xl">SGLibReads [Beta]</a>
-        <a class="ml-auto text-white hover:bg-sky-700 mr-1 mt-1.5" target="_blank"
-            href='https://www.notion.so/cliffchew/SG-Libraries-App-Changelog-c9842dba13684212b6df1567688cffc8'>Changelog</a>
     </div>
 
     {% else %}
@@ -23,12 +21,12 @@
                 <ul tabindex="0"
                     class="bg-sky-700 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
 
-                    {% include 'm_nb_lib_btn.html' %}
-                    {% include 'm_nb_bk_search_logout.html' %}
+                    {% include 'partials/nb_lib_btn.html' %}
+                    {% include 'partials/nb_bk_search_logout_btns.html' %}
 
                 </ul>
             </div>
-            {% include 'm_nb_profile_btn.html' %}
+            {% include 'partials/nb_profile_btn.html' %}
             <div class="lg:hidden">
                 <span id='head-spinner' class="text-white justify-center pt-2 px-2 
                 htmx-indicator loading loading-ball loading-xs"></span>
@@ -57,9 +55,9 @@
                 htmx-indicator loading loading-ball loading-xs"></span>
                 </div>
 
-                {% include 'm_nb_profile_btn.html' %}
-                {% include 'm_nb_lib_btn.html' %}
-                {% include 'm_nb_bk_search_logout.html' %}
+                {% include 'partials/nb_profile_btn.html' %}
+                {% include 'partials/nb_lib_btn.html' %}
+                {% include 'partials/nb_bk_search_logout_btns.html' %}
 
                 <div class="hidden lg:flex">
                     <span id='head-spinner' class="text-white justify-center pt-2 px-2 
