@@ -287,7 +287,7 @@ async def htmx_main(request: Request,
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@app.get("/{username}/m_yourbooks")
+@app.get("/{username}/user_bks")
 async def m_current_books(request: Request,
                           db=Depends(get_db),
                           username=Depends(manager)):
@@ -301,7 +301,7 @@ async def m_current_books(request: Request,
         output = []
         if username:
             output = m_db.q_user_bks_subset(db=db, username=username)
-            return templates.TemplateResponse("m_yourbooks.html", {
+            return templates.TemplateResponse("user_bks.html", {
                 "request": request,
                 "username": username,
                 "api_data": output,
@@ -313,7 +313,7 @@ async def m_current_books(request: Request,
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@app.get("/{username}/m_lib/{library}/", response_class=HTMLResponse)
+@app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
 async def show_avail_m_books(request: Request,
                              library: Optional[str],
                              db=Depends(get_db),
@@ -342,7 +342,7 @@ async def show_avail_m_books(request: Request,
             lib_avail = len(p.get_avail_bks(output))
             lib_all = len(p.get_unique_bks(output))
 
-            return templates.TemplateResponse("m_result.html", {
+            return templates.TemplateResponse("result.html", {
                 "request": request,
                 "username": username,
                 "api_data": output,
@@ -361,11 +361,11 @@ async def show_avail_m_books(request: Request,
 
 def update_bk_avail_in_mongo(db, bid_no: str):
     """ 
-    Takes in a single BID to get its avail info
-    Processes data to load into mongoDB
+    Takes in single BID to get its avail info
+    Processes data for mongoDB
 
     # Should separate these functions!
-    Existing MongoDB data is cleared
+    Delete existing MongoDB data if found
     Inject new data into MongoDB
     """
     try:
@@ -424,7 +424,7 @@ async def update_user_saved_bks(background_tasks: BackgroundTasks,
                                 username=Depends(manager)):
     """ Updates availability of all user's saved books """
     background_tasks.add_task(update_all_user_books, db, username)
-    return RedirectResponse(f"/{username.get('UserName')}/m_lib/all",
+    return RedirectResponse(f"/{username.get('UserName')}/lib/all",
                             status_code=status.HTTP_302_FOUND)
 
 
@@ -490,7 +490,7 @@ async def update_header(request: Request,
     lib_avail = len(p.get_avail_bks(output))
     lib_all = len(p.get_unique_bks(output))
 
-    return templates.TemplateResponse("m_navbar.html", {
+    return templates.TemplateResponse("navbar.html", {
         "request": request,
         "username": username,
         "api_data": output,
@@ -539,7 +539,7 @@ async def ingest_books_navbar(request: Request,
     avail_bks_by_lib = p.get_avail_bks_by_lib(response)
     lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
 
-    return templates.TemplateResponse("m_navbar.html", {
+    return templates.TemplateResponse("navbar.html", {
         "request": request,
         "username": username,
         'all_avail_books': all_avail_books,
@@ -584,7 +584,7 @@ async def delete_books(request: Request,
         avail_bks_by_lib = p.get_avail_bks_by_lib(response)
         lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
 
-    return templates.TemplateResponse("m_yourbooks.html", {
+    return templates.TemplateResponse("user_bks.html", {
         "request": request,
         "username": username,
         "api_data": output,
@@ -622,7 +622,7 @@ async def htmx_bk_search(request: Request,
         m_db.user_search_tracking(db, table="user_search", username=username,
                                   search_params=search_params)
 
-        empty_table_result = templates.TemplateResponse("search_table.html", {
+        empty_table_result = templates.TemplateResponse("partials/search_table.html", {
             "request": request,
             "keyword": book_search,
             "author": author,
@@ -660,7 +660,7 @@ async def htmx_bk_search(request: Request,
 
                 bk_output.append(bk)
 
-    return templates.TemplateResponse("search_table.html", {
+    return templates.TemplateResponse("partials/search_table.html", {
         "request": request,
         "keyword": book_search,
         "author": author,
@@ -698,7 +698,7 @@ async def htmx_paginate_bk_search(request: Request,
         total_records = titles.get("totalRecords")
         offset_links = p.pg_links(int(offset), total_records)
 
-        empty_table_result = templates.TemplateResponse("search_table.html", {
+        empty_table_result = templates.TemplateResponse("partials/search_table.html", {
             "request": request,
             "keyword": book_search,
             "author": author,
@@ -741,7 +741,7 @@ async def htmx_paginate_bk_search(request: Request,
 
                 final_response.append(book)
 
-    return templates.TemplateResponse("search_table.html", {
+    return templates.TemplateResponse("partials/search_table.html", {
         "request": request,
         "keyword": book_search,
         "author": author,
@@ -754,8 +754,8 @@ async def htmx_paginate_bk_search(request: Request,
     })
 
 
-@app.get("/{username}/m_search/", response_class=HTMLResponse)
-async def m_search_books(request: Request,
+@app.get("/{username}/search/", response_class=HTMLResponse)
+async def search_books(request: Request,
                          book_search: Optional[str] = None,
                          author: Optional[str] = None,
                          db=Depends(get_db),
@@ -764,7 +764,7 @@ async def m_search_books(request: Request,
     if m_db.query_status(db=db, username=username.get("UserName")):
         update_status = "Updating In Progress!"
 
-    return templates.TemplateResponse("m_search.html", {
+    return templates.TemplateResponse("search.html", {
         "request": request,
         "keyword": book_search,
         "author": author,
@@ -773,8 +773,8 @@ async def m_search_books(request: Request,
     })
 
 
-@app.get("/{username}/m_profile", response_class=HTMLResponse)
-async def user_m_profile(request: Request,
+@app.get("/{username}/profile", response_class=HTMLResponse)
+async def user_profile(request: Request,
                          db=Depends(get_db),
                          username=Depends(manager)):
 
@@ -788,7 +788,7 @@ async def user_m_profile(request: Request,
 
     # Query user profile info from database
     user_info = m_db.query_user_info(db, username)
-    return templates.TemplateResponse("m_profile.html", {
+    return templates.TemplateResponse("profile.html", {
         "request": request,
         "username": username,
         "email_address": user_info.get("email_address", None),

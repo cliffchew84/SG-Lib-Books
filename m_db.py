@@ -4,6 +4,11 @@ from datetime import datetime
 import time
 import os
 
+# This scripts focus on functions solely to interact with MongoDB. The good
+# thing is that MongoDB has no rate limiting. However, I need to improve on
+# debugging issues with MongoDB, which I actually figured should be at the NLB
+# API call portions of my code instead, which is under nlb_api.py 
+
 # MongoDB credentials
 MONGO_PASSWORD = os.environ["mongo_pw"]
 base_url = "mongodb+srv://cliffchew84:"

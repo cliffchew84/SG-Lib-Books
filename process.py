@@ -3,6 +3,12 @@ from typing import Dict, List
 import pendulum
 import re
 
+# This script focuses purely on functions that processes my data. The good thing
+# is this script doesn't require the nlb_api nor the m_db api, so everything
+# happens on the Python programming level itself. In a way, this is also the
+# transition layer between the raw data from NLB to the processed data that is
+# to be ingested into MongoDB.
+
 
 def get_unique_bks(response):
     return set(i["TitleName"] for i in response)
@@ -13,16 +19,15 @@ def get_avail_bks(response):
 
 
 def get_unique_libs(response):
-    output = sorted(set(i['BranchName'] for i in response))
-    output = [i.split("Public Library", 1)[0].split("Library", 1)[0] for i in output]
-    return output
+    op = sorted(set(i['BranchName'] for i in response))
+    return [i.split("Public Library", 1)[0].split("Library", 1)[0] for i in op]
 
 
 def get_avail_bks_by_lib(response):
-    """ Get available library books by library """
+    """ Get avail bks at lib level """
     avail_bks_by_lib = []
     for book in response:
-        if book['StatusDesc'] == "Available":
+        if book.get('StatusDesc', None) == "Available":
             avail_bks_by_lib.append(book)
 
     unique_avail_bks_by_lib = list(
@@ -31,13 +36,13 @@ def get_avail_bks_by_lib(response):
     return unique_avail_bks_by_lib
 
 
-def get_lib_bk_summary(all_unique_lib, all_avail_bks_by_lib):
-    # Creating book summary
+def get_lib_bk_summary(unique_libs, avail_bks_by_lib):
+    """ Create summary of library and their respective bks"""
     lib_bk_summary = []
-    for lib in all_unique_lib:
+    for lib in unique_libs:
         book_count = 0
 
-        for book in all_avail_bks_by_lib:
+        for book in avail_bks_by_lib:
             if lib == book["BranchName"]:
                 book_count += 1
         lib_bk_summary.append({lib: book_count})
@@ -85,7 +90,7 @@ def process_user_bks(query: str):
             a.get("InsertTime"), pendulum.timezone("Asia/Singapore")
         ).strftime("%d/%m %H:%M")
 
-        raw_status = a.get("StatusDesc")
+        raw_status = a.get("StatusDesc", None)
         status = re.findall('Not Loan|Loan|Reference|Transit|$', raw_status)[0]
         status = "Available" if status == "Not Loan" else status
         status = raw_status if status == "" else status
@@ -93,7 +98,7 @@ def process_user_bks(query: str):
         if due_date is not None:
             status = status + '[' + str(due_date) + ']'
 
-        branch_name = a.get("BranchName")
+        branch_name = a.get("BranchName", None)
         if "Lifelong Learning" in branch_name:
             library = "Lifelong Learning Institute"
         elif "Public Library" in branch_name:
@@ -111,23 +116,22 @@ def process_user_bks(query: str):
             "UpdateTime": update_time,
             "BID": a.get("BID", None)
         })
-
     return response
 
 
-def process_title(api_input) -> List[Dict]:
+def process_title(json_input) -> List[Dict]:
     """ Processes GetTitles API data to fit my origin data structure"""
-    main_list = []
-    for i in api_input.get("titles"):
-        tmp_dict = dict()
-        tmp_dict['TitleName'] = i.get('title', None)
-        tmp_dict['Author'] = i.get('author', None)
-        tmp_dict['BID'] = i.get('brn', None)
-        tmp_dict['DigitalID'] = i.get('digitalId', None)
-        tmp_dict['PublishYear'] = i.get('publishDate', None)
-        tmp_dict["type"] = i.get('format', None).get('name', None)
-        main_list.append(tmp_dict)
-    return main_list
+    output_list = []
+    for i in json_input.get("titles"):
+        output = dict()
+        output['TitleName'] = i.get('title', None)
+        output['Author'] = i.get('author', None)
+        output['BID'] = i.get('brn', None)
+        output['DigitalID'] = i.get('digitalId', None)
+        output['PublishYear'] = i.get('publishDate', None)
+        output["type"] = i.get('format', None).get('name', None)
+        output_list.append(output)
+    return output_list
 
 
 def process_bk_avail(nlb_input: Dict):
@@ -141,7 +145,7 @@ def process_bk_avail(nlb_input: Dict):
         "InsertTime": pendulum.now().int_timestamp,
         "BID": str(nlb_input.get('brn'))
     }
-    if output['StatusDesc'] == "On Loan":
+    if output.get('StatusDesc', None) == "On Loan":
         output.update({'DueDate': nlb_input.get(
             'transactionStatus', None).get("date", None).split("T", 1)[0]})
     return output

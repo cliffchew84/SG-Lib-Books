@@ -48,14 +48,14 @@
                 <div class="hidden md:block">
                     <a class="text-blue-800 hover:text-blue-600 hover:cursor-pointer underline"
                         hx-target=".main_content" hx-indicator="#head-spinner"
-                        hx-get="/{{username}}/m_lib/{{data['BranchName'].lower().strip()}}">
+                        hx-get="/{{username}}/lib/{{data['BranchName'].lower().strip()}}">
                         {{ data["BranchName"] }}
                     </a> - {{ data['CallNumber'] }}
                 </div>
                 <div class="block md:hidden">
                     <a class="text-blue-800 hover:text-blue-600 hover:cursor-pointer underline"
                         hx-target=".main_content" hx-indicator="#head-spinner"
-                        hx-get="/{{username}}/m_lib/{{data['BranchName'].lower().strip()}}">
+                        hx-get="/{{username}}/lib/{{data['BranchName'].lower().strip()}}">
                         {{ data["BranchName"] }}
                     </a><br> {{ data['CallNumber'] }}
                 </div>
