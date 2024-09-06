@@ -359,13 +359,14 @@ async def show_avail_m_books(request: Request,
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-def update_bk_avail_in_mongo(db, bid_no):
-    """ This function does four things
-    1. Make API calls to NLB to get book availability
-    2. Process and combine the records into a single List[Dict]
-    3. Delete existing book available records in MongoDB
-    4. Ingest new book available records into MongoDB
+def update_bk_avail_in_mongo(db, bid_no: str):
+    """ 
+    Takes in a single BID to get its avail info
+    Processes data to load into mongoDB
 
+    # Should separate these functions!
+    Existing MongoDB data is cleared
+    Inject new data into MongoDB
     """
     try:
         # Make API call on book availability
@@ -404,8 +405,7 @@ def update_all_user_books(db, username):
 
     user_bids = m_db.q_user_bks_bids(db=db, username=username)
     m_db.insert_status(db, username=username)
-    m_db.update_user_info(db, username=username,
-                          dict_values_to_add={'books_updated': 0})
+    m_db.update_user_info(db, username, {'books_updated': 0})
     for i, ubid in enumerate(user_bids):
         bid_no = ubid.get("BID")
         print(bid_no)
@@ -413,10 +413,9 @@ def update_all_user_books(db, username):
         time.sleep(2)
         update_bk_avail_in_mongo(db, bid_no)
 
-        m_db.update_user_info(db, username=username,
-                              dict_values_to_add={'books_updated': i+1})
+        m_db.update_user_info(db, username, {'books_updated': i+1})
     m_db.delete_status(db, username=username)
-    return {"message": "All user books are updated!"}
+    return {"message": "All user books updated!"}
 
 
 @app.post("/m_update_user_books/{username}", response_class=HTMLResponse)
