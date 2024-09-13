@@ -1579,9 +1579,19 @@ html {
   transform: translateX(0%);
 }
 
+.\!dropdown {
+  position: relative !important;
+  display: inline-block !important;
+}
+
 .dropdown {
   position: relative;
   display: inline-block;
+}
+
+.\!dropdown > *:focus {
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
 }
 
 .dropdown > *:focus {
@@ -1589,8 +1599,27 @@ html {
   outline-offset: 2px;
 }
 
+.\!dropdown .dropdown-content {
+  position: absolute !important;
+}
+
 .dropdown .dropdown-content {
   position: absolute;
+}
+
+.\!dropdown:is(:not(details)) .dropdown-content {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transform-origin: top !important;
+  --tw-scale-x: .95 !important;
+  --tw-scale-y: .95 !important;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter !important;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter !important;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1) !important;
+  transition-duration: 200ms !important;
 }
 
 .dropdown:is(:not(details)) .dropdown-content {
@@ -1648,6 +1677,13 @@ html {
   top: auto;
 }
 
+.\!dropdown.dropdown-open .dropdown-content,
+.\!dropdown:not(.dropdown-hover):focus .dropdown-content,
+.\!dropdown:focus-within .dropdown-content {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 .dropdown.dropdown-open .dropdown-content,
 .dropdown:not(.dropdown-hover):focus .dropdown-content,
 .dropdown:focus-within .dropdown-content {
@@ -1655,7 +1691,19 @@ html {
   opacity: 1;
 }
 
+.\!dropdown.dropdown-open .dropdown-content,
+.\!dropdown:not(.dropdown-hover):focus .dropdown-content,
+.\!dropdown:focus-within .dropdown-content {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 @media (hover: hover) {
+  .\!dropdown.dropdown-hover:hover .dropdown-content {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   .dropdown.dropdown-hover:hover .dropdown-content {
     visibility: visible;
     opacity: 1;
@@ -1840,6 +1888,12 @@ html {
     background-color: hsl(var(--pf) / var(--tw-bg-opacity));
   }
 
+  .\!dropdown.dropdown-hover:hover .dropdown-content {
+    --tw-scale-x: 1 !important;
+    --tw-scale-y: 1 !important;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+  }
+
   .dropdown.dropdown-hover:hover .dropdown-content {
     --tw-scale-x: 1;
     --tw-scale-y: 1;
@@ -1861,6 +1915,10 @@ html {
     color: hsl(var(--bc) / var(--tw-text-opacity));
     --tw-text-opacity: 0.2;
   }
+}
+
+.\!dropdown:is(details) summary::-webkit-details-marker {
+  display: none !important;
 }
 
 .dropdown:is(details) summary::-webkit-details-marker {
@@ -4031,12 +4089,28 @@ details.collapse summary::-webkit-details-marker {
   outline-offset: 2px;
 }
 
+.\!dropdown.dropdown-open .dropdown-content,
+.\!dropdown:focus .dropdown-content,
+.\!dropdown:focus-within .dropdown-content {
+  --tw-scale-x: 1 !important;
+  --tw-scale-y: 1 !important;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+}
+
 .dropdown.dropdown-open .dropdown-content,
 .dropdown:focus .dropdown-content,
 .dropdown:focus-within .dropdown-content {
   --tw-scale-x: 1;
   --tw-scale-y: 1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.\!dropdown.dropdown-open .dropdown-content,
+.\!dropdown:focus .dropdown-content,
+.\!dropdown:focus-within .dropdown-content {
+  --tw-scale-x: 1 !important;
+  --tw-scale-y: 1 !important;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
 }
 
 .file-input-bordered {

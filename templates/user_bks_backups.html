@@ -5,38 +5,6 @@
             <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
                 id="myInput" type="text" placeholder="Search your saved books by keywords in their title!">
 
-            {% for data in api_data %}
-
-            <div class="card w-full card-compact">
-                <div class="card-body">
-                    <div class="flex items-center">
-                        <button
-                            class="bg-red-700 px-2 my-1 py-1 rounded-lg hover:text-white hover:bg-red-400 text-white"
-                            hx-post="/delete_bk/{{data['BID']}}" hx-swap='outerHTML' hx-indicator='#header'
-                            hx-target=".main_content">
-                            <i class="fas fa-trash fa-2xs" aria-hidden="true"></i>
-                        </button>
-                        <p class="flex-grow px-2">
-                            <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
-                                class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline"
-                                target="_blank" rel="noopener noreferrer">{{
-                                data['TitleName'].split(" | ", 1)[0] }}</a>
-
-                            <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
-                                class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline"
-                                target="_blank" rel="noopener noreferrer">{{
-                                data['TitleName'].split(" : ", 1)[0] }}</a>
-
-                            <b>Author:</b> {{ data['Author'] }}
-                        </p>
-                    </div>
-                    <div class="badge badge-outline">{{ data['CallNumber'] }}</div>
-                    <td class="hidden md:block"></td>
-                </div>
-            </div>
-
-            {% endfor %}
-
             <form hx-post="/delete_books" hx-indicator="#head-spinner" hx-target=".main_content">
                 <table id="user_books" class="mx-auto table-auto border-collapse rounded-lg table-sm w-full">
                     <thead class=' rounded-lg'>
@@ -52,6 +20,7 @@
                             </th>
                         </tr>
                     </thead>
+                    <tbody id="myTable">
                     <tbody id="myTable">
                         {% for data in api_data %}
                         <tr>
