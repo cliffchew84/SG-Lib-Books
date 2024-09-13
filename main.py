@@ -288,9 +288,9 @@ async def htmx_main(request: Request,
 
 
 @app.get("/{username}/user_bks")
-async def m_current_books(request: Request,
-                          db=Depends(get_db),
-                          username=Depends(manager)):
+async def current_bks(request: Request,
+                      db=Depends(get_db),
+                      username=Depends(manager)):
     """ Used by htmx to render user books within main_content <div> """
     try:
         username=username.get("UserName")
@@ -542,6 +542,51 @@ async def ingest_books_navbar(request: Request,
     return templates.TemplateResponse("navbar.html", {
         "request": request,
         "username": username,
+        'all_avail_books': all_avail_books,
+        'all_unique_books': all_unique_books,
+        'lib_book_summary': lib_book_summary,
+    })
+
+
+@app.post("/delete_bk/{bid}", response_class=HTMLResponse)
+async def delete_bk(request: Request,
+                    bid: int,
+                    db=Depends(get_db),
+                    username=Depends(manager)):
+    username=username.get("UserName")
+    BID = str(bid)
+    # Check BID is linked to more than 1 user
+    counter = db.user_books.aggregate([
+        {"$match": {"BID": BID}},
+        {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+        {"$project": {"_id": 0}}
+    ])
+    final_count = counter.next().get("BID")
+
+    # If book is only linked to one user,
+    # delete book available and info records
+    if final_count == 1:
+        m_db.delete_bk_avail(db=db, bid_no=BID)
+        m_db.delete_bk_info(db=db, bid_no=BID)
+    m_db.delete_user_bk(db=db, username=username, bid_no=BID)
+
+    output = []
+    if username:
+        output = m_db.q_user_bks_subset(db=db, username=username)
+        query = m_db.q_user_bks_full(db=db, username=username)
+        response = p.process_user_bks(query)
+
+        # Processing necessary statistics
+        all_unique_books = p.get_unique_bks(response)
+        all_avail_books = p.get_avail_bks(response)
+        unique_libs = p.get_unique_libs(response)
+        avail_bks_by_lib = p.get_avail_bks_by_lib(response)
+        lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
+
+    return templates.TemplateResponse("user_bks.html", {
+        "request": request,
+        "username": username,
+        "api_data": output,
         'all_avail_books': all_avail_books,
         'all_unique_books': all_unique_books,
         'lib_book_summary': lib_book_summary,

@@ -177,6 +177,7 @@ def q_user_bks_subset(db, username: str):
             "_id": 0,
             "CallNumber": "$books_avail.CallNumber",
             "TitleName": "$books_info.TitleName",
+            "Author": "$books_info.Author",
             "BID": "$books_info.BID"
         }}
     ])
