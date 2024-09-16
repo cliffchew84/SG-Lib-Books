@@ -548,7 +548,7 @@ async def ingest_books_navbar(request: Request,
     })
 
 
-@app.post("/delete_bk/{bid}", response_class=HTMLResponse)
+@app.delete("/delete_bk/{bid}", response_class=HTMLResponse)
 async def delete_bk(request: Request,
                     bid: int,
                     db=Depends(get_db),
@@ -570,27 +570,29 @@ async def delete_bk(request: Request,
         m_db.delete_bk_info(db=db, bid_no=BID)
     m_db.delete_user_bk(db=db, username=username, bid_no=BID)
 
-    output = []
-    if username:
-        output = m_db.q_user_bks_subset(db=db, username=username)
-        query = m_db.q_user_bks_full(db=db, username=username)
-        response = p.process_user_bks(query)
+    return ""
 
-        # Processing necessary statistics
-        all_unique_books = p.get_unique_bks(response)
-        all_avail_books = p.get_avail_bks(response)
-        unique_libs = p.get_unique_libs(response)
-        avail_bks_by_lib = p.get_avail_bks_by_lib(response)
-        lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
-
-    return templates.TemplateResponse("user_bks.html", {
-        "request": request,
-        "username": username,
-        "api_data": output,
-        'all_avail_books': all_avail_books,
-        'all_unique_books': all_unique_books,
-        'lib_book_summary': lib_book_summary,
-    })
+    # output = []
+    # if username:
+    #     output = m_db.q_user_bks_subset(db=db, username=username)
+    #     query = m_db.q_user_bks_full(db=db, username=username)
+    #     response = p.process_user_bks(query)
+    #
+    #     # Processing necessary statistics
+    #     all_unique_books = p.get_unique_bks(response)
+    #     all_avail_books = p.get_avail_bks(response)
+    #     unique_libs = p.get_unique_libs(response)
+    #     avail_bks_by_lib = p.get_avail_bks_by_lib(response)
+    #     lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
+    #
+    # return templates.TemplateResponse("user_bks.html", {
+    #     "request": request,
+    #     "username": username,
+    #     "api_data": output,
+    #     'all_avail_books': all_avail_books,
+    #     'all_unique_books': all_unique_books,
+    #     'lib_book_summary': lib_book_summary,
+    # })
 
 
 @app.post("/delete_books", response_class=HTMLResponse)
