@@ -4,19 +4,19 @@
 
             <div class="flex justify-center items-center space-x-2 pt-2">
                 <input type="checkbox" id="e_resources" name="e_resources" value=True
-                    class="form-control checkbox checkbox-info hover:bg-sky-500 border-sky-500" />
-                <label for="e_resources">Include eResources</label>
+                    class="form-control checkbox checkbox-xs checkbox-info hover:bg-sky-500 border-sky-500" />
+                <label for="e_resources">Include eResources**</label>
             </div>
 
             <div class="join form-inline flex items-center justify-center">
                 {% if keyword %}
-                <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
+                <input placeholder="Title / ISBN" type="search" id="book_search" name="book_search"
                     class="join-item flex mt-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
                     value="{{keyword|safe}}" />
 
                 {% else %}
 
-                <input placeholder="Search by title / ISBN" type="search" id="book_search" name="book_search"
+                <input placeholder="Title / ISBN" type="search" id="book_search" name="book_search"
                     class="join-item flex mt-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
                 {% endif %}
@@ -41,12 +41,9 @@
             </div>
         </form>
 
-        <div class="flex flex-col justify-center mx-auto pt-2 px-2 md:w-3/4 w-full">
-            <p class='mx-auto flex justify-start text-sm italic pt-2 px-2'>
-                *Search is taken directly from NLB, and I am trying to improve it.
-                Use [ISBN] OR [Titles / Author] to get better search results.
-            </p>
-        </div>
+        <p class='mx-auto flex justify-center text-sm italic px-2'>
+            *Search is provided by NLB. Please use [ISBN] OR [Title] OR [Author] to refine search results.
+        </p>
     </div>
 
     <div class="mx-auto max-w-screen-lg px-4 mt-3">
