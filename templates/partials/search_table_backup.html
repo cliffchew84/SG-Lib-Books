@@ -1,0 +1,141 @@
+<div class="search_table">
+    {% if offset_links %}
+
+    {% if e_resources %}
+    <div class="join flex items-center justify-center">
+        <button hx-indicator='#head-spinner' hx-target=".search_table"
+            hx-get="/navigate_search/?e_resource={{ e_resource }}&book_search={{ keyword }}&author={{ author }}&offset=0"
+            hx-swap="outerHTML" class="join-item btn bg-sky-700 hover:bg-sky-500 text-white 
+                   btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
+            First</button>
+
+        <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
+            hx-get="/navigate_search/?e_resources={{ e_resources }}&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.previous }}"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white
+                   btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
+            «</button>
+
+        <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm" distabled>
+            {{ offset_links.current + 1 }} - {{ total_records if offset_links.next == None else offset_links.next }} [{{
+            total_records }}]**</button>
+
+        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+            hx-get="/navigate_search/?e_resources={{ e_resources }}&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.next }}"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white
+                   {{ 'btn-disabled' if offset_links.next == None else '' }} btn-sm">»</button>
+
+        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+            hx-get="/navigate_search/?e_resources={{ e_resources }}&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.last }}"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white
+                   {{ 'btn-disabled' if offset_links.last == None else '' }} btn-sm">Last</button>
+    </div>
+
+    {% else %}
+
+    <div class="join flex items-center justify-center">
+        <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset=0"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
+            First</button>
+
+        <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
+            hx-get="/navigate_search/?&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.previous }}"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
+            «</button>
+
+        <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm" distabled>
+            {{ offset_links.current + 1 }} - {{ total_records if offset_links.next == None else offset_links.next }} [{{
+            total_records }}]**</button>
+
+        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if offset_links.next == None else '' }} btn-sm"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.next }}">»</button>
+
+        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+            class="join-item btn bg-sky-700 he_resource={{ e_resource }}&over:bg-sky-500 text-white {{ 'btn-disabled' if offset_links.last == None else '' }} btn-sm"
+            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.last }}">Last</button>
+    </div>
+
+    {% endif %}
+    {% endif %}
+
+    <form id="myForm" hx-post="/ingest_books_navbar" hx-indicator="#head-spinner" hx-target="#header"
+        hx-swap="outerHTML">
+        <table class="table w-full">
+            <thead>
+                <tr class='bg-sky-700 text-white rounded-lg'>
+                    <th class="flex justify-center items-center">
+                        <button type="submit" id="submitButton" class="bg-sky-500 px-2 my-1 py-1 rounded-lg 
+                                    hover:text-white hover:bg-sky-200 text-white disabled:bg-gray-400 
+                                    disabled:hover:bg-gray-400" disabled>Add
+                        </button>
+                    </th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody id="myTable">
+                {% for data in api_data %}
+                <tr>
+                    {% set disable, BID = data['BID'].split(' | ') %}
+                    <td class="flex justify-center items-center">
+                        {% if data['type'] == "Book" %}
+                        <div class="flex items-center">
+                            <label>
+                                <input type="checkbox" class="checkbox checkbox-info hover:bg-sky-500 border-sky-500"
+                                    name='bids' value='{{BID}}' onchange="checkSelection()" {{ disable }} />
+                            </label>
+                        </div>
+                        {% endif %}
+                    </td>
+
+                    {% set TitleName, BID = data['TitleName'].split(' | ') %}
+                    {% if data['type'] == "Book" %}
+
+                    <td>
+                        <i class="fas fa-book text-sky-800"></i>
+                        <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{BID}}"
+                            class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
+                                noreferrer">{{ TitleName }}
+                        </a>
+                    </td>
+                    <td>{{ data['Author']}}</td>
+                    <td>{{ data['PublishYear'] }}</td>
+
+                    {% elif data['type'] == "Ebook" %}
+
+                    <td>
+                        <i class="fas fa-tablet-alt"></i>
+                        <a href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
+                            class="button text-blue-800 underline font-semibold" target="_blank" rel="noopener
+                                noreferrer">{{ TitleName }}
+                        </a>
+                    </td>
+                    <td>{{ data['Author']}}</td>
+                    <td>{{ data['PublishYear'] }}</td>
+
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<script>
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevents the form from submitting normally
+
+        // Get all checkboxes inside the form
+        var checkboxes = this.querySelectorAll('input[type="checkbox"]');
+
+        // Loop through checkboxes
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                checkbox.disabled = true; // Disable the checked checkboxes
+            }
+        });
+        document.getElementById('submitButton').disabled = true;
+    });
+</script>

@@ -35,11 +35,11 @@
                         <div class="badge badge-outline">{{ data['CallNumber'] }}</div>
                         <button
                             class="bg-sky-700 px-2 py-1 my-1 rounded-lg hover:text-white hover:bg-red-400 text-white"
-                            hx-delete="/delete_bk/{{data['BID']}}" hx-swap='outerHTML' hx-target="closest .card">
+                            hx-delete="/delete_bk/{{data['BID']}}" hx-swap='outerHTML' hx-indicator="#head-spinner"
+                            hx-target="closest .card">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
-                    <td class="hidden md:block"></td>
                 </div>
             </div>
 
