@@ -1,59 +1,39 @@
 <div class="search_table">
-    {% if offset_links %}
+    {% if pag_links %}
 
     {% if e_resources %}
-    <div class="join flex items-center justify-center">
-        <button hx-indicator='#head-spinner' hx-target=".search_table"
-            hx-get="/navigate_search/?e_resource={{ e_resource }}&book_search={{ keyword }}&author={{ author }}&offset=0"
-            hx-swap="outerHTML"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
-            First</button>
-
-        <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
-            hx-get="/navigate_search/?e_resources={{ e_resources }}&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.previous }}"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
-            «</button>
-
-        <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm" distabled>
-            {{ offset_links.current + 1 }} - {{ total_records if offset_links.next == None else offset_links.next }} [{{
-            total_records }}]**</button>
-
-        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if offset_links.next == None else '' }} btn-sm"
-            hx-get="/navigate_search/?e_resources={{ e_resources }}&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.next }}">»</button>
-
-        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if offset_links.last == None else '' }} btn-sm"
-            hx-get="/navigate_search/?e_resources={{ e_resources }}&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.last }}">Last</button>
-    </div>
-
+    {% set nav_search = '/navigate_search/?e_resources=True&' %}
     {% else %}
+    {% set nav_search = '/navigate_search/?' %}
+    {% endif %}
 
     <div class="join flex items-center justify-center">
         <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
-            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset=0"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
-            First</button>
+            hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset=0"
+            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
+            << </button>
 
-        <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
-            hx-get="/navigate_search/?&book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.previous }}"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if offset_links.previous == None else '' }}">
-            «</button>
+                <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
+                    hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.previous }}"
+                    class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
+                    < </button>
 
-        <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm" distabled>
-            {{ offset_links.current + 1 }} - {{ total_records if offset_links.next == None else offset_links.next }} [{{
-            total_records }}]**</button>
+                        <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm"
+                            distabled>
+                            {{ pag_links.current + 1 }} - {{ total_records if pag_links.next == None else
+                            pag_links.next }} of {{ total_records }} records*</button>
 
-        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if offset_links.next == None else '' }} btn-sm"
-            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.next }}">»</button>
+                        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+                            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.next == None else '' }} btn-sm"
+                            hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.next }}">
+                            > </button>
 
-        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-            class="join-item btn bg-sky-700 he_resource={{ e_resource }}&over:bg-sky-500 text-white {{ 'btn-disabled' if offset_links.last == None else '' }} btn-sm"
-            hx-get="/navigate_search/?book_search={{ keyword }}&author={{ author }}&offset={{ offset_links.last }}">Last</button>
+                        <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+                            class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.last == None else '' }} btn-sm"
+                            hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.last }}">
+                            >> </button>
     </div>
 
-    {% endif %}
     {% endif %}
 
     <form id="myForm" hx-post="/ingest_books_navbar" hx-indicator="#head-spinner" hx-target="#header"
@@ -62,9 +42,9 @@
             <thead>
                 <tr class='bg-sky-700 text-white rounded-lg'>
                     <th class="flex justify-center items-center">
-                        <button type="submit" id="submitButton" class="bg-sky-500 px-2 my-1 py-1 rounded-lg 
-                                    hover:text-white hover:bg-sky-200 text-white disabled:bg-gray-400 
-                                    disabled:hover:bg-gray-400" disabled>Add
+                        <button type="submit" id="submitButton" class="bg-sky-500 px-2 my-1 py-1 rounded-lg
+                            hover:text-white hover:bg-sky-200 text-white
+                            disabled:bg-gray-400 disabled:hover:bg-gray-400" disabled>Add
                         </button>
                     </th>
                     <th>Title</th>

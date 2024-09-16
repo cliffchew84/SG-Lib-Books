@@ -664,28 +664,27 @@ async def htmx_bk_search(request: Request,
         titles = n_api.bk_search(input_dict=search_input, offset=0)
         total_records = titles.get("totalRecords", None)
         more_records = titles.get("hasMoreRecords", None)
-        offset_links = p.pg_links(0, total_records)
+        pag_links = p.pg_links(0, total_records)
         search_params = {"Title": book_search, 'Author' : author}
         m_db.user_search_tracking(db, table="user_search", username=username,
                                   search_params=search_params)
 
-        empty_table_result = templates.TemplateResponse("partials/search_table.html", {
+        errors = [400, 404, 500, 401, 405, 429]
+        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
+            # Return temply table
+            return templates.TemplateResponse("partials/search_table.html", {
             "request": request,
             "keyword": book_search,
             "author": author,
             "username": username,
             "api_data": bk_output,
         })
-
-        errors = [400, 404, 500, 401, 405, 429]
-        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
-            return empty_table_result
         else:
             all_titles = p.process_title(titles)
             # Only keep physical books for now
             final_titles = [t for t in all_titles if t['type'] == "Book"]
             if e_resources:
-                print("I am including ebooks")
+                print("Including ebooks")
                 ebooks = [t for t in all_titles if t['type'] == "Ebook"]
                 final_titles += ebooks
 
@@ -715,7 +714,7 @@ async def htmx_bk_search(request: Request,
         "api_data": bk_output,
         "total_records": total_records,
         "more_records": more_records,
-        "offset_links": offset_links,
+        "pag_links": pag_links,
         "e_resources": e_resources
     })
 
@@ -743,9 +742,12 @@ async def htmx_paginate_bk_search(request: Request,
     if book_search or author:
         titles = n_api.bk_search(input_dict=search_input, offset=offset)
         total_records = titles.get("totalRecords")
-        offset_links = p.pg_links(int(offset), total_records)
+        pag_links = p.pg_links(int(offset), total_records)
 
-        empty_table_result = templates.TemplateResponse("partials/search_table.html", {
+        errors = [400, 404, 500, 401, 405, 429]
+        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
+            # return empty table
+            return templates.TemplateResponse("partials/search_table.html", {
             "request": request,
             "keyword": book_search,
             "author": author,
@@ -753,9 +755,6 @@ async def htmx_paginate_bk_search(request: Request,
             "api_data": final_response,
         })
 
-        errors = [400, 404, 500, 401, 405, 429]
-        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
-            return empty_table_result
         else:
             all_titles = p.process_title(titles)
             more_records = titles.get("hasMoreRecords")
@@ -764,7 +763,7 @@ async def htmx_paginate_bk_search(request: Request,
             final_titles = [t for t in all_titles if t['type'] == "Book"]
 
             if e_resources:
-                print("I am including ebooks")
+                print("Including ebooks")
                 ebooks = [t for t in all_titles if t['type'] == "Ebook"]
                 final_titles += ebooks
 
@@ -796,7 +795,7 @@ async def htmx_paginate_bk_search(request: Request,
         "api_data": final_response,
         "total_records": total_records,
         "more_records": more_records,
-        "offset_links": offset_links,
+        "pag_links": pag_links,
         "e_resources": e_resources
     })
 

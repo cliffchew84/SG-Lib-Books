@@ -2635,6 +2635,21 @@ html {
   margin-bottom: 0.75rem;
 }
 
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.mx-0 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.mx-0\.5 {
+  margin-left: 0.125rem;
+  margin-right: 0.125rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -2673,6 +2688,10 @@ html {
 
 .mt-14 {
   margin-top: 3.5rem;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
 }
 
 .block {
