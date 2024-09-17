@@ -51,7 +51,13 @@
         {% set year = data['PublishYear'] | replace("]", "") | replace("[", "") | replace(".", "") %}
         {% set disable, BID = data['BID'].split(' | ') %}
 
-        <div class="card w-full card-compact">
+        {% if disable %}
+        {% set card_class = "card w-full bg-gray-300 card-bordered card-compact" %}
+        {% else %}
+        {% set card_class = "card w-full card-bordered card-compact" %}
+        {% endif %}
+
+        <div class="{{card_class}}">
             <div class="card-body">
                 <div class="flex items-center justify-left">
 

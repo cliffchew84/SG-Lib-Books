@@ -1,7 +1,7 @@
 <style>
     .card.htmx-swapping {
         opacity: 0;
-        transition: opacity 1s ease-out;
+        transition: opacity 2s ease-out;
     }
 </style>
 
@@ -14,7 +14,7 @@
                 id="myInput" type="text" placeholder="Search your saved books by keywords in their title!">
 
             {% for data in api_data %}
-            <div class="card w-full card-compact">
+            <div class="card w-full card-bordered card-compact">
                 <div class="card-body">
                     <div class="flex items-center">
                         <p class="flex-grow px-2">
