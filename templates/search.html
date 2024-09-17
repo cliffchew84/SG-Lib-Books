@@ -11,24 +11,24 @@
             <div class="join form-inline flex items-center justify-center">
                 {% if keyword %}
                 <input placeholder="Title / ISBN" type="search" id="book_search" name="book_search"
-                    class="join-item flex mt-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
+                    class="join-item flex mt-2 px-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
                     value="{{keyword|safe}}" />
 
                 {% else %}
 
                 <input placeholder="Title / ISBN" type="search" id="book_search" name="book_search"
-                    class="join-item flex mt-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
+                    class="join-item flex mt-2 px-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
 
                 {% endif %}
 
                 {% if author %}
                 <input placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}"
-                    class="join-item flex mt-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm
+                    class="join-item flex mt-2 px-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm
                            form-control rounded-lg border-2 border-sky-700" />
 
                 {% else %}
 
-                <input placeholder="Author (Optional)" type="search" id="author" name="author" class="join-item flex mt-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm
+                <input placeholder="Author (Optional)" type="search" id="author" name="author" class="join-item flex mt-2 px-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm
                            form-control rounded-lg border-2 border-sky-700" />
 
                 {% endif %}

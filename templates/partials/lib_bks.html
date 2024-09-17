@@ -1,5 +1,4 @@
 <div class="w-full overflow-x-auto">
-
     {% if api_data|length == 0 %}
     {% include 'starter.html' %}
     {% else %}
@@ -8,20 +7,22 @@
     {% include 'update_status.html' %}
     {% endif %}
 
-    <input class="md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800" id="myInput"
-        type="text" placeholder="Search books by their title keywords!">
+    <input id="myInput" type="text" placeholder="Search your books by titles!"
+        class="px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800">
 
-    {% if library == 'all' %}
+    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg">
+        <i class="fas fa-building"></i>
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building">
-        </i> {{library|title}} - {{all_avail_books|length}} / {{all_unique_books|length}}</h3>
+        {% if library == 'all' %}
 
-    {% else %}
+        {{library|title}} - {{all_avail_books|length}} / {{all_unique_books|length}}
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg"><i class="fas fa-building">
-        </i> {{library|title}} - {{ lib_avail }} / {{ lib_all }}</h3>
+        {% else %}
 
-    {% endif %}
+        {{library|title}} - {{ lib_avail }} / {{ lib_all }}
+
+        {% endif %}
+    </h3>
 
     {% include "partials/lib_bks_table.html" %}
 
