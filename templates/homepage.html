@@ -24,69 +24,65 @@
         </div>
     </div>
     <div class="flex flex-col md:flex-row items-center justify-center md:space-x-16 pt-4">
-        <div class="w-full md:w-5/6 lg:w-1/2 md:pb-2 md:pt-2 py-4 px-6 border-1 border-gray-400 shadow-md rounded-lg">
+        <!-- Login Form -->
+        <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border border-gray-400 shadow-md rounded-lg">
             <form action="/login" method="POST">
-                <div class="mb-3 items-center justify-center">
-                    <label for="username" class="mx-3 form-label">Username</label>
-                    <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
-                        rounded-lg border-1 border-black" id='username' name='username' required>
+                <div class="mb-3">
+                    <label for="username" class="mx-3 text-sm font-semibold">Username</label>
+                    <input type="text" id="username" name="username" required
+                        class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base text-sm rounded-lg border border-black" />
                 </div>
-                <label for="password" class="mx-3 form-label">Password</label>
 
-                <div class="relative w-full" <!-- Password show and hide button -->
-                    <div class="absolute inset-y-0 right-0 flex items-center px-4 xs:px-4 sm:px-4 xl:px-8">
-                        <input class="hidden js-password-toggle" id="login-toggle" type="checkbox" />
-                        <label class="bg-white rounded-lg px-2 mx-1
-                            text-xs text-gray-600 font-semibold cursor-pointer js-password-label"
-                            for="login-toggle">show</label>
-                    </div>
+                <label for="password" class="mx-3 text-sm font-semibold">Password</label>
+                <div class="relative w-full mt-2">
                     <!-- Password show and hide button -->
+                    <div class="absolute inset-y-0 right-0 flex items-center px-4">
+                        <input class="hidden js-password-toggle" id="login-toggle" type="checkbox" />
+                        <label for="login-toggle"
+                            class="bg-white rounded-lg px-2 mx-1 text-xs text-gray-600 font-semibold cursor-pointer js-password-label">show</label>
+                    </div>
 
-                    <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
-                        rounded-lg border-1 border-black js-password" id='password' name='password' required />
+                    <input type="password" id="password" name="password" required
+                        class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base text-sm rounded-lg border border-black js-password" />
                 </div>
 
-                <div class="flex">
-                    <button type="submit"
-                        class="bg-blue-700 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Login</button>
-                    <a href="/forgot_password" class="text-blue-700 italic underline py-1.5 mt-4 px-3">Forgot
+                <div class="flex mt-4">
+                    <button type="submit" class="bg-blue-700 text-white rounded-lg py-1.5 px-3 mx-3">Login</button>
+                    <a href="/forgot_password" class="text-blue-700 italic underline py-1.5 mx-3 px-3">Forgot
                         Password</a>
                 </div>
             </form>
         </div>
 
-        <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border-1 border-gray-400 shadow-md rounded-lg">
+        <!-- Registration Form -->
+        <div class="w-full md:w-5/6 lg:w-1/2 py-4 px-6 border border-gray-400 shadow-md rounded-lg">
             <form action="/" method="POST">
                 <div class="mb-3">
-                    <label for="username" class="form-label mx-3">Username</label>
-                    <input type="text" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm 
-                        form-control rounded-lg border-1 border-black" id='username' name='username' required
+                    <label for="username" class="mx-3 text-sm font-semibold">Username</label>
+                    <input type="text" id="username" name="username" required
+                        class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base text-sm rounded-lg border border-black"
                         hx-get="/check_user_register/" hx-trigger="change, keyup delay:500ms"
-                        hx-target="next .dup_user">
+                        hx-target="next .dup_user" />
                 </div>
-                <label for="password" class="form-label mx-3">Password</label>
 
-                <div class="relative w-full">
-
-                    <!-- Adding password hide and show button -->
-                    <div class="absolute inset-y-0 right-0 flex items-center px-4 xs:px-4 sm:px-4 xl:px-8">
+                <label for="password" class="mx-3 text-sm font-semibold">Password</label>
+                <div class="relative w-full mt-2">
+                    <!-- Password show and hide button -->
+                    <div class="absolute inset-y-0 right-0 flex items-center px-4">
                         <input class="hidden js-password-toggle_2" id="register-toggle" type="checkbox" />
-                        <label class="bg-white rounded-lg px-2 mx-1 
-                            text-xs font-semibold text-gray-600 cursor-pointer js-password-label_2"
-                            for="register-toggle">show</label>
+                        <label for="register-toggle" class="bg-white rounded-lg px-2 mx-1 text-xs font-semibold 
+                            text-gray-600 cursor-pointer js-password-label_2">show</label>
                     </div>
-                    <!-- Adding password hide and show button -->
-
-                    <input type="password" class="flex mt-2 py-2 mx-3 w-11/12 md:text-base text-sm form-control 
-                        rounded-lg border-1 border-black js-password_2" id='password' name='password' required>
+                    <input type="password" class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base
+                        text-sm rounded-lg border border-black js-password_2" id="password" name="password" required />
                 </div>
-                <div class='dup_user flex'>
-                    <button type="submit"
-                        class="bg-red-400 text-white border-white rounded-lg py-1.5 mt-4 px-3 mx-3">Register</button>
+
+                <div class="dup_user flex mt-4">
+                    <button type="submit" class="bg-red-400 text-white rounded-lg py-1.5 px-3 mx-3">Register</button>
                 </div>
             </form>
             {% if register_invalid %}
-
+            <!-- Error message or form feedback can go here -->
             {% endif %}
         </div>
     </div>
