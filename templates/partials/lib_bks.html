@@ -10,7 +10,7 @@
     <input id="myInput" type="text" placeholder="Search your books by titles!"
         class="px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800">
 
-    <h3 class="bg-sky-700 text-white font-semibold py-2 text-lg">
+    <h3 class="bg-sky-700 text-white font-semibold py-4 px-6 text-lg rounded-lg">
         <i class="fas fa-building"></i>
 
         {% if library == 'all' %}
@@ -23,6 +23,10 @@
 
         {% endif %}
     </h3>
+    <div class='py-2'>
+        <input class="mx-1 toggle toggle-xs border-sky-700 bg-sky-700 hover:bg-sky-400" type="checkbox"
+            id="availableCheckbox">Available Books
+    </div>
 
     {% include "partials/lib_bks_table.html" %}
 

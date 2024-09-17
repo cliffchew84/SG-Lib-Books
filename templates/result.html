@@ -1,11 +1,11 @@
 <div class="main_content">
-    <div class="pt-8 mt-16 px-2 flex flex-col justify-center items-center text-center">
+    <div class="pt-8 mt-16 px-2 flex flex-col">
         {% include 'partials/lib_bks.html' %}
     </div>
 
     <script>
         $(document).ready(function () {
-            const rows = $('#myTable tr');
+            const cards = $('.card'); // Select all card elements
             const availableCheckbox = $("#availableCheckbox");
             const searchInput = $("#myInput");
 
@@ -13,10 +13,10 @@
             function filterByAvailability() {
                 const checked = availableCheckbox.is(":checked");
                 const searchValue = searchInput.val().toLowerCase();
-                rows.each(function () {
-                    const status = $(this).find('td:nth-last-child(2)').text().toLowerCase();
-                    const rowText = $(this).text().toLowerCase();
-                    if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && rowText.indexOf(searchValue) === -1)) {
+                cards.each(function () {
+                    const status = $(this).find('span').text().toLowerCase(); // Adjust to find the 'Available' or 'Not Available' text in card
+                    const cardText = $(this).text().toLowerCase(); // Search inside the card's text
+                    if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && cardText.indexOf(searchValue) === -1)) {
                         $(this).hide();
                     } else {
                         $(this).show();
@@ -28,10 +28,10 @@
             function filterBySearch() {
                 const checked = availableCheckbox.is(":checked");
                 const searchValue = searchInput.val().toLowerCase();
-                rows.each(function () {
-                    const rowText = $(this).text().toLowerCase();
-                    const status = $(this).find('td:nth-last-child(2)').text().toLowerCase();
-                    if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && rowText.indexOf(searchValue) === -1)) {
+                cards.each(function () {
+                    const cardText = $(this).text().toLowerCase();
+                    const status = $(this).find('span').text().toLowerCase(); // Adjust to find 'Available' status in card
+                    if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && cardText.indexOf(searchValue) === -1)) {
                         $(this).hide();
                     } else {
                         $(this).show();

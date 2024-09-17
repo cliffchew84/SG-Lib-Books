@@ -144,6 +144,7 @@ def q_user_bks_full(db, username: str):
             "_id": 0,
             # 'UserName': 1,
             "TitleName": "$books_info.TitleName",
+            "Author": "$books_info.Author",
             "BranchName": "$books_avail.BranchName",
             "CallNumber": "$books_avail.CallNumber",
             "StatusDesc": "$books_avail.StatusDesc",

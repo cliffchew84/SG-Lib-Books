@@ -110,6 +110,7 @@ def process_user_bks(query: str):
 
         response.append({
             "TitleName": title,
+            "Author": a.get("Author"),
             "BranchName": library,
             "CallNumber": call_no,
             "StatusDesc": status,
