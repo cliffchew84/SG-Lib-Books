@@ -1,6 +1,7 @@
 from pymongo import mongo_client
 from typing import Dict, List
 from datetime import datetime
+import pandas as pd
 import time
 import os
 
@@ -66,6 +67,15 @@ def delete_status(db, username: str):
 
 def query_status(db, username: str):
     return db.user_status.find_one({"UserName": username})
+
+
+def query_mg_table(table_name: str) -> pd.DataFrame:
+    """ General MongoDB table query """
+    db = connect_mdb()
+    db_nlb = db['nlb']
+    books = db_nlb[table_name].find({})
+    books_list = [book for book in books]
+    return pd.DataFrame(books_list)
 
 
 def update_user_info(db, username: str, dict_values_to_add: Dict):
