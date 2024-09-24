@@ -80,6 +80,7 @@ def process_bk_info(nlb_input: Dict) -> Dict:
         'PublishYear' : nlb_input.get('publishDate', None),
         'Subjects' : subjects,
         'Publisher' : nlb_input.get('publisher', None),
+        'isbns' : nlb_input.get("isbns", None)
     }
 
 

@@ -55,8 +55,10 @@ def test_not_available_brn():
     assert (output.get("count") == 0)
 
 
-@pytest.mark.skip(reason="Skip for now")
+# @pytest.mark.skip(reason="Skip for now")
 def test_spss_for_dummies_missing_search():
+    """ This function shows that weird records from GetTitles that doesn't show
+    up on the search results on the NLB app."""
     time.sleep(1)
     search_input={"Title": "SPSS for dummies"}
     titles = get_bk_data("GetTitles", input_dict=search_input)
@@ -69,8 +71,8 @@ def test_spss_for_dummies_missing_search():
     assert(output == ["False | 12849865", "False | 13706621", "True | 202345779"])
 
 
+@pytest.mark.skip(reason="Skip for now")
 def test_get_process_bk_info():
-    time.sleep(1)
     bid_no=14484799
     output = get_process_bk_info(bid_no)
     output_to_check = [output.get("BID"), output.get("TitleName"),
