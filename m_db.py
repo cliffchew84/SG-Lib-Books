@@ -1,6 +1,7 @@
 from pymongo import mongo_client
 from typing import Dict, List
 from datetime import datetime
+import pandas as pd
 import time
 import os
 
@@ -66,6 +67,15 @@ def delete_status(db, username: str):
 
 def query_status(db, username: str):
     return db.user_status.find_one({"UserName": username})
+
+
+def query_mg_table(table_name: str) -> pd.DataFrame:
+    """ General MongoDB table query """
+    db = connect_mdb()
+    db_nlb = db['nlb']
+    books = db_nlb[table_name].find({})
+    books_list = [book for book in books]
+    return pd.DataFrame(books_list)
 
 
 def update_user_info(db, username: str, dict_values_to_add: Dict):
@@ -150,7 +160,10 @@ def q_user_bks_full(db, username: str):
             "StatusDesc": "$books_avail.StatusDesc",
             "DueDate": "$books_avail.DueDate",
             "InsertTime": "$books_avail.InsertTime",
-            "BID": "$books_info.BID"
+            "BID": "$books_info.BID",
+            "Subjects": "$books_info.Subjects",
+            "Publisher": "$books_info.Publisher",
+            "isbns": "$books_info.isbns",
         }},
     ])
     return [i for i in books_avail_users]
@@ -179,7 +192,11 @@ def q_user_bks_subset(db, username: str):
             "CallNumber": "$books_avail.CallNumber",
             "TitleName": "$books_info.TitleName",
             "Author": "$books_info.Author",
-            "BID": "$books_info.BID"
+            "BID": "$books_info.BID",
+            "Subjects": "$books_info.Subjects",
+            "Publisher": "$books_info.Publisher",
+            "isbns": "$books_info.isbns",
+
         }}
     ])
     return list({dic['TitleName']: dic for dic in output}.values())

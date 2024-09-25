@@ -25,8 +25,8 @@ import m_db
 SECRET_KEY = os.environ["mongo_secret_key"]
 ACCESS_TOKEN_EXPIRY = 240
 
-APPLICATION_ID = os.environ['nlb_rest_app_id']
-API_KEY = os.environ['nlb_rest_api_key']
+# APPLICATION_ID = os.environ['nlb_rest_app_id']
+# API_KEY = os.environ['nlb_rest_api_key']
 
 manager = LoginManager(SECRET_KEY, token_url="/login", use_cookie=True)
 manager.cookie_name = "auth"
@@ -292,25 +292,22 @@ async def current_bks(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):
     """ Used by htmx to render user books within main_content <div> """
-    try:
-        username=username.get("UserName")
-        update_status = None
-        if m_db.query_status(db=db, username=username):
-            update_status = "Updating In Progress... Please refresh to update!"
+    username=username.get("UserName")
+    update_status = None
+    if m_db.query_status(db=db, username=username):
+        update_status = "Updating In Progress... Please refresh to update!"
 
-        output = []
-        if username:
-            output = m_db.q_user_bks_subset(db=db, username=username)
-            return templates.TemplateResponse("user_bks.html", {
-                "request": request,
-                "username": username,
-                "api_data": output,
-                "status": update_status
-            })
-        else:
-            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    output = []
+    if username:
+        output = m_db.q_user_bks_subset(db=db, username=username)
+        return templates.TemplateResponse("user_bks.html", {
+            "request": request,
+            "username": username,
+            "api_data": output,
+            "status": update_status
+        })
+    else:
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
@@ -370,7 +367,8 @@ def update_bk_avail_in_mongo(db, bid_no: str):
     """
     try:
         # Make API call on book availability
-        bk = n_api.get_bk_data("GetAvailabilityInfo", input=bid_no)
+        bk = n_api.get_bk_data("GetAvailabilityInfo", 
+                               input_dict={"BRN": bid_no})
         all_avail_bks = [p.process_bk_avail(i) for i in bk.get("items")]
 
         if len(all_avail_bks) > 0:
@@ -516,7 +514,7 @@ async def ingest_books_navbar(request: Request,
         BID = str(bid)
         print(BID)
         # Makes API to bk info and bk avail and ingest the data into DB
-        bk_title = n_api.get_process_bk_info(db=db, bid_no=BID)
+        bk_title = n_api.get_process_bk_info(bid_no=BID)
 
         time.sleep(2)
         update_bk_avail_in_mongo(db, BID)
@@ -571,28 +569,6 @@ async def delete_bk(request: Request,
     m_db.delete_user_bk(db=db, username=username, bid_no=BID)
 
     return ""
-
-    # output = []
-    # if username:
-    #     output = m_db.q_user_bks_subset(db=db, username=username)
-    #     query = m_db.q_user_bks_full(db=db, username=username)
-    #     response = p.process_user_bks(query)
-    #
-    #     # Processing necessary statistics
-    #     all_unique_books = p.get_unique_bks(response)
-    #     all_avail_books = p.get_avail_bks(response)
-    #     unique_libs = p.get_unique_libs(response)
-    #     avail_bks_by_lib = p.get_avail_bks_by_lib(response)
-    #     lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
-    #
-    # return templates.TemplateResponse("user_bks.html", {
-    #     "request": request,
-    #     "username": username,
-    #     "api_data": output,
-    #     'all_avail_books': all_avail_books,
-    #     'all_unique_books': all_unique_books,
-    #     'lib_book_summary': lib_book_summary,
-    # })
 
 
 @app.post("/delete_books", response_class=HTMLResponse)
@@ -661,7 +637,9 @@ async def htmx_bk_search(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = n_api.bk_search(input_dict=search_input, offset=0)
+        titles = n_api.get_bk_data(ext_url="GetTitles",
+                                   input_dict=search_input,
+                                   offset=0)
         total_records = titles.get("totalRecords", None)
         more_records = titles.get("hasMoreRecords", None)
         pag_links = p.pg_links(0, total_records)
@@ -679,6 +657,7 @@ async def htmx_bk_search(request: Request,
             "username": username,
             "api_data": bk_output,
         })
+
         else:
             all_titles = p.process_title(titles)
             # Only keep physical books for now
@@ -689,6 +668,7 @@ async def htmx_bk_search(request: Request,
                 final_titles += ebooks
 
             # Search user book BIDs and disable add book if user saved the book
+            # [TODO] - Refactor this to just call user_books BIDs
             user_books = m_db.q_user_bks_full(db=db, username=username)
             bid_checks = set(i.get("BID") for i in user_books)
             for bk in final_titles:
@@ -740,7 +720,9 @@ async def htmx_paginate_bk_search(request: Request,
         search_input.update({"Author": c_author})
 
     if book_search or author:
-        titles = n_api.bk_search(input_dict=search_input, offset=offset)
+        titles = n_api.get_bk_data(ext_url="GetTitles", 
+                                   input_dict=search_input, 
+                                   offset=offset)
         total_records = titles.get("totalRecords")
         pag_links = p.pg_links(int(offset), total_records)
 
