@@ -292,25 +292,22 @@ async def current_bks(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):
     """ Used by htmx to render user books within main_content <div> """
-    try:
-        username=username.get("UserName")
-        update_status = None
-        if m_db.query_status(db=db, username=username):
-            update_status = "Updating In Progress... Please refresh to update!"
+    username=username.get("UserName")
+    update_status = None
+    if m_db.query_status(db=db, username=username):
+        update_status = "Updating In Progress... Please refresh to update!"
 
-        output = []
-        if username:
-            output = m_db.q_user_bks_subset(db=db, username=username)
-            return templates.TemplateResponse("user_bks.html", {
-                "request": request,
-                "username": username,
-                "api_data": output,
-                "status": update_status
-            })
-        else:
-            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    output = []
+    if username:
+        output = m_db.q_user_bks_subset(db=db, username=username)
+        return templates.TemplateResponse("user_bks.html", {
+            "request": request,
+            "username": username,
+            "api_data": output,
+            "status": update_status
+        })
+    else:
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/{username}/lib/{library}/", response_class=HTMLResponse)

@@ -71,7 +71,8 @@ def get_bk_data(ext_url: str,
 def process_bk_info(nlb_input: Dict) -> Dict:
     """ Process book info output from NLB API - GetTitleDetails"""
 
-    subjects = list(set(nlb_input.get('subjects', [])))
+    subjects = " | ".join(list(set([i.replace(".", "") for i in nlb_input.get('subjects')])))
+    isbns = " | ".join(" | ".join(nlb_input.get('isbns', None)).split(","))
 
     return {
         'BID' : nlb_input.get('brn', None),

@@ -5,19 +5,17 @@
             <p class="flex-grow px-2">
                 <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                     class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                    rel="noopener noreferrer">{{
-                    data['TitleName'].split(" | ", 1)[0] }}</a>
+                    rel="noopener noreferrer">{{ data['TitleName'].split(" | ", 1)[0] }}</a>
 
                 <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                     class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                    rel="noopener noreferrer">{{
-                    data['TitleName'].split(" : ", 1)[0] }}</a>
+                    rel="noopener noreferrer">{{ data['TitleName'].split(" : ", 1)[0] }}</a>
 
                 <span class="badge badge-outline font-semibold">{{ data['CallNumber'] }}</span>
 
                 {% if data["StatusDesc"] == "Available" %}
-                <span class="badge badge-outline font-semibold text-green-700 bg-green-100">{{ data['StatusDesc']
-                    }}</span>
+                <span class="badge badge-outline font-semibold text-green-700 bg-green-100">
+                    {{ data['StatusDesc'] }}</span>
 
                 {% else %}
                 <span class="badge badge-outline font-semibold text-red-700 bg-red-100">{{ data['StatusDesc'] }}</span>
@@ -25,7 +23,6 @@
                 {% endif %}
 
                 <span class="badge badge-outline font-semibold bg-primary-content">{{ data['BranchName'] }}</span>
-
                 <b>Author:</b> {{ data['Author'] }}
             </p>
             <form action="/update_book/{{ data['BID'] }}" method="POST">

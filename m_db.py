@@ -160,7 +160,10 @@ def q_user_bks_full(db, username: str):
             "StatusDesc": "$books_avail.StatusDesc",
             "DueDate": "$books_avail.DueDate",
             "InsertTime": "$books_avail.InsertTime",
-            "BID": "$books_info.BID"
+            "BID": "$books_info.BID",
+            "Subjects": "$books_info.Subjects",
+            "Publisher": "$books_info.Publisher",
+            "isbns": "$books_info.isbns",
         }},
     ])
     return [i for i in books_avail_users]
@@ -189,7 +192,11 @@ def q_user_bks_subset(db, username: str):
             "CallNumber": "$books_avail.CallNumber",
             "TitleName": "$books_info.TitleName",
             "Author": "$books_info.Author",
-            "BID": "$books_info.BID"
+            "BID": "$books_info.BID",
+            "Subjects": "$books_info.Subjects",
+            "Publisher": "$books_info.Publisher",
+            "isbns": "$books_info.isbns",
+
         }}
     ])
     return list({dic['TitleName']: dic for dic in output}.values())
