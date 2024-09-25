@@ -1,0 +1,118 @@
+<div class="main_content">
+    <div class="pt-8 mt-8 sm:px-20 xl:px-40"></div>
+    <div class="w-full overflow-x-auto my-3 pt-2">
+        <div class="mx-auto max-w-screen-lg px-4">
+            <input class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
+                id="myInput" type="text" placeholder="Search your saved books by keywords in their title!">
+
+            <div class="sort-buttons">
+                <button class="border border-sky-700" id="sortAsc">Sort by Title (Ascending)</button>
+                <button id="sortDesc">Sort by Title (Descending)</button>
+                <button id="sortOriginal">Original Order</button>
+            </div>
+
+            {% for data in api_data %}
+            <div x-data="{ open: false }" class="card w-full card-bordered card-compact"
+                data-title="{{ data['TitleName'].split(' | ', 1)[0] }}">
+                <div class="card-body">
+                    <div class="flex items-center">
+                        <p class="flex-grow px-2">
+                            <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
+                                class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline"
+                                target="_blank" rel="noopener noreferrer">{{ loop.index }} - {{
+                                data['TitleName'].split(" | ", 1)[0] }}</a>
+
+                            <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
+                                class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline"
+                                target="_blank" rel="noopener noreferrer">{{ loop.index }} - {{
+                                data['TitleName'].split(" : ", 1)[0] }}</a>
+
+                            <button class="text-sky-700 hover:text-red-400" @click="open = ! open">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            <span class="badge badge-outline">{{ data['CallNumber'] }}</span>
+                            <b>Author:</b> {{ data['Author'] }}
+                            <span>
+                                <button class="text-sky-700 hover:text-red-400" hx-delete="/delete_bk/{{data['BID']}}"
+                                    hx-swap='outerHTML' hx-indicator="#head-spinner" hx-target="closest .card">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </span>
+                        </p>
+                    </div>
+                    <span x-show="open" @click.outside="open = false">
+                        <ul class='pl-2'>
+                            <li><b>Publisher: </b> {{ data['Publisher'][0] }}</li>
+                            <li><b>Subjects: </b>{{ data['Subjects'] }}</li>
+                            <li><b>isnbs: </b>{{ data['isbns'] }}</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let cardContainer = document.getElementById('cardContainer');
+        let cards = Array.from(cardContainer.getElementsByClassName('card')); // Get all cards
+        const originalOrder = cards.slice(); // Copy of the original order of the cards
+
+        function initializeSortButtons() {
+            // Sort in ascending order by title
+            document.getElementById('sortAsc').addEventListener('click', function () {
+                sortCards('asc');
+            });
+
+            // Sort in descending order by title
+            document.getElementById('sortDesc').addEventListener('click', function () {
+                sortCards('desc');
+            });
+
+            // Restore original order
+            document.getElementById('sortOriginal').addEventListener('click', function () {
+                resetOriginalOrder();
+            });
+        }
+
+        function sortCards(order) {
+            const sortedCards = cards.slice().sort(function (a, b) {
+                const titleA = a.getAttribute('data-title').toLowerCase();
+                const titleB = b.getAttribute('data-title').toLowerCase();
+
+                if (order === 'asc') {
+                    return titleA.localeCompare(titleB);
+                } else if (order === 'desc') {
+                    return titleB.localeCompare(titleA);
+                }
+            });
+
+            // Clear and append sorted cards
+            while (cardContainer.firstChild) {
+                cardContainer.removeChild(cardContainer.firstChild); // Remove all cards
+            }
+            sortedCards.forEach(card => cardContainer.appendChild(card)); // Append sorted cards
+        }
+
+        function resetOriginalOrder() {
+            while (cardContainer.firstChild) {
+                cardContainer.removeChild(cardContainer.firstChild); // Clear all cards
+            }
+            originalOrder.forEach(card => cardContainer.appendChild(card)); // Append original cards
+        }
+
+        // Initialize sorting on page load
+        initializeSortButtons();
+
+        // Handle HTMX content updates (e.g., after content is swapped or loaded)
+        document.body.addEventListener('htmx:afterSwap', function () {
+            cardContainer = document.getElementById('cardContainer'); // Re-fetch the container after HTMX swap
+            cards = Array.from(cardContainer.getElementsByClassName('card')); // Re-fetch the cards
+            initializeSortButtons(); // Re-initialize the sort buttons
+        });
+    });
+</script>
