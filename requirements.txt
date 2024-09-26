@@ -31,3 +31,4 @@ pyopenssl
 requests[security]
 ndg-httpsclient 
 pyasn1
+supabase
