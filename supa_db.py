@@ -1,5 +1,6 @@
 import os
 import time
+import psycopg2
 from typing import Dict, List
 from datetime import datetime
 from supabase import create_client, Client
@@ -92,82 +93,50 @@ def q_username(db, username: str):
     """ Return user username and password from mongo DB """
     return supabase.table("users").select("*").eq("UserName", 'cliffchew84').execute()
 
-# def query_user_info(db, username: str):
-#     """ Return user username and password from mongo DB """
-#
-#     return db['users'].find_one({"UserName": username},
-#                                 {"_id": 0, "HashedPassword": 0})
+
+def query_user_info(db, username: str):
+    """ Return user username and password from mongo DB """
+    user_prop = ["UserName", "latest_login", "email_address", "preferred_lib",
+                 "pw_ans", "pw_qn", "books_updated", "registered_time"]
+    return supabase.table("users").select(", ".join(user_prop)).eq(
+        "UserName", "cliffchew84").execute().data
 
 
-def q_user_bks_full(db, username: str):
-    """ Fuller query of user saved books """
-    books_avail_users = db.user_books.aggregate([
-        # connect all tables
-        {"$lookup": {
-            "from": "books_avail",
-            "localField": "BID",
-            "foreignField": "BID",
-            "as": "books_avail"
-        }},
-        {"$unwind": '$books_avail'},
-        {"$lookup": {
-            "from": "books_info",
-            "localField": "BID",
-            "foreignField": "BID",
-            "as": "books_info"
-        }},
-        {"$unwind": '$books_info'},
-        {"$match": {"UserName": username}},
-        {"$project": {
-            "_id": 0,
-            # 'UserName': 1,
-            "TitleName": "$books_info.TitleName",
-            "Author": "$books_info.Author",
-            "BranchName": "$books_avail.BranchName",
-            "CallNumber": "$books_avail.CallNumber",
-            "StatusDesc": "$books_avail.StatusDesc",
-            "DueDate": "$books_avail.DueDate",
-            "InsertTime": "$books_avail.InsertTime",
-            "BID": "$books_info.BID",
-            "Subjects": "$books_info.Subjects",
-            "Publisher": "$books_info.Publisher",
-            "isbns": "$books_info.isbns",
-        }},
-    ])
-    return [i for i in books_avail_users]
+DB_HOST = os.environ.get(SUPA_DB_HOST) 
+DB_PORT = os.environ.get(SUPA_DB_PORT) 
+DB_NAME = os.environ.get(SUPA_DB_NAME)
+DB_USER = os.environ.get(SUPA_DB_USER)
+DB_PASSWORD = os.environ.get(SUPA_DB_PASSWORD)
 
+def pg_query(query: str):
+    """ Performs complex SQL queries on Supabase PostgreSQL"""
+    try:
+        connection = psycopg2.connect(
+            host=DB_HOST,
+            port=DB_PORT,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = connection.cursor()
 
-def q_user_bks_subset(db, username: str):
-    """ Query user saved books for lesser columns for efficiency """
-    output = db.user_books.aggregate([
-        {"$lookup": {
-            "from": "books_info",
-            "localField": "BID",
-            "foreignField": "BID",
-            "as": "books_info"
-        }},
-        {"$unwind": '$books_info'},
-        {"$lookup": {
-            "from": "books_avail",
-            "localField": "BID",
-            "foreignField": "BID",
-            "as": "books_avail"
-        }},
-        {"$unwind": '$books_avail'},
-        {"$match": {"UserName": username}},
-        {"$project": {
-            "_id": 0,
-            "CallNumber": "$books_avail.CallNumber",
-            "TitleName": "$books_info.TitleName",
-            "Author": "$books_info.Author",
-            "BID": "$books_info.BID",
-            "Subjects": "$books_info.Subjects",
-            "Publisher": "$books_info.Publisher",
-            "isbns": "$books_info.isbns",
+        # Example of executing an SQL query
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        colnames = [desc[0] for desc in cursor.description]
+        output = list()
+        for row in rows:
+            output.append(row)
 
-        }}
-    ])
-    return list({dic['TitleName']: dic for dic in output}.values())
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+    finally:
+        # Close the connection
+        if connection:
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection closed.")
+    return output
 
 
 # EventTracking

@@ -32,3 +32,4 @@ requests[security]
 ndg-httpsclient 
 pyasn1
 supabase
+psycopg2
