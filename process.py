@@ -83,8 +83,7 @@ def process_user_bks(query: str):
 
         due_date = a.get("DueDate", None)
         if due_date:
-            due_date = datetime.strptime(
-                due_date.split("T", 1)[0], "%Y-%m-%d").strftime("%d/%m")
+            due_date = due_date.strftime("%d/%m")
 
         update_time = datetime.fromtimestamp(
             a.get("InsertTime"), pendulum.timezone("Asia/Singapore")
