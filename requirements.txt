@@ -33,3 +33,4 @@ ndg-httpsclient
 pyasn1
 supabase
 psycopg2
+dotenv
