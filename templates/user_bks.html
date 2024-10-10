@@ -1,4 +1,8 @@
 <div class="main_content">
+    <!-- Current this is working, not the bar above -->
+    {% if status %}
+    {% include 'update_status.html' %}
+    {% endif %}
     <div class="w-full overflow-x-auto my-3 mt-18 pt-20 sm:px-20 xl:px-40"">
         <div class=" mx-auto max-w-screen-lg px-4">
         <div x-data="{
@@ -8,7 +12,7 @@
             filteredItems() {
                 // Filter and Sort Items
                 return this.items
-                    .filter(item => 
+                    .filter(item =>
                         item.TitleName.toLowerCase().includes(this.search.toLowerCase()) ||
                         item.Author.toLowerCase().includes(this.search.toLowerCase()) ||
                         item.CallNumber.toLowerCase().includes(this.search.toLowerCase())
@@ -38,7 +42,7 @@
             </div>
 
             <div x-sort.items="type">
-                <template x-for="(item, index) in filteredItems()" :key="item.BID">
+                <template x-for="(item, index) in filteredItems()">
                     <div x-data="{ open: false }" class="mt-1 card w-full card-bordered border-sky-700 card-compact">
                         <div class="card-body">
                             <div class="flex items-center">

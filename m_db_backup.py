@@ -64,7 +64,7 @@ def delete_status(db, username: str):
     return db.user_status.delete_many({'UserName': username})
 
 
-def q_status(db, username: str):
+def query_status(db, username: str):
     return db.user_status.find_one({"UserName": username})
 
 
@@ -74,7 +74,7 @@ def update_user_info(db, username: str, dict_values_to_add: Dict):
     new_dict.update(dict_values_to_add)
     newvalues = {"$set": new_dict}
 
-    db['user_status'].update_one({"UserName": username}, newvalues)
+    db['users'].update_one({"UserName": username}, newvalues)
     return f"Tracked {dict_values_to_add} for {username}"
 
 
@@ -115,9 +115,10 @@ def q_username(db, username: str):
     return db['users'].find_one({"UserName": username}, {"_id": 0})
 
 
-def q_user_info(db, username: str):
+def query_user_info(db, username: str):
     """ Return user username and password from mongo DB """
-    return db['user_status'].find_one({"UserName": username})
+    return db['users'].find_one({"UserName": username},
+                                {"_id": 0, "HashedPassword": 0})
 
 
 def q_user_bks_full(db, username: str):

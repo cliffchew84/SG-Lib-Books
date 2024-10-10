@@ -1,294 +1,240 @@
 from fastapi import (FastAPI, status, Request, Form, Depends, BackgroundTasks,
-                     HTTPException)
-from fastapi.responses import RedirectResponse, HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
+                     HTTPException, Response, Cookie)
+from fastapi.responses import RedirectResponse, HTMLResponse 
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi_login import LoginManager
+from supabase import create_client, Client
 
-# Set up user authentication flows
-from passlib.context import CryptContext
+from urllib.parse import urlencode
+from jose import JWTError, jwt
+from dotenv import load_dotenv
+import httpx
+load_dotenv()
+import os
+
 from datetime import timedelta, datetime
 from typing import Optional
 import urllib.parse
 import pendulum
-import supabase
 import time
-import os
 import re
 
-# My own packages
-import process as p
-import nlb_api as n_api
 import supa_db as s_db
-import m_db
+import nlb_api as n_api
+import process as p
+import m_db 
 
-# Load environment variables
-SECRET_KEY = os.environ["mongo_secret_key"]
-ACCESS_TOKEN_EXPIRY = 240
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
-# APPLICATION_ID = os.environ['nlb_rest_app_id']
-# API_KEY = os.environ['nlb_rest_api_key']
+app = FastAPI()
+app.mount('/static', StaticFiles(directory='static'), name='static')
+templates = Jinja2Templates(directory='templates')
 
-manager = LoginManager(SECRET_KEY, token_url="/login", use_cookie=True)
-manager.cookie_name = "auth"
+# Think about adding back mongoDB stuff
+# user_status
 
+# Environment setup
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_SECRET = os.getenv("GOOGLE_SECRET")
+SECRET_KEY = os.getenv("SUPABASE_JWT_SECRET")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def get_db():
-    return s_db.connect_sdb()
+origins = ["http://localhost:8000",
+           "https://127.0.0.1:8000",
+           "http://localhost:3000",
+           "localhost"]
 
-
-# Password hashing setup
-pwd_ctx = CryptContext(schemes=['bcrypt'], deprecated="auto")
-
-
-def get_hashed_password(plain_password):
-    return pwd_ctx.hash(plain_password)
-
-
-def verify_password(plain_password, hashed_password):
-    return pwd_ctx.verify(plain_password, hashed_password)
-
-
-@manager.user_loader()
-def get_user(username: str):
-    db = s_db.connect_sdb()
-    user = s_db.q_username(db=db, username=username)
-    if user:
-        return user
-
-
-def auth_user(username: str,
-              password: str,
-              db=Depends(get_db)):
-    user = s_db.q_username(db=db, username=username)
-    if not user:
-        return None
-    if not verify_password(plain_password=password,
-                           hashed_password=user.get("HashedPassword")):
-        return None
-    return user
-
-
-class NotAuthenticationException(Exception):
-    pass
-
-
-def not_authenticated_exception_handler(request, exception):
-    return RedirectResponse("/")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Application code
 app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
 templates = Jinja2Templates(directory='templates')
 
-manager.not_authenticated_exception = NotAuthenticationException
-app.add_exception_handler(NotAuthenticationException,
-                          not_authenticated_exception_handler)
 
-# Define an error handler to render the error page
-@app.exception_handler(HTTPException)
-async def handle_http_exception(request: Request, exc: HTTPException):
-    return templates.TemplateResponse("error.html", {"request": request})
+def get_db():
+    return s_db.connect_sdb()
 
 
-# Example route that triggers an internal server error
-@app.get("/trigger-error")
-def trigger_error():
-    raise HTTPException(status_code=500, detail="Internal Server Error")
+def username_email_resol(user_info: str):
+    """ In the current new flow, username == email 
+        To cover legacy situation where username != email
+    """
+    email, username = user_info.split(" | ") 
+    if not username:
+        username = email
+    return username
 
 
-# Logout
-@app.get("/logout")
-def logout():
-    response = RedirectResponse("/")
-    manager.set_cookie(response, None)
-    return response
+@app.get("/login-google")
+async def login():
+    try:
+        # Construct the Google OAuth URL for Authorization Code Flow
+        params = {
+            "client_id": GOOGLE_CLIENT_ID,
+            "redirect_uri": "http://localhost:8000/auth/callback",
+            "response_type": "code",
+            "scope": "openid email profile",  # Add other scopes as needed
+            "prompt": "select_account"  # Forces Google login screen
+        }
+        google_auth_url = f"https://accounts.google.com/o/oauth2/auth?{urlencode(params)}"
+        
+        # Redirect the user to the Google login page
+        return RedirectResponse(google_auth_url)
+    except Exception as e:
+        raise HTTPException(status_code=500,
+                            detail=f"Error initiating Google OAuth: {str(e)}")
 
 
-# Register page
-@app.get("/register_complete/{username}", response_class=HTMLResponse)
-def get_register(request: Request, username: str):
-    return templates.TemplateResponse(
-        "register_complete.html",
-        {"request": request, "username": username})
+@app.get("/auth/callback")
+async def auth_callback(code: str, response: Response):
+    async with httpx.AsyncClient() as client:
+        token_response = await client.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_SECRET,
+                "redirect_uri": "http://localhost:8000/auth/callback",
+                "grant_type": "authorization_code",
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"}
+        )
 
+    tokens = token_response.json()
+    access_token = tokens.get("access_token")
 
-@app.get("/check_user_register/", response_class=HTMLResponse)
-async def check_user_register(username):
+    if not access_token:
+        raise HTTPException(status_code=400,
+                            detail="Access token not received")
+
+    # Test if I can get supbase user info
+    async with httpx.AsyncClient() as client:
+        user_info_response = await client.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+    user_email = user_info_response.json().get('email')
     db = s_db.connect_sdb()
-    user = s_db.q_username(db=db, username=username)
-    if user:
-        dup_user_msg = f"{username} is already registered"
+    try:
+        username = s_db.q_username_by_email(db, user_email)
+    except:
+        username = user_email
+        # [TODO] - To change this in the future. This is a quick fix for now
+        db.table('users').insert(
+            {"UserName": username, 
+             "HashedPassword": "ThisIsGoogleLogin",
+             "email_address": username}).execute()
 
-        return f"""<button type="submit" class="bg-gray-400 text-white
-                    border-white rounded-lg py-1.5 mt-4 px-3 mx-3
-                    disabled:bg-gray-400 disabled:hover:bg-gray-400" disabled
-                    >Register</button>
-                    <p class="italic py-1.5 mt-4 px-3">{dup_user_msg}</p>
-                    """
+    user_info = user_email + " | " + username
+    if user_info is None:
+        raise HTTPException(status_code=401,
+                            detail="Could not retrieve user info")
+
+    # Set the access token in a cookie
+    response.set_cookie(
+        key="user_info",
+        value=user_info,
+        httponly=True,
+        secure=False,
+        # secure=True,  # Set to True if using HTTPS in production
+        domain="localhost",  # Ensure correct domain
+        # domain="127.0.0.1",
+        path="/",  # Make sure it's available for the whole app
+        samesite="Lax"
+        # samesite="none"
+    )
+
+    # Redirect to the protected route
+    return RedirectResponse(url="/main",
+                            status_code=303,
+                            headers=response.headers)
+
+
+@app.get("/main", response_class=HTMLResponse)
+async def main(request: Request,
+               user_info: str=Cookie(None),
+               db=Depends(get_db)):
+
+    if user_info:
+        username = username_email_resol(user_info)
+
+        # Continue to extract user book info
+        query = s_db.q_user_bks(username)
+        response = p.process_user_bks(query)
+
+        # Processing necessary statistics
+        all_unique_books = p.get_unique_bks(response)
+        all_avail_books = p.get_avail_bks(response)
+        unique_libs = p.get_unique_libs(response)
+        avail_bks_by_lib = p.get_avail_bks_by_lib(response)
+        lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
+
+        mdb = m_db.connect_mdb()
+        mdb = mdb['nlb']
+        update_status = None
+        if m_db.q_status(db=mdb, username=username):
+            update_status = " "
+
+        # Check if user has a default library
+        user_info = s_db.q_user_info(db, username)
+        preferred_lib = user_info.get("preferred_lib")
+
+        if preferred_lib:
+            preferred_lib = preferred_lib.lower()
+            output = []
+            for book in response:
+                if preferred_lib in book['BranchName'].lower():
+                    output.append(book)
+        else:
+            preferred_lib = 'all'
+            output = response
+
+        lib_avail = len(p.get_avail_bks(output))
+        lib_all = len(p.get_unique_bks(output))
+
+        return templates.TemplateResponse("main.html", {
+            "request": request,
+            "username": username,
+            "api_data": output,
+            'all_avail_books': all_avail_books,
+            'all_unique_books': all_unique_books,
+            'avail_books': avail_bks_by_lib,
+            'lib_book_summary': lib_book_summary,
+            'lib_avail': lib_avail,
+            'lib_all': lib_all,
+            "library": preferred_lib,
+            "status": update_status
+        })
+
     else:
-        return """<button type="submit"
-                class="bg-red-400 text-white border-white
-                rounded-lg py-1.5 mt-4 px-3 mx-2">Register</button>"""
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@app.post("/")
-def register_user(request: Request,
-                  username: Optional[str] = Form(...),
-                  password: Optional[str] = Form(...),
-                  db=Depends(get_db)):
-    hashed_password = get_hashed_password(password)
-    invalid = False
-    if username:
-        if s_db.q_username(db=db, username=username):
-            invalid = True
-
-        if not invalid:
-            s_db.add_user(db=db, username=username, hashed_pw=hashed_password)
-            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRY)
-            access_token = manager.create_access_token(
-                data={"sub": username},
-                expires=access_token_expires)
-
-            resp = RedirectResponse("/register_complete/" +
-                                    urllib.parse.quote(username),
-                                    status_code=status.HTTP_302_FOUND)
-            # [TODO]
-            s_db.event_tracking(db, 'users', username, "registered_time")
-            s_db.event_tracking(db, 'users', username, 'latest_login')
-            manager.set_cookie(resp, access_token)
-            return resp
-    else:
-        return templates.TemplateResponse(
-            "homepage.html",
-            {"request": request,
-             "register_invalid": True},
-            status_code=status.HTTP_400_BAD_REQUEST)
-
-
-# Base page
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse("homepage.html", {"request": request})
-
-
-# Login
-@app.post("/login")
-def login(request: Request,
-          form_data: OAuth2PasswordRequestForm = Depends(),
-          db=Depends(get_db)):
-    user = auth_user(username=form_data.username,
-                     password=form_data.password,
-                     db=db)
-
-    if not user:
-        return templates.TemplateResponse(
-            "homepage.html",
-            {"request": request,
-             "login_invalid": True},
-            status_code=status.HTTP_401_UNAUTHORIZED)
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRY)
-    access_token = manager.create_access_token(
-        data={"sub": user.get("UserName")},
-        expires=access_token_expires)
-
-    resp = RedirectResponse(
-        f"/{user.get('UserName')}/main/", status_code=status.HTTP_302_FOUND)
-
-    manager.set_cookie(resp, access_token)
-    s_db.event_tracking(db, 'users', user.get("UserName"), 'latest_login')
-    return resp
-
-
-@app.get("/forgot_password", response_class=HTMLResponse)
-async def forgot_password(request: Request, wrong_question=False):
-    return templates.TemplateResponse("forgot_password.html", {
-        "request": request})
-
-
-@app.get("/reset_password/", response_class=HTMLResponse)
-async def reset_password(request: Request,
-                         username: str = Form(...),
-                         pw_qn: str = Form(...),
-                         pw_ans: str = Form(...),
-                         new_password: str = Form(...)):
-    db = s_db.connect_sdb()
-    user = s_db.q_user(db=db, username=username)
-    if user:
-        if user.get("pw_qn") == pw_qn & user.get("pw_ans") == pw_ans:
-            hashed_password = get_hashed_password(new_password)
-            new_dict = {"HashedPassword": hashed_password}
-            s_db.update_user_info(db, username.get("UserName"), new_dict)
-    else:
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User email not found")
-    return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-
-
-@app.get("/{username}/main")
-async def htmx_main(request: Request,
-                    db=Depends(get_db),
-                    username=Depends(manager)):
-
-    username=username.get("UserName")
-    query = s_db.q_user_bks(username)
-    response = p.process_user_bks(query)
-
-    # Processing necessary statistics
-    all_unique_books = p.get_unique_bks(response)
-    all_avail_books = p.get_avail_bks(response)
-    unique_libs = p.get_unique_libs(response)
-    avail_bks_by_lib = p.get_avail_bks_by_lib(response)
-    lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
-
-    update_status = None
-    if s_db.q_status(db=db, username=username):
-        update_status = "Updating In Progress!"
-
-    # Check if user has a default library
-    user_info = s_db.q_user_info(db, username)
-    preferred_lib = user_info.get("preferred_lib")
-
-    if preferred_lib:
-        preferred_lib = preferred_lib.lower()
-        output = []
-        for book in response:
-            if preferred_lib in book['BranchName'].lower():
-                output.append(book)
-    else:
-        preferred_lib = 'all'
-        output = response
-
-    lib_avail = len(p.get_avail_bks(output))
-    lib_all = len(p.get_unique_bks(output))
-
-    return templates.TemplateResponse("main.html", {
-        "request": request,
-        "username": username,
-        "api_data": output,
-        'all_avail_books': all_avail_books,
-        'all_unique_books': all_unique_books,
-        'avail_books': avail_bks_by_lib,
-        'lib_book_summary': lib_book_summary,
-        'lib_avail': lib_avail,
-        'lib_all': lib_all,
-        "library": preferred_lib,
-        "status": update_status
-    })
-
-@app.get("/{username}/user_bks")
+@app.get("/user_bks")
 async def current_bks(request: Request,
                       db=Depends(get_db),
-                      username=Depends(manager)):
+                      user_info: str=Cookie(None)):
     """ Used by htmx to render user books within main_content <div> """
-    username=username.get("UserName")
+
+    username = username_email_resol(user_info)
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
     update_status = None
-    if s_db.q_status(db=db, username=username):
-        update_status = "Updating In Progress... Please refresh to update!"
+    if m_db.q_status(db=mdb, username=username):
+        update_status = " "
 
     output = []
     if username:
@@ -302,61 +248,60 @@ async def current_bks(request: Request,
     else:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
+# Start my edits from here
+@app.get("/lib/{library}/", response_class=HTMLResponse)
+async def show_avail_bks(request: Request,
+                         library: Optional[str],
+                         db=Depends(get_db),
+                         user_info: str=Cookie(None)):
 
-@app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
-async def show_avail_m_books(request: Request,
-                             library: Optional[str],
-                             db=Depends(get_db),
-                             username=Depends(manager)):
-    try:
-        if username:
-            username=username.get("UserName")
-            update_status = None
-            if s_db.q_status(db=db, username=username):
-                update_status = "Updating In Progress!"
+    if user_info:
+        username = username_email_resol(user_info)
+        mdb = m_db.connect_mdb()
+        mdb = mdb['nlb']
+        update_status = None
+        if m_db.q_status(db=mdb, username=username):
+            update_status = " "
 
-            # Query entire user books - Inefficient
-            query = s_db.q_user_bks(username=username)
-            response = p.process_user_bks(query)
-            all_unique_books = p.get_unique_bks(response)
-            all_avail_books = p.get_avail_bks(response)
+        # Query entire user books - Inefficient
+        query = s_db.q_user_bks(username=username)
+        response = p.process_user_bks(query)
+        all_unique_books = p.get_unique_bks(response)
+        all_avail_books = p.get_avail_bks(response)
 
-            if library != 'all':
-                output = []
-                for book in response:
-                    if library in book['BranchName'].lower():
-                        output.append(book)
-            else:
-                output = response
-
-            lib_avail = len(p.get_avail_bks(output))
-            lib_all = len(p.get_unique_bks(output))
-
-            return templates.TemplateResponse("result.html", {
-                "request": request,
-                "username": username,
-                "api_data": output,
-                'library': library,
-                'all_avail_books': all_avail_books,
-                'all_unique_books': all_unique_books,
-                'lib_avail': lib_avail,
-                'lib_all': lib_all,
-                'status': update_status
-            })
+        if library != 'all':
+            output = []
+            for book in response:
+                if library in book['BranchName'].lower():
+                    output.append(book)
         else:
-            return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+            output = response
+
+        lib_avail = len(p.get_avail_bks(output))
+        lib_all = len(p.get_unique_bks(output))
+
+        return templates.TemplateResponse("result.html", {
+            "request": request,
+            "username": username,
+            "api_data": output,
+            'library': library,
+            'all_avail_books': all_avail_books,
+            'all_unique_books': all_unique_books,
+            'lib_avail': lib_avail,
+            'lib_all': lib_all,
+            'status': update_status
+        })
+
+    else:
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
 def update_bk_avail_supa(db, bid_no: str):
     """ 
-    Takes in single BID to get its avail info
-    Processes data for Supabase
-
-    # Should separate these functions!
-    Delete existing Supabase data if found
-    Inject new data into Supabase 
+    - Takes in single BID to get avail info
+    - Processes data for Supabase
+    - Delete existing Supabase data if necessary 
+    - Inject new data into Supabase 
     """
     try:
         # Make API call on book availability
@@ -377,78 +322,105 @@ def update_bk_avail_supa(db, bid_no: str):
         return {"API call": False}
 
 
-
-
 @app.post("/update_book/{BID}", response_class=HTMLResponse)
 async def update_book(BID: str,
-                      db=Depends(get_db),
-                      username=Depends(manager)):
+                      db=Depends(get_db)):
 
     api_result = update_bk_avail_supa(db, BID)
     if api_result.get("API call"):
-        return RedirectResponse(f"/{username.get('UserName')}/main",
-                                status_code=status.HTTP_302_FOUND)
+        return RedirectResponse("/main", status_code=status.HTTP_302_FOUND)
 
 
-def update_all_user_books(db, username):
+@app.post("/update_user_bks/", response_class=HTMLResponse)
+async def update_user_bks(background_tasks: BackgroundTasks,
+                          db=Depends(get_db),
+                          user_info: str=Cookie(None)):
+
+    username = username_email_resol(user_info)
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
+    m_db.insert_status(mdb, username=username)
+    m_db.update_user_info(mdb, username, {'books_updated': 0})
+
+    """ Updates availability of all user's saved books """
+    background_tasks.add_task(update_all_user_bks, db, user_info)
+    return RedirectResponse("/lib/all",
+                            status_code=status.HTTP_302_FOUND)
+
+
+def update_all_user_bks(db, user_info):
     """ Update all books linked to user."""
-    username = username.get("UserName")
-
+    username = username_email_resol(user_info)
     user_bids = s_db.q_user_bks_bids(db=db, username=username)
-    s_db.insert_status(db, username=username)
-    s_db.update_user_info(db, username, {'books_updated': 0})
-    for i, ubid in enumerate(user_bids):
-        bid_no = ubid.get("BID")
-        print(bid_no)
+    user_bks_info = s_db.q_user_bks_info(username=username)
 
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
+    for i, bk in enumerate(user_bks_info):
+        bid_no = bk.get("BID")
+        title = bk.get("TitleName")
         time.sleep(2)
         update_bk_avail_supa(db, bid_no)
 
-        s_db.update_user_info(db, username, {'books_updated': i+1})
-    s_db.delete_status(db, username=username)
+        m_db.update_user_info(mdb, username,
+                              {'books_updated': i+1,
+                               'title': title
+                               })
+    m_db.delete_status(mdb, username=username)
     return {"message": "All user books updated!"}
-
-
-@app.post("/m_update_user_books/{username}", response_class=HTMLResponse)
-async def update_user_saved_bks(background_tasks: BackgroundTasks,
-                                db=Depends(get_db),
-                                username=Depends(manager)):
-    """ Updates availability of all user's saved books """
-    background_tasks.add_task(update_all_user_books, db, username)
-    return RedirectResponse(f"/{username.get('UserName')}/lib/all",
-                            status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/book_status/{book_saved}")
 async def book_status_progress_bar(request: Request,
                                    book_saved: int,
                                    db=Depends(get_db),
-                                   username=Depends(manager)):
+                                   user_info: str=Cookie(None)):
+    try:
+        username = username_email_resol(user_info)
+        mdb = m_db.connect_mdb()
+        mdb = mdb['nlb']
+        user_info = m_db.q_user_info(db=mdb, username=username)
+        books_updated = user_info.get("books_updated")
+        title = user_info.get("title")
 
-    username = username.get("UserName")
-    books_updated = s_db.q_user_info(
-        db=db, username=username).get("books_updated")
+        print(books_updated)
+        print(title)
 
-    progress = 0
-    if books_updated > 0:
-        progress = (books_updated / book_saved) * 100
+        progress = 0
+        if books_updated > 0:
+            progress = (books_updated / book_saved) * 100
 
-    update_status = None
-    if s_db.q_status(db=db, username=username):
-        update_status = "Updating! Please Refresh when Done"
-    return templates.TemplateResponse("book_updates.html", {
-        "request": request,
-        "progress": progress,
-        "status": update_status
-    })
+        update_status = None
+        if m_db.q_status(db=mdb, username=username):
+            update_status = " "
+
+        return templates.TemplateResponse("/partials/update_status_text.html", {
+            "request": request,
+            "progress": progress,
+            "TitleName": title,
+            "total_books": book_saved,
+            "book_count": books_updated,
+            "status": update_status
+        })
+    except:
+        return templates.TemplateResponse("/partials/update_status_text.html", {
+            "request": request,
+        })
+
+
+@app.post("/complete-update/", response_class=HTMLResponse)
+async def update_book(request: Request):
+
+    return templates.TemplateResponse("complete-status.html", 
+                                      {"request": request})
 
 
 @app.get("/update_header", response_class=HTMLResponse)
 async def update_header(request: Request,
                         db=Depends(get_db),
-                        username=Depends(manager)):
+                        user_info: str=Cookie(None)):
 
-    username = username.get("UserName")
+    username = username_email_resol(user_info)
     query = s_db.q_user_bks(username=username)
     response = p.process_user_bks(query)
 
@@ -459,9 +431,11 @@ async def update_header(request: Request,
     avail_bks_by_lib = p.get_avail_bks_by_lib(response)
     lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
 
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
     update_status = None
-    if s_db.q_status(db=db, username=username):
-        update_status = "Updating In Progress!"
+    if m_db.q_status(db=mdb, username=username):
+        update_status = " "
 
     # Check if user has a default library
     user_info = s_db.q_user_info(db, username)
@@ -496,13 +470,13 @@ async def update_header(request: Request,
     })
 
 
-# Experimental navbar updates
 @app.post("/ingest_books_navbar", response_class=HTMLResponse)
 async def ingest_books_navbar(request: Request,
                               bids: list = Form(...),
                               db=Depends(get_db),
-                              username=Depends(manager)):
-    username = username.get("UserName")
+                              user_info: str=Cookie(None)):
+
+    username = username_email_resol(user_info)
     for bid in bids:
         print(bid)
         # Makes API to bk info and bk avail and ingest the data into DB
@@ -542,8 +516,9 @@ async def ingest_books_navbar(request: Request,
 async def delete_bk(request: Request,
                     bid: int,
                     db=Depends(get_db),
-                    username=Depends(manager)):
-    username=username.get("UserName") 
+                    user_info: str=Cookie(None)):
+
+    username = username_email_resol(user_info)
     final_count = s_db.q_bid_counter(bid_no=str(bid)) 
 
     # If book is only linked to one user,
@@ -556,12 +531,13 @@ async def delete_bk(request: Request,
     return ""
 
 
-@app.post("/delete_books", response_class=HTMLResponse)
-async def delete_books(request: Request,
+@app.post("/delete_bks", response_class=HTMLResponse)
+async def delete_bks(request: Request,
                        bids: list = Form(...),
                        db=Depends(get_db),
-                       username=Depends(manager)):
-    username=username.get("UserName")
+                       user_info: str=Cookie(None)):
+
+    username = username_email_resol(user_info)
     for bid in bids:
         final_count = s_db.q_bid_counter(bid_no=str(bid)) 
         # If book is only linked to one user,
@@ -595,16 +571,18 @@ async def delete_books(request: Request,
 
 
 @app.get("/htmx_search", response_class=HTMLResponse)
-async def htmx_bk_search(request: Request,
-                         e_resources: Optional[str] = None,
-                         book_search: Optional[str] = None,
-                         author: Optional[str] = None,
-                         db=Depends(get_db),
-                         username=Depends(manager)):
-    """ Calls NLB API GetTitles Search and show results in search_table.html"""
-    bk_output, search_input = [], dict()
-    username = username.get("UserName")
+async def htmx_search(request: Request,
+                      e_resources: Optional[str] = None,
+                      book_search: Optional[str] = None,
+                      author: Optional[str] = None,
+                      db=Depends(get_db),
+                      user_info: str=Cookie(None)):
+    """ Calls NLB API GetTitles Search and show results 
+        in search_table.html
+    """
 
+    username = username_email_resol(user_info)
+    bk_output, search_input = [], dict()
     if book_search:
         c_book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
         search_input.update({"Title": c_book_search})
@@ -678,16 +656,17 @@ async def htmx_bk_search(request: Request,
 
 
 @app.get("/navigate_search", response_class=HTMLResponse)
-async def htmx_paginate_bk_search(request: Request,
-                                  book_search: Optional[str] = None,
-                                  author: Optional[str] = None,
-                                  offset: Optional[str] = None,
-                                  e_resources: Optional[str] = None,
-                                  db=Depends(get_db),
-                                  username=Depends(manager)):
+async def paginate_search(request: Request,
+                          book_search: Optional[str] = None,
+                          author: Optional[str] = None,
+                          offset: Optional[str] = None,
+                          e_resources: Optional[str] = None,
+                          db=Depends(get_db),
+                          user_info: str=Cookie(None)):
+
     """ Calls new GetTitles Search and show results in search_table.html"""
     final_response, search_input = list(), dict()
-    username=username.get("UserName")
+    username = username_email_resol(user_info)
 
     if book_search:
         c_book_search = re.sub(r'[^a-zA-Z0-9\s]', ' ', book_search)
@@ -760,37 +739,45 @@ async def htmx_paginate_bk_search(request: Request,
     })
 
 
-@app.get("/{username}/search/", response_class=HTMLResponse)
+@app.get("/search", response_class=HTMLResponse)
 async def search_books(request: Request,
-                         book_search: Optional[str] = None,
-                         author: Optional[str] = None,
-                         db=Depends(get_db),
-                         username=Depends(manager)):
+                       book_search: Optional[str] = None,
+                       author: Optional[str] = None,
+                       db=Depends(get_db),
+                       user_info: str=Cookie(None)):
+
+    username = username_email_resol(user_info)
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
+    user_bids = s_db.q_user_bks_bids(db=db, username=username)
     update_status = None
-    if s_db.q_status(db=db, username=username.get("UserName")):
-        update_status = "Updating In Progress!"
+    if m_db.q_status(db=mdb, username=username):
+        update_status = " "
 
     return templates.TemplateResponse("search.html", {
         "request": request,
         "keyword": book_search,
         "author": author,
-        "username": username.get("UserName"),
-        "status": update_status
+        "username": username,
+        "status": update_status,
+        "all_unique_books": user_bids
     })
 
 
-@app.get("/{username}/profile", response_class=HTMLResponse)
+@app.get("/profile", response_class=HTMLResponse)
 async def user_profile(request: Request,
-                         db=Depends(get_db),
-                         username=Depends(manager)):
+                       db=Depends(get_db),
+                       user_info: str=Cookie(None)):
 
-    username=username.get("UserName")
+    username = username_email_resol(user_info)
     query = s_db.q_user_bks(username=username)
     response = p.process_user_bks(query)
     unique_libs = p.get_unique_libs(response)
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
     update_status = None
-    if s_db.q_status(db=db, username=username):
-        update_status = "Updating In Progress!"
+    if m_db.q_status(db=mdb, username=username):
+        update_status = " "
 
     # Query user profile info from database
     user_info = s_db.q_user_info(db, username)
@@ -806,7 +793,7 @@ async def user_profile(request: Request,
     })
 
 
-@app.post("/update_user/{username}", response_class=HTMLResponse)
+@app.post("/update_user", response_class=HTMLResponse)
 async def update_user(request: Request,
                       email_address: str = Form(None),
                       preferred_lib: str = Form(None),
@@ -814,9 +801,9 @@ async def update_user(request: Request,
                       pw_ans: str = Form(None),
                       password: str = Form(None),
                       db=Depends(get_db),
-                      username=Depends(manager)):
+                      user_info: str=Cookie(None)):
 
-    username=username.get("UserName")
+    username = username_email_resol(user_info)
     # Update info
     new_dict = {'email_address': email_address,
                 "preferred_lib": preferred_lib,
@@ -827,13 +814,28 @@ async def update_user(request: Request,
         new_dict.update({"HashedPassword": hashed_password})
 
     s_db.update_user_info(db, username, new_dict)
-    return RedirectResponse(f"/profile/{username}",
-                            status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(f"/profile", status_code=status.HTTP_302_FOUND)
 
 
-@app.post("/delete_user/{username}", response_class=HTMLResponse)
+@app.post("/delete_user", response_class=HTMLResponse)
 async def delete_user(request: Request,
                       db=Depends(get_db),
-                      username=Depends(manager)):
-    s_db.delete_user(db, username=username.get("UserName"))
+                      user_info: str=Cookie(None)):
+
+    username = username_email_resol(user_info)
+    s_db.delete_user(db, username=username)
     return RedirectResponse("/logout", status_code=status.HTTP_302_FOUND)
+
+
+# Main Page
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("google_page.html", {"request": request})
+
+
+# Logout route to remove the JWT token
+@app.get("/logout")
+def logout():
+    response = RedirectResponse("/")
+    response.delete_cookie("user_info")
+    return response
