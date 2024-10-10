@@ -1,18 +1,18 @@
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/{{username}}/user_bks" hx-indicator="#head-spinner"
-        hx-target=".main_content"><i class="fas fa-book"></i>Books
+    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/user_bks" hx-indicator="#head-spinner"
+        hx-target=".main_content" hx-swap="outerHTML"><i class="fas fa-book"></i>Books
     </a>
 </li>
 
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/{{username}}/search" hx-indicator="#head-spinner"
-        hx-target=".main_content"><i class="fas fa-search"></i>NLB
+    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/search" hx-indicator="#head-spinner"
+        hx-target=".main_content" hx-swap='outerHTML'><i class="fas fa-search"></i>NLB
     </a>
 </li>
 
 <li>
-    <form class="form-inline hover:text-white hover:bg-sky-500" hx-post="/m_update_user_books/{{username}}"
-        hx-indicator="#head-spinner" hx-target=".main_content"><button type="submit">
+    <form class="form-inline hover:text-white hover:bg-sky-500" hx-post="/update_user_bks/" hx-indicator="#head-spinner"
+        hx-target=".main_content" hx-swap="outerHTML"><button type="submit">
             <i class="fas fa-sync"></i> Book Status</button>
     </form>
 </li>

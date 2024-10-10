@@ -94,7 +94,19 @@ def delete_user(db, username: str):
 
 
 # Queries
+def q_username_by_email(db, email: str) -> str:
+    """ Extract UserName using ( Google ) auth email """
+    return db.table("users").select("UserName").eq(
+        "email_address", email).execute().data[0].get("UserName")
+
+
 def q_user_bks_bids(db, username: str):
+    """ To extract a list of user saved books BIDs """
+    return db.table("user_books").select("BID").eq(
+        "UserName", username).execute().data
+
+
+def q_user_bks(db, username: str):
     """ To extract a list of user saved books BIDs """
     return db.table("user_books").select("BID").eq(
         "UserName", username).execute().data
@@ -223,6 +235,32 @@ USING ("BID")
 
 
 def q_user_bks_subset(username: str, query: str=subset_query):
+    return pg_query(query.format(username=username))
+
+
+smallest_set_query = """
+WITH user_bks AS (
+    SELECT 
+        ub."UserName",
+        ub."BID"
+    FROM user_books AS ub
+    WHERE "UserName" = '{username}'
+), bks_info AS (
+    SELECT * 
+    FROM books_info
+    RIGHT JOIN user_bks
+    USING ("BID")
+)
+SELECT DISTINCT 
+    bi."TitleName",
+    CAST(bi."BID" AS TEXT) AS "BID"
+FROM books_avail AS ba
+RIGHT JOIN bks_info AS bi
+USING ("BID")
+"""
+
+
+def q_user_bks_info(username: str, query: str=smallest_set_query):
     return pg_query(query.format(username=username))
 
 

@@ -3,6 +3,11 @@
     {% include 'starter.html' %}
     {% else %}
 
+    <!-- Add empty status_bar div -->
+    <!-- When trigger update book, this div gets replaced -->
+    <!-- When done, this status_bar becomes empty again -->
+
+    <!-- Current this is working, not the bar above -->
     {% if status %}
     {% include 'update_status.html' %}
     {% endif %}
