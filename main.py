@@ -47,7 +47,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 origins = ["http://localhost:8000",
            "https://127.0.0.1:8000",
            "http://localhost:3000",
-           "localhost", 
+           "localhost",
            "https://sg-nlb-available-books.onrender.com"
            ]
 
@@ -110,7 +110,7 @@ async def auth_callback(code: str, response: Response):
                 "code": code,
                 "client_id": GOOGLE_CLIENT_ID,
                 "client_secret": GOOGLE_SECRET,
-                "redirect_uri": "http://localhost:8000/auth/callback",
+                "redirect_uri": "https://sg-nlb-available-books.onrender.com/auth/callback",
                 "grant_type": "authorization_code",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"}
