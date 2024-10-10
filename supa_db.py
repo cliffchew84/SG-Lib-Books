@@ -229,7 +229,7 @@ SELECT DISTINCT
     bi."Publisher",
     bi."isbns"
 FROM books_avail AS ba
-RIGHT JOIN bks_info AS bi
+INNER JOIN bks_info AS bi
 USING ("BID")
 """
 
@@ -255,7 +255,7 @@ SELECT DISTINCT
     bi."TitleName",
     CAST(bi."BID" AS TEXT) AS "BID"
 FROM books_avail AS ba
-RIGHT JOIN bks_info AS bi
+INNER JOIN bks_info AS bi
 USING ("BID")
 """
 
