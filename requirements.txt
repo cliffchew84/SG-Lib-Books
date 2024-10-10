@@ -34,3 +34,4 @@ pyasn1
 supabase
 psycopg2
 python-dotenv
+python-jose
