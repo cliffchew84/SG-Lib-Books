@@ -47,7 +47,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 origins = ["http://localhost:8000",
            "https://127.0.0.1:8000",
            "http://localhost:3000",
-           "localhost"]
+           "localhost", 
+           "https://sg-nlb-available-books.onrender.com"
+           ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -83,7 +85,9 @@ async def login():
         # Construct the Google OAuth URL for Authorization Code Flow
         params = {
             "client_id": GOOGLE_CLIENT_ID,
-            "redirect_uri": "http://localhost:8000/auth/callback",
+            # "redirect_uri": "http://localhost:8000/auth/callback",
+            "redirect_uri":
+            "https://sg-nlb-available-books.onrender.com/auth/callback",
             "response_type": "code",
             "scope": "openid email profile",  # Add other scopes as needed
             "prompt": "select_account"  # Forces Google login screen
@@ -148,10 +152,10 @@ async def auth_callback(code: str, response: Response):
         key="user_info",
         value=user_info,
         httponly=True,
-        secure=False,
-        # secure=True,  # Set to True if using HTTPS in production
-        domain="localhost",  # Ensure correct domain
-        # domain="127.0.0.1",
+        # secure=False,
+        secure=True,  # Set to True if using HTTPS in production
+        # domain="localhost",  # Ensure correct domain
+        domain="sg-nlb-available-books.onrender.com/auth/callback",
         path="/",  # Make sure it's available for the whole app
         samesite="Lax"
         # samesite="none"
