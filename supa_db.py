@@ -199,7 +199,7 @@ SELECT
     bi."Publisher",
     bi."isbns"
 FROM books_avail AS ba
-RIGHT JOIN bks_info AS bi
+INNER JOIN bks_info AS bi
 USING ("BID")
 """
 
