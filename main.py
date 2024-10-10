@@ -136,7 +136,7 @@ async def auth_callback(code: str, response: Response):
         username = s_db.q_username_by_email(db, user_email)
     except:
         username = user_email
-        # [TODO] - To change this in the future. This is a quick fix for now
+        # [TODO] - Quick fix for now
         db.table('users').insert(
             {"UserName": username, 
              "HashedPassword": "ThisIsGoogleLogin",
@@ -155,7 +155,7 @@ async def auth_callback(code: str, response: Response):
         # secure=False,
         secure=True,  # Set to True if using HTTPS in production
         # domain="localhost",  # Ensure correct domain
-        domain="sg-nlb-available-books.onrender.com/auth/callback",
+        domain="sg-nlb-available-books.onrender.com",
         path="/",  # Make sure it's available for the whole app
         samesite="Lax"
         # samesite="none"
