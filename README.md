@@ -13,3 +13,32 @@ This side project is also a way for me to continue to learn and apply more techn
 1. Availability of eBooks
 2. Linking to NLB Events from EventBrite 
 3. Recommending books
+
+## Getting Started
+The following section details the step it takes to start-up a local FastAPI server for development purpose.
+
+1. Create and activate virtual environment with `venv`.
+
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+
+2. Install dependencies with pip.
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  Update `.env` file with APIKeys from `.env.example` template.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+4. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose.
+
+    ```bash
+    uvicorn main:app --reload
+    ```
+
