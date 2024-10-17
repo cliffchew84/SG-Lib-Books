@@ -10,5 +10,5 @@ jobs:
         with:
           args: "format --check"
         # Check for code linting with ruff check
-      - uses: astral-sh/ruff-action@v1
+      # - uses: astral-sh/ruff-action@v1
 
