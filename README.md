@@ -42,3 +42,17 @@ The following section details the step it takes to start-up a local FastAPI serv
     uvicorn main:app --reload
     ```
 
+### Code Linting and Formating
+
+This project uses [ruff](https://github.com/astral-sh/ruff) as Python code linter and formatter.
+
+To integrate this seamlessly to your development workflow, we recommend using [pre-commit](https://pre-commit.com/) to run the formatter and linter before commiting to the repo.
+
+1. run `pre-commit install` to set up the git hook scripts
+
+    ```bash
+    $ pre-commit install
+    pre-commit installed at .git/hooks/pre-commit
+    ```
+
+2. run `git commit` as usual to commit your changes.
