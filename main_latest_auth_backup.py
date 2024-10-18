@@ -1,5 +1,14 @@
-from fastapi import (FastAPI, status, Request, Form, Depends, BackgroundTasks,
-                     HTTPException, Response, Cookie)
+from fastapi import (
+    FastAPI,
+    status,
+    Request,
+    Form,
+    Depends,
+    BackgroundTasks,
+    HTTPException,
+    Response,
+    Cookie,
+)
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -11,6 +20,7 @@ from urllib.parse import urlencode
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 import httpx
+
 load_dotenv()
 import os
 
@@ -22,7 +32,7 @@ import time
 import re
 
 import supa_db as s_db
-import nlb_api as n_api 
+import nlb_api as n_api
 import process as p
 
 url: str = os.environ.get("SUPABASE_URL")
@@ -30,8 +40,8 @@ key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
 app = FastAPI()
-app.mount('/static', StaticFiles(directory='static'), name='static')
-templates = Jinja2Templates(directory='templates')
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 # Environment setup
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -50,8 +60,8 @@ app.add_middleware(
 
 # Application code
 app = FastAPI()
-app.mount('/static', StaticFiles(directory='static'), name='static')
-templates = Jinja2Templates(directory='templates')
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
 def get_db():
@@ -70,9 +80,11 @@ def get_token_from_header(request: Request):
     token = request.cookies.get("access_token")
     print(token)
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="Missing access token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing access token"
+        )
     return token
+
 
 # Function to decode and verify JWT token
 def verify_token(token: str):
@@ -81,12 +93,14 @@ def verify_token(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")  # Get user ID from the token
         if user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Invalid token")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            )
         return user_id
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
-                            detail="Invalid or expired token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token"
+        )
 
 
 @app.get("/login-google")
@@ -98,15 +112,18 @@ async def login():
             "redirect_uri": "http://localhost:8000/auth/callback",
             "response_type": "code",
             "scope": "openid email profile",  # Add other scopes as needed
-            "prompt": "select_account"  # Forces Google login screen
+            "prompt": "select_account",  # Forces Google login screen
         }
-        google_auth_url = f"https://accounts.google.com/o/oauth2/auth?{urlencode(params)}"
-        
+        google_auth_url = (
+            f"https://accounts.google.com/o/oauth2/auth?{urlencode(params)}"
+        )
+
         # Redirect the user to the Google login page
         return RedirectResponse(google_auth_url)
     except Exception as e:
-        raise HTTPException(status_code=500,
-                            detail=f"Error initiating Google OAuth: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error initiating Google OAuth: {str(e)}"
+        )
 
 
 @app.get("/auth/callback")
@@ -122,15 +139,14 @@ async def auth_callback(code: str, response: Response):
                     "redirect_uri": "http://localhost:8000/auth/callback",
                     "grant_type": "authorization_code",
                 },
-                headers={"Content-Type": "application/x-www-form-urlencoded"}
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
 
         tokens = token_response.json()
         access_token = tokens.get("access_token")
 
         if not access_token:
-            raise HTTPException(status_code=400,
-                                detail="Access token not received")
+            raise HTTPException(status_code=400, detail="Access token not received")
 
         # Set the access token in a cookie
         response.set_cookie(
@@ -140,34 +156,32 @@ async def auth_callback(code: str, response: Response):
             secure=False,  # Set to True if using HTTPS in production
             domain="localhost",  # Ensure correct domain
             path="/",  # Make sure it's available for the whole app
-            samesite="lax"
+            samesite="lax",
         )
 
         # Redirect to the protected route
-        return RedirectResponse(url="/protected-route",
-                                status_code=303,
-                                headers=response.headers)
+        return RedirectResponse(
+            url="/protected-route", status_code=303, headers=response.headers
+        )
     except Exception as e:
-        raise HTTPException(status_code=500,
-                            detail=f"Error in OAuth callback: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error in OAuth callback: {str(e)}"
+        )
 
 
 # Protected Route
 @app.get("/protected-route", response_class=HTMLResponse)
-async def protected_route(request: Request,
-                          access_token: str=Cookie(None)):
-
+async def protected_route(request: Request, access_token: str = Cookie(None)):
     # Test if I can get supbase user info
     async with httpx.AsyncClient() as client:
         user_info_response = await client.get(
             "https://www.googleapis.com/oauth2/v2/userinfo",
-            headers={"Authorization": f"Bearer {access_token}"}
+            headers={"Authorization": f"Bearer {access_token}"},
         )
 
     user_info = user_info_response.json()
     if user_info is None:
-        raise HTTPException(status_code=401,
-                            detail="Could not retrieve user info")
+        raise HTTPException(status_code=401, detail="Could not retrieve user info")
 
     db = s_db.connect_sdb()
     username = s_db.q_username_by_email(db, user_info.get("email"))
@@ -194,28 +208,31 @@ async def protected_route(request: Request,
         preferred_lib = preferred_lib.lower()
         output = []
         for book in response:
-            if preferred_lib in book['BranchName'].lower():
+            if preferred_lib in book["BranchName"].lower():
                 output.append(book)
     else:
-        preferred_lib = 'all'
+        preferred_lib = "all"
         output = response
 
     lib_avail = len(p.get_avail_bks(output))
     lib_all = len(p.get_unique_bks(output))
 
-    return templates.TemplateResponse("main.html", {
-        "request": request,
-        "username": username,
-        "api_data": output,
-        'all_avail_books': all_avail_books,
-        'all_unique_books': all_unique_books,
-        'avail_books': avail_bks_by_lib,
-        'lib_book_summary': lib_book_summary,
-        'lib_avail': lib_avail,
-        'lib_all': lib_all,
-        "library": preferred_lib,
-        "status": update_status
-    })
+    return templates.TemplateResponse(
+        "main.html",
+        {
+            "request": request,
+            "username": username,
+            "api_data": output,
+            "all_avail_books": all_avail_books,
+            "all_unique_books": all_unique_books,
+            "avail_books": avail_bks_by_lib,
+            "lib_book_summary": lib_book_summary,
+            "lib_avail": lib_avail,
+            "lib_all": lib_all,
+            "library": preferred_lib,
+            "status": update_status,
+        },
+    )
 
 
 # Main Page
