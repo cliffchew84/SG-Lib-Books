@@ -15,8 +15,27 @@ This side project is also a way for me to continue to learn and apply more techn
 3. Recommending books
 
 ## Getting Started
-The following section details the step it takes to start-up a local FastAPI server for development purpose.
+The following section details the step it takes to start-up a local Supabase and FastAPI server for development purpose.
 
+### Prerequisite: Supabase CLI
+The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage the database schema and seed data. Please follow the instructions below:
+
+1. Install Supabase CLI using the official guide in your local machine [here](https://supabase.com/docs/guides/cli/getting-started#installing-the-supabase-cli).
+
+
+2. Authenticate Supabase CLI with the following command:
+```bash
+supabase login
+```
+
+3. Run supabase start to take note of the local Supabase URL and API Key. 
+```bash
+supabase start
+```
+
+4. Copy and Update the `.env` file with the Supabase URL and API Key before beginning of any development.
+
+### FastAPI Server
 1. Create and activate virtual environment with `venv`.
 
     ```bash
@@ -30,7 +49,7 @@ The following section details the step it takes to start-up a local FastAPI serv
     pip install -r requirements.txt
     ```
 
-3.  Update `.env` file with APIKeys from `.env.example` template.
+3. Update `.env` file with APIKeys from `.env.example` template.
 
     ```bash
     cp .env.example .env
