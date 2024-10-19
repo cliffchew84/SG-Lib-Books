@@ -19,13 +19,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-import httpx
-from urllib.parse import urlencode
 
 from src import m_db
 from src import supa_db as s_db
 from src import nlb_api as n_api
 from src import process as p
+from src.api import api
 from src.config import settings
 
 
@@ -39,9 +38,6 @@ templates = Jinja2Templates(directory="templates")
 # user_status
 
 # Environment setup
-GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_ID
-GOOGLE_SECRET = settings.GOOGLE_SECRET
-GOOGLE_REDIRECT_URI = settings.GOOGLE_REDIRECT_URI
 SECRET_KEY = settings.SUPABASE_JWT_SECRET
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -58,6 +54,7 @@ app.add_middleware(
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+app.include_router(api)
 
 
 def get_db():
@@ -72,99 +69,6 @@ def username_email_resol(user_info: str):
     if not username:
         username = email
     return username
-
-
-@app.get("/login-google")
-async def login():
-    try:
-        # Construct the Google OAuth URL for Authorization Code Flow
-        params = {
-            "client_id": GOOGLE_CLIENT_ID,
-            "redirect_uri": GOOGLE_REDIRECT_URI,
-            "response_type": "code",
-            "scope": "openid email profile",  # Add other scopes as needed
-            "prompt": "select_account",  # Forces Google login screen
-        }
-        google_auth_url = (
-            f"https://accounts.google.com/o/oauth2/auth?{urlencode(params)}"
-        )
-
-        # Redirect the user to the Google login page
-        return RedirectResponse(google_auth_url)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error initiating Google OAuth: {str(e)}"
-        )
-
-
-@app.get("/auth/callback")
-async def auth_callback(code: str, response: Response):
-    async with httpx.AsyncClient() as client:
-        token_response = await client.post(
-            "https://oauth2.googleapis.com/token",
-            data={
-                "code": code,
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_SECRET,
-                "redirect_uri": GOOGLE_REDIRECT_URI,
-                "grant_type": "authorization_code",
-            },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-
-    tokens = token_response.json()
-    access_token = tokens.get("access_token")
-
-    if not access_token:
-        raise HTTPException(status_code=400, detail="Access token not received")
-
-    # Test if I can get supbase user info
-    async with httpx.AsyncClient() as client:
-        user_info_response = await client.get(
-            "https://www.googleapis.com/oauth2/v2/userinfo",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-
-    user_email = user_info_response.json().get("email")
-    db = s_db.connect_sdb()
-    try:
-        username = s_db.q_username_by_email(db, user_email)
-    except:
-        username = user_email
-        # [TODO] - Quick fix for now
-        db.table("users").insert(
-            {
-                "UserName": username,
-                "HashedPassword": "ThisIsGoogleLogin",
-                "email_address": username,
-            }
-        ).execute()
-
-    user_info = user_email + " | " + username
-    if user_info is None:
-        raise HTTPException(status_code=401, detail="Could not retrieve user info")
-
-    # Set the access token in a cookie
-    response.set_cookie(
-        key="user_info",
-        value=user_info,
-        httponly=True,
-        # secure=False,
-        secure=True,  # Set to True if using HTTPS in production
-        domain=(
-            "localhost"
-            if "localhost" in GOOGLE_REDIRECT_URI
-            else "sg-nlb-available-books.onrender.com"
-        ),
-        # domain="localhost",  # Ensure correct domain
-        # domain="sg-nlb-available-books.onrender.com",
-        path="/",  # Make sure it's available for the whole app
-        samesite="Lax",
-        # samesite="none"
-    )
-
-    # Redirect to the protected route
-    return RedirectResponse(url="/main", status_code=303, headers=response.headers)
 
 
 @app.get("/main", response_class=HTMLResponse)
