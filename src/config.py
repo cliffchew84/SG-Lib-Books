@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         "View the availability of library books from the Singapore libraries"
     )
     VERSION: str = "0.1"
-    BACKEND_CORS_ORIGIN: list[str] = [
+    BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:8000",
         "https://127.0.0.1:8000",
         "http://localhost:3000",
