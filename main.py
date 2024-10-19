@@ -50,6 +50,9 @@ templates = Jinja2Templates(directory="templates")
 # Environment setup
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_SECRET = os.getenv("GOOGLE_SECRET")
+GOOGLE_REDIRECT_URI = os.getenv(
+    "GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/callback"
+)
 SECRET_KEY = os.getenv("SUPABASE_JWT_SECRET")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -96,8 +99,7 @@ async def login():
         # Construct the Google OAuth URL for Authorization Code Flow
         params = {
             "client_id": GOOGLE_CLIENT_ID,
-            # "redirect_uri": "http://localhost:8000/auth/callback",
-            "redirect_uri": "https://sg-nlb-available-books.onrender.com/auth/callback",
+            "redirect_uri": GOOGLE_REDIRECT_URI,
             "response_type": "code",
             "scope": "openid email profile",  # Add other scopes as needed
             "prompt": "select_account",  # Forces Google login screen
@@ -123,7 +125,7 @@ async def auth_callback(code: str, response: Response):
                 "code": code,
                 "client_id": GOOGLE_CLIENT_ID,
                 "client_secret": GOOGLE_SECRET,
-                "redirect_uri": "https://sg-nlb-available-books.onrender.com/auth/callback",
+                "redirect_uri": GOOGLE_REDIRECT_URI,
                 "grant_type": "authorization_code",
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -168,8 +170,13 @@ async def auth_callback(code: str, response: Response):
         httponly=True,
         # secure=False,
         secure=True,  # Set to True if using HTTPS in production
+        domain=(
+            "localhost"
+            if "localhost" in GOOGLE_REDIRECT_URI
+            else "sg-nlb-available-books.onrender.com"
+        ),
         # domain="localhost",  # Ensure correct domain
-        domain="sg-nlb-available-books.onrender.com",
+        # domain="sg-nlb-available-books.onrender.com",
         path="/",  # Make sure it's available for the whole app
         samesite="Lax",
         # samesite="none"
