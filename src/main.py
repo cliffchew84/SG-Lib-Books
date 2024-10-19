@@ -1,3 +1,4 @@
+from importlib.metadata import version
 import re
 import time
 from typing import Optional
@@ -29,7 +30,9 @@ from src.config import settings
 
 # supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
-app = FastAPI()
+app = FastAPI(
+    title=settings.APP_NAME, version=settings.VERSION, description=settings.DESCRIPTION
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
