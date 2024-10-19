@@ -1,3 +1,7 @@
+import re
+import time
+from typing import Optional
+
 from fastapi import (
     FastAPI,
     status,
@@ -11,34 +15,19 @@ from fastapi import (
 )
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from supabase import create_client, Client
 
-from urllib.parse import urlencode
-from jose import JWTError, jwt
-from dotenv import load_dotenv
 import httpx
+from urllib.parse import urlencode
 
-load_dotenv()
-import os
-
-from datetime import timedelta, datetime
-from typing import Optional
-import urllib.parse
-import pendulum
-import time
-import re
-
-import src.supa_db as s_db
-import src.nlb_api as n_api
-import src.process as p
 from src import m_db
+from src import supa_db as s_db
+from src import nlb_api as n_api
+from src import process as p
+from src.config import settings
 
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+# supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -48,12 +37,10 @@ templates = Jinja2Templates(directory="templates")
 # user_status
 
 # Environment setup
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_SECRET = os.getenv("GOOGLE_SECRET")
-GOOGLE_REDIRECT_URI = os.getenv(
-    "GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/callback"
-)
-SECRET_KEY = os.getenv("SUPABASE_JWT_SECRET")
+GOOGLE_CLIENT_ID = settings.GOOGLE_CLIENT_ID
+GOOGLE_SECRET = settings.GOOGLE_SECRET
+GOOGLE_REDIRECT_URI = settings.GOOGLE_REDIRECT_URI
+SECRET_KEY = settings.SUPABASE_JWT_SECRET
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

@@ -1,13 +1,11 @@
-import os
 import time
 import psycopg2
 import psycopg2.extras
 from typing import Dict, List
 from datetime import datetime
 from supabase import create_client, Client
-from dotenv import load_dotenv
 
-load_dotenv()
+from src.config import settings
 
 # This script uses supabase to handle internal data operations, and is a
 # migration from MongoDB. I still need to figure out how to handle NLB API side
@@ -15,18 +13,15 @@ load_dotenv()
 # The 3 tables of user_books, books_info and books_avail remain the same
 
 # Supabase credentials
-DB_HOST = os.environ.get("SUPA_DB_HOST")
-DB_PORT = os.environ.get("SUPA_DB_PORT")
-DB_NAME = os.environ.get("SUPA_DB_NAME")
-DB_USER = os.environ.get("SUPA_DB_USER")
-DB_PASSWORD = os.environ.get("SUPA_DB_PASSWORD")
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+DB_HOST = settings.SUPA_DB_HOST
+DB_PORT = settings.SUPA_DB_PORT
+DB_NAME = settings.SUPA_DB_NAME
+DB_USER = settings.SUPA_DB_USER
+DB_PASSWORD = settings.SUPA_DB_PASSWORD
 
 
 def connect_sdb():
-    supabase: Client = create_client(url, key)
+    supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
     return supabase
 
 
