@@ -33,7 +33,7 @@ supabase login
 supabase start
 ```
 
-4. Copy and Update the `.env` file with the Supabase URL and API Key before beginning of any development.
+4. Copy and Update the `.env` file with the Supabase API Key before beginning of any development.
 
 ### FastAPI Server
 1. Create and activate virtual environment with `venv`.
