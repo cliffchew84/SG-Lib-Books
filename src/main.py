@@ -31,10 +31,10 @@ import pendulum
 import time
 import re
 
-import supa_db as s_db
-import nlb_api as n_api
-import process as p
-import m_db
+import src.supa_db as s_db
+import src.nlb_api as n_api
+import src.process as p
+from src import m_db
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
