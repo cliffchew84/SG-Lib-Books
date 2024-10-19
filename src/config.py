@@ -16,6 +16,13 @@ class Settings(BaseSettings):
         "View the availability of library books from the Singapore libraries"
     )
     VERSION: str = "0.1"
+    BACKEND_CORS_ORIGIN: list[str] = [
+        "http://localhost:8000",
+        "https://127.0.0.1:8000",
+        "http://localhost:3000",
+        "localhost",
+        "https://sg-nlb-available-books.onrender.com",
+    ]
 
     # NLB API Key
     nlb_rest_app_id: str = "NLB_APP_ID"

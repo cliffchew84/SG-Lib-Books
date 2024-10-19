@@ -28,7 +28,6 @@ from src import nlb_api as n_api
 from src import process as p
 from src.config import settings
 
-# supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 app = FastAPI(
     title=settings.APP_NAME, version=settings.VERSION, description=settings.DESCRIPTION
@@ -47,17 +46,9 @@ SECRET_KEY = settings.SUPABASE_JWT_SECRET
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-origins = [
-    "http://localhost:8000",
-    "https://127.0.0.1:8000",
-    "http://localhost:3000",
-    "localhost",
-    "https://sg-nlb-available-books.onrender.com",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
