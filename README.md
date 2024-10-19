@@ -58,7 +58,7 @@ supabase start
 4. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose.
 
     ```bash
-    uvicorn main:app --reload
+    uvicorn src.main:app --reload
     ```
 
 ### Code Linting and Formating
