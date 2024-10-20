@@ -1,5 +1,4 @@
 import time
-import psycopg2
 import psycopg2.extras
 from typing import Dict, List
 from datetime import datetime
@@ -116,7 +115,7 @@ def q_user_bks_bids(db, username: str):
     return db.table("user_books").select("BID").eq("UserName", username).execute().data
 
 
-def q_user_bks(db, username: str):
+def q_user_bks(db: Client, username: str):
     """To extract a list of user saved books BIDs"""
     return db.table("user_books").select("BID").eq("UserName", username).execute().data
 
