@@ -1,5 +1,3 @@
-from importlib.metadata import version
-import re
 import time
 from typing import Optional
 
@@ -10,13 +8,10 @@ from fastapi import (
     Form,
     Depends,
     BackgroundTasks,
-    HTTPException,
-    Response,
     Cookie,
 )
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 
@@ -26,21 +21,23 @@ from src import nlb_api as n_api
 from src import process as p
 from src.api import api
 from src.config import settings
+from src.utils import templates, username_email_resol
 
-
-app = FastAPI(
-    title=settings.APP_NAME, version=settings.VERSION, description=settings.DESCRIPTION
-)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
 # Think about adding back mongoDB stuff
 # user_status
 
 # Environment setup
-SECRET_KEY = settings.SUPABASE_JWT_SECRET
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+# Application code
+app = FastAPI(
+    title=settings.APP_NAME, version=settings.VERSION, description=settings.DESCRIPTION
+)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(api)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,12 +46,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Application code
-app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-app.include_router(api)
 
 
 def get_db():
@@ -485,224 +476,6 @@ async def delete_bks(
             "all_avail_books": all_avail_books,
             "all_unique_books": all_unique_books,
             "lib_book_summary": lib_book_summary,
-        },
-    )
-
-
-@app.get("/htmx_search", response_class=HTMLResponse)
-async def htmx_search(
-    request: Request,
-    e_resources: Optional[str] = None,
-    book_search: Optional[str] = None,
-    author: Optional[str] = None,
-    db=Depends(get_db),
-    user_info: str = Cookie(None),
-):
-    """Calls NLB API GetTitles Search and show results
-    in search_table.html
-    """
-
-    username = username_email_resol(user_info)
-    bk_output, search_input = [], dict()
-    if book_search:
-        c_book_search = re.sub(r"[^a-zA-Z0-9\s]", " ", book_search)
-        search_input.update({"Title": c_book_search})
-
-    if author:
-        c_author = re.sub(r"[^a-zA-Z0-9\s]", " ", author)
-        search_input.update({"Author": c_author})
-
-    if book_search or author:
-        titles = n_api.get_bk_data(
-            ext_url="GetTitles", input_dict=search_input, offset=0
-        )
-        total_records = titles.get("totalRecords", None)
-        more_records = titles.get("hasMoreRecords", None)
-        pag_links = p.pg_links(0, total_records)
-        search_params = {"Title": book_search, "Author": author}
-        s_db.user_search_tracking(
-            db, table_name="user_search", username=username, search_params=search_params
-        )
-
-        errors = [400, 404, 500, 401, 405, 429]
-        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
-            # Return temply table
-            return templates.TemplateResponse(
-                "partials/search_table.html",
-                {
-                    "request": request,
-                    "keyword": book_search,
-                    "author": author,
-                    "username": username,
-                    "api_data": bk_output,
-                },
-            )
-
-        else:
-            all_titles = p.process_title(titles)
-            # Only keep physical books for now
-            final_titles = [t for t in all_titles if t["type"] == "Book"]
-            if e_resources:
-                print("Including ebooks")
-                ebooks = [t for t in all_titles if t["type"] == "Ebook"]
-                final_titles += ebooks
-
-            # Search user book BIDs and disable add book if user saved the book
-            user_books = s_db.q_user_bks(username=username)
-            bid_checks = set(i.get("BID") for i in user_books)
-            for bk in final_titles:
-                bid = (
-                    bk.get("BID")
-                    if bk.get("DigitalID") is None
-                    else bk.get("DigitalID")
-                )
-                bid = str(bid)
-
-                title = bk.get("TitleName", " / ").split(" / ", 1)[0].strip()
-
-                # Enable disable button if book is already saved
-                disable = "disabled" if bid in bid_checks else ""
-
-                bk["TitleName"] = title + " | " + bid
-                bk["BID"] = disable + " | " + bid
-
-                bk_output.append(bk)
-
-    return templates.TemplateResponse(
-        "partials/search_table.html",
-        {
-            "request": request,
-            "keyword": book_search,
-            "author": author,
-            "username": username,
-            "api_data": bk_output,
-            "total_records": total_records,
-            "more_records": more_records,
-            "pag_links": pag_links,
-            "e_resources": e_resources,
-        },
-    )
-
-
-@app.get("/navigate_search", response_class=HTMLResponse)
-async def paginate_search(
-    request: Request,
-    book_search: Optional[str] = None,
-    author: Optional[str] = None,
-    offset: Optional[str] = None,
-    e_resources: Optional[str] = None,
-    db=Depends(get_db),
-    user_info: str = Cookie(None),
-):
-    """Calls new GetTitles Search and show results in search_table.html"""
-    final_response, search_input = list(), dict()
-    username = username_email_resol(user_info)
-
-    if book_search:
-        c_book_search = re.sub(r"[^a-zA-Z0-9\s]", " ", book_search)
-        search_input.update({"Title": c_book_search})
-
-    if author:
-        c_author = re.sub(r"[^a-zA-Z0-9\s]", " ", author)
-        search_input.update({"Author": c_author})
-
-    if book_search or author:
-        titles = n_api.get_bk_data(
-            ext_url="GetTitles", input_dict=search_input, offset=offset
-        )
-        total_records = titles.get("totalRecords")
-        pag_links = p.pg_links(int(offset), total_records)
-
-        errors = [400, 404, 500, 401, 405, 429]
-        if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
-            # return empty table
-            return templates.TemplateResponse(
-                "partials/search_table.html",
-                {
-                    "request": request,
-                    "keyword": book_search,
-                    "author": author,
-                    "username": username,
-                    "api_data": final_response,
-                },
-            )
-
-        else:
-            all_titles = p.process_title(titles)
-            more_records = titles.get("hasMoreRecords")
-
-            # Only keep physical books for now
-            final_titles = [t for t in all_titles if t["type"] == "Book"]
-
-            if e_resources:
-                print("Including ebooks")
-                ebooks = [t for t in all_titles if t["type"] == "Ebook"]
-                final_titles += ebooks
-
-            # Search user book BIDs and disable add book if user saved the book
-            user_books = s_db.q_user_bks(username=username)
-            bid_checks = set(i.get("BID") for i in user_books)
-            for book in final_titles:
-                # Prep for eResources in the future
-                bid = (
-                    book.get("BID")
-                    if book.get("DigitalID") is None
-                    else book.get("DigitalID")
-                )
-                bid = str(bid)
-
-                title = book.get("TitleName", "")
-                title = title.split(" / ", 1)[0].strip()
-
-                # Enable disable button if book is already saved
-                disable = "disabled" if bid in bid_checks else ""
-
-                book["TitleName"] = title + " | " + bid
-                book["BID"] = disable + " | " + bid
-
-                final_response.append(book)
-
-    return templates.TemplateResponse(
-        "partials/search_table.html",
-        {
-            "request": request,
-            "keyword": book_search,
-            "author": author,
-            "username": username,
-            "api_data": final_response,
-            "total_records": total_records,
-            "more_records": more_records,
-            "pag_links": pag_links,
-            "e_resources": e_resources,
-        },
-    )
-
-
-@app.get("/search", response_class=HTMLResponse)
-async def search_books(
-    request: Request,
-    book_search: Optional[str] = None,
-    author: Optional[str] = None,
-    db=Depends(get_db),
-    user_info: str = Cookie(None),
-):
-    username = username_email_resol(user_info)
-    mdb = m_db.connect_mdb()
-    mdb = mdb["nlb"]
-    user_bids = s_db.q_user_bks_bids(db=db, username=username)
-    update_status = None
-    if m_db.q_status(db=mdb, username=username):
-        update_status = " "
-
-    return templates.TemplateResponse(
-        "search.html",
-        {
-            "request": request,
-            "keyword": book_search,
-            "author": author,
-            "username": username,
-            "status": update_status,
-            "all_unique_books": user_bids,
         },
     )
 
