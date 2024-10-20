@@ -54,8 +54,13 @@ supabase start
     ```bash
     cp .env.example .env
     ```
+4. Start-up Supabase server with supabase-cli and docker.
 
-4. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose.
+    ```bash
+    supabase start
+    ```
+
+5. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose.
 
     ```bash
     uvicorn src.main:app --reload
