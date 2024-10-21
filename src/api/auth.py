@@ -100,3 +100,11 @@ async def auth_callback(code: str, response: Response, db: SDBDep):
 
     # Redirect to the protected route
     return RedirectResponse(url="/main", status_code=303, headers=response.headers)
+
+
+# Logout route to remove the JWT token
+@router.get("/logout")
+def logout():
+    response = RedirectResponse("/")
+    response.delete_cookie("user_info")
+    return response

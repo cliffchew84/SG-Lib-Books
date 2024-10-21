@@ -93,7 +93,7 @@ async def update_books(
     return RedirectResponse("/lib/all", status_code=status.HTTP_302_FOUND)
 
 
-@router.post("/{BID}", response_class=HTMLResponse)
+@router.put("/{BID}", response_class=HTMLResponse)
 async def update_book(BID: str, db: SDBDep):
     success = update_bk_avail_supa(db, BID)
     if success:

@@ -11,14 +11,14 @@
 </li>
 
 <li>
-    <form class="form-inline hover:text-white hover:bg-sky-500" hx-post="/books" hx-indicator="#head-spinner"
+    <form class="form-inline hover:text-white hover:bg-sky-500" hx-put="/books" hx-indicator="#head-spinner"
         hx-target=".main_content" hx-swap="outerHTML"><button type="submit">
             <i class="fas fa-sync"></i> Book Status</button>
     </form>
 </li>
 
 <li>
-    <a class="hover:text-white text-white hover:bg-sky-500" href='/logout'>
+    <a class="hover:text-white text-white hover:bg-sky-500" href='/auth/logout'>
         <i class="fas fa-sign-out-alt"></i>Logout
     </a>
 </li>
