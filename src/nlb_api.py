@@ -1,7 +1,5 @@
-import os
 import time
 import requests
-import pendulum
 from typing import Dict, List
 
 from src.config import settings

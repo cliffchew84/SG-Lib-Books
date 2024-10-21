@@ -2,8 +2,6 @@ from fastapi import (
     FastAPI,
     status,
     Request,
-    Depends,
-    Cookie,
 )
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,14 +15,6 @@ from src.api import api
 from src.api.deps import SDBDep, UsernameDep
 from src.config import settings
 from src.utils import templates
-
-
-# Think about adding back mongoDB stuff
-# user_status
-
-# Environment setup
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 # Application code

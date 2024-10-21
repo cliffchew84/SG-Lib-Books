@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import datetime
 from typing import Dict, List
 import pendulum
 import re
