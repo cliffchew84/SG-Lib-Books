@@ -1,8 +1,8 @@
 import re
 from typing import Optional
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 
 from src.api.deps import SDBDep, MDBDep, UsernameDep
@@ -25,7 +25,7 @@ async def search_books(
     author: Optional[str] = None,
 ):
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     # TODO: Figure out usage of q_status and deprecate if possible
     update_status = None
@@ -58,7 +58,7 @@ async def htmx_search(
     in search_table.html
     """
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     if not book_search and not author:
         # return as no book_search or author is provided

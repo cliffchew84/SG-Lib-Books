@@ -19,8 +19,9 @@ from src import supa_db as s_db
 from src import nlb_api as n_api
 from src import process as p
 from src.api import api
+from src.api.deps import UsernameDep
 from src.config import settings
-from src.utils import templates, username_email_resol
+from src.utils import templates
 
 
 # Think about adding back mongoDB stuff
@@ -177,44 +178,43 @@ async def show_avail_bks(
 async def book_status_progress_bar(
     request: Request, book_saved: int, db=Depends(get_db), user_info: str = Cookie(None)
 ):
-    return
-    # try:
-    #     username = username_email_resol(user_info)
-    #     mdb = m_db.connect_mdb()
-    #     mdb = mdb["nlb"]
-    #     user_info = m_db.q_user_info(db=mdb, username=username)
-    #     books_updated = user_info.get("books_updated")
-    #     title = user_info.get("title")
-    #
-    #     print(books_updated)
-    #     print(title)
-    #
-    #     progress = 0
-    #     if books_updated > 0:
-    #         progress = (books_updated / book_saved) * 100
-    #
-    #     update_status = None
-    #     if m_db.q_status(db=mdb, username=username):
-    #         update_status = " "
-    #
-    #     return templates.TemplateResponse(
-    #         "/partials/update_status_text.html",
-    #         {
-    #             "request": request,
-    #             "progress": progress,
-    #             "TitleName": title,
-    #             "total_books": book_saved,
-    #             "book_count": books_updated,
-    #             "status": update_status,
-    #         },
-    #     )
-    # except:
-    #     return templates.TemplateResponse(
-    #         "/partials/update_status_text.html",
-    #         {
-    #             "request": request,
-    #         },
-    #     )
+    try:
+        username = username_email_resol(user_info)
+        mdb = m_db.connect_mdb()
+        mdb = mdb["nlb"]
+        user_info = m_db.q_user_info(db=mdb, username=username)
+        books_updated = user_info.get("books_updated")
+        title = user_info.get("title")
+
+        print(books_updated)
+        print(title)
+
+        progress = 0
+        if books_updated > 0:
+            progress = (books_updated / book_saved) * 100
+
+        update_status = None
+        if m_db.q_status(db=mdb, username=username):
+            update_status = " "
+
+        return templates.TemplateResponse(
+            "/partials/update_status_text.html",
+            {
+                "request": request,
+                "progress": progress,
+                "TitleName": title,
+                "total_books": book_saved,
+                "book_count": books_updated,
+                "status": update_status,
+            },
+        )
+    except:
+        return templates.TemplateResponse(
+            "/partials/update_status_text.html",
+            {
+                "request": request,
+            },
+        )
 
 
 @app.post("/complete-update/", response_class=HTMLResponse)
@@ -327,7 +327,10 @@ async def ingest_books_navbar(
 
 # Main Page
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
+async def root(request: Request, username: UsernameDep):
+    if username:
+        # Redirect to main if user is logged in
+        return RedirectResponse("/main")
     return templates.TemplateResponse("google_page.html", {"request": request})
 
 

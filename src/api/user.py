@@ -17,7 +17,8 @@ async def user_profile(
     request: Request, db: SDBDep, mdb: MDBDep, username: UsernameDep
 ):
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+
     query = s_db.q_user_bks(username=username)
     response = p.process_user_bks(query)
     unique_libs = p.get_unique_libs(response)
@@ -53,7 +54,7 @@ async def update_user(
     password: str = Form(None),
 ):
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     # Update info
     new_dict = {
@@ -70,7 +71,7 @@ async def update_user(
 @router.delete("", response_class=HTMLResponse)
 async def delete_user(db: SDBDep, username: UsernameDep):
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     s_db.delete_user(db, username=username)
     # TODO: Remove all books belongs to user

@@ -81,7 +81,7 @@ async def update_books(
 ):
     """Updates availability of all user's saved books"""
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     m_db.insert_status(mdb.nlb, username=username)
     m_db.update_user_info(mdb.nlb, username, {"books_updated": 0})
@@ -103,7 +103,7 @@ async def update_book(BID: str, db: SDBDep):
 @router.delete("/{BID}", response_class=HTMLResponse)
 async def delete_book(BID: int, db: SDBDep, username: UsernameDep):
     if not username:
-        return
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     final_count = s_db.q_bid_counter(bid_no=BID)
 
