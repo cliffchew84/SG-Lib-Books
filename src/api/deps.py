@@ -42,4 +42,4 @@ def username_email_resol(user_info: Annotated[str | None, Cookie()] = None):
     return username if username else email
 
 
-UsernameDep = Annotated[str, Depends(username_email_resol)]
+UsernameDep = Annotated[str | None, Depends(username_email_resol)]
