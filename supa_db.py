@@ -140,7 +140,7 @@ def q_user_info(db, username: str):
     return user
 
 
-def pg_query(query: str):
+def pg_query(query: str, params: tuple):
     """ Performs complex SQL queries on Supabase PostgreSQL"""
     try:
         connection = psycopg2.connect(
@@ -154,7 +154,7 @@ def pg_query(query: str):
             cursor_factory = psycopg2.extras.RealDictCursor)
 
         # Example of executing an SQL query
-        cursor.execute(query)
+        cursor.execute(query % params)
         rows = cursor.fetchall()
         output = list()
         for row in rows:
@@ -179,7 +179,7 @@ WITH user_bks AS (
         ub."UserName",
         ub."BID"
     FROM user_books AS ub
-    WHERE "UserName" = '{username}'
+    WHERE "UserName" = '%s'
 ), bks_info AS (
     SELECT * 
     FROM books_info
@@ -205,7 +205,7 @@ WHERE ba."CallNumber" != ''
 """
 
 def q_user_bks(username: str, query: str=full_query):
-    return pg_query(query.format(username=username))
+    return pg_query(query=query, params=(username))
 
 
 subset_query = """
@@ -214,7 +214,7 @@ WITH user_bks AS (
         ub."UserName",
         ub."BID"
     FROM user_books AS ub
-    WHERE "UserName" = '{username}'
+    WHERE "UserName" = '%s'
 ), bks_info AS (
     SELECT * 
     FROM books_info
@@ -237,7 +237,7 @@ WHERE ba."CallNumber" != ''
 
 
 def q_user_bks_subset(username: str, query: str=subset_query):
-    return pg_query(query.format(username=username))
+    return pg_query(query=query, params=(username))
 
 
 smallest_set_query = """
@@ -246,7 +246,7 @@ WITH user_bks AS (
         ub."UserName",
         ub."BID"
     FROM user_books AS ub
-    WHERE "UserName" = '{username}'
+    WHERE "UserName" = '%s'
 ), bks_info AS (
     SELECT * 
     FROM books_info
@@ -263,17 +263,17 @@ USING ("BID")
 
 
 def q_user_bks_info(username: str, query: str=smallest_set_query):
-    return pg_query(query.format(username=username))
+    return pg_query(query=query, params=(username))
 
 
 bid_counter_query = """
 SELECT COUNT("BID")
 FROM user_books AS ub
-WHERE ub."BID" = {bid}
+WHERE ub."BID" = %s
 """
 
 def q_bid_counter(bid_no: int, query: str=bid_counter_query):
-    return pg_query(query.format(bid=str(bid_no)))[0].get("count")
+    return pg_query(query=query, params=(str(bid_no)))[0].get("count")
 
 
 # EventTracking
