@@ -201,6 +201,7 @@ SELECT
 FROM books_avail AS ba
 INNER JOIN bks_info AS bi
 USING ("BID")
+WHERE ba."CallNumber" != ''
 """
 
 def q_user_bks(username: str, query: str=full_query):
@@ -231,6 +232,7 @@ SELECT DISTINCT
 FROM books_avail AS ba
 INNER JOIN bks_info AS bi
 USING ("BID")
+WHERE ba."CallNumber" != ''
 """
 
 
