@@ -20,12 +20,11 @@
                     </a>
                 </p>
                 <p class='pt-2'>
-                    As of 10th Oct 2024, I have included Google OAuth login flow
-                    into my web app, under <b>"3rd Party Signup / Login"</b>.
-                    The old login flow is currently under maintanence. Existing
-                    users can port over to this new Google login flow by sending me
-                    your gmail through Linkedin, as I respond the fastest there!
-                    I am working to add the old login flow back soon!
+                    As of 10th Oct 2024, I switched to a new Google OAuth login.
+                    I will try to implement back this password login flow in the
+                    near future. Current users can port over to this new Google
+                    login flow by sending me your gmail through Linkedin, as I
+                    respond the fastest there!
                 </p>
             </div>
         </div>
@@ -42,6 +41,19 @@
                             Google login
                         </button>
                     </li>
+                    <!-- DO NOT DELETE - KEEPING THESE FOR FUTURE ADDITION OF OTHER LOGIN FLOWS-->
+                    <!-- <li @click="currentTab = 1"> -->
+                    <!--     <button :class="currentTab === 1 ? 'bg-gray-300 text-black' : 'bg-white text-gray-700'" -->
+                    <!--         class="px-4 py-2 border border-gray-300 rounded-t hover:bg-gray-100 transition duration-300"> -->
+                    <!--         Password Login -->
+                    <!--     </button> -->
+                    <!-- </li> -->
+                    <!-- <li @click="currentTab = 2"> -->
+                    <!--     <button :class="currentTab === 2 ? 'bg-gray-300 text-black' : 'bg-white text-gray-700'" -->
+                    <!--         class="px-4 py-2 border border-gray-300 rounded-t hover:bg-gray-100 transition duration-300"> -->
+                    <!--         Signup -->
+                    <!--     </button> -->
+                    <!-- </li> -->
                 </ul>
                 <!-- Panel -->
                 <div class="w-full py-4 px-6">
@@ -100,7 +112,7 @@
                 <div class="px-5 py-2">
                     <a href="mailto: sglibreads@gmail.com"
                         class="text-base leading-6 text-gray-500 hover:text-gray-900">
-                        Contact (WIP)
+                        Contact
                     </a>
                 </div>
             </nav>
