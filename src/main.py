@@ -165,52 +165,6 @@ async def book_status_progress_bar(
         )
 
 
-@app.post("/ingest_books_navbar", response_class=HTMLResponse)
-async def ingest_books_navbar(
-    request: Request,
-    bids: list = Form(...),
-    db=Depends(get_db),
-    user_info: str = Cookie(None),
-):
-    username = username_email_resol(user_info)
-    for bid in bids:
-        print(bid)
-        # Makes API to bk info and bk avail and ingest the data into DB
-        bk_title = n_api.get_process_bk_info(bid_no=bid)
-
-        time.sleep(2)
-        update_bk_avail_supa(db, bid)
-
-        # Do all the adding at the end, after everything is confirmed
-        # This also doesn't require any time.sleep() as this is with my own DB
-        s_db.add_user_book(db=db, username=username, bid_no=bid)
-        s_db.add_book_info(db=db, books_info=bk_title)
-
-        print("print started book_available update")
-
-    # Update the books calculation on the navbar
-    query = s_db.q_user_bks(username=username)
-    response = p.process_user_bks(query)
-
-    # Processing necessary statistics
-    all_unique_books = p.get_unique_bks(response)
-    all_avail_books = p.get_avail_bks(response)
-    unique_libs = p.get_unique_libs(response)
-    avail_bks_by_lib = p.get_avail_bks_by_lib(response)
-    lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
-
-    return templates.TemplateResponse(
-        "navbar.html",
-        {
-            "request": request,
-            "username": username,
-            "all_avail_books": all_avail_books,
-            "all_unique_books": all_unique_books,
-            "lib_book_summary": lib_book_summary,
-        },
-    )
-
-
 # Main Page
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request, username: UsernameDep):
