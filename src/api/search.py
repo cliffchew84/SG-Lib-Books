@@ -19,12 +19,14 @@ router = APIRouter()
 @router.get("", response_class=HTMLResponse)
 async def search_books(
     request: Request,
-    db: SDBDep,
     mdb: MDBDep,
     username: UsernameDep,
     book_search: Optional[str] = None,
     author: Optional[str] = None,
 ):
+    if not username:
+        return
+
     # TODO: Figure out usage of q_status and deprecate if possible
     update_status = None
     if m_db.q_status(db=mdb.nlb, username=username):
@@ -55,6 +57,8 @@ async def htmx_search(
     """Calls NLB API GetTitles Search and show results
     in search_table.html
     """
+    if not username:
+        return
 
     if not book_search and not author:
         # return as no book_search or author is provided

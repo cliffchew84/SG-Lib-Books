@@ -66,7 +66,7 @@ def pg_links(offset, total):
     return {"previous": previous, "current": current, "next": next, "last": last}
 
 
-def process_user_bks(query: str):
+def process_user_bks(query: list[dict]):
     """Process db result for frontpage"""
     response = []
     for a in query:
