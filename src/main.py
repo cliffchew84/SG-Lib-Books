@@ -7,7 +7,6 @@ from fastapi import (
     Request,
     Form,
     Depends,
-    BackgroundTasks,
     Cookie,
 )
 from fastapi.responses import RedirectResponse, HTMLResponse
@@ -122,35 +121,6 @@ async def main(request: Request, user_info: str = Cookie(None), db=Depends(get_d
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@app.get("/user_bks")
-async def current_bks(
-    request: Request, db=Depends(get_db), user_info: str = Cookie(None)
-):
-    """Used by htmx to render user books within main_content <div>"""
-
-    username = username_email_resol(user_info)
-    mdb = m_db.connect_mdb()
-    mdb = mdb["nlb"]
-    update_status = None
-    if m_db.q_status(db=mdb, username=username):
-        update_status = " "
-
-    output = []
-    if username:
-        output = s_db.q_user_bks_subset(username=username)
-        return templates.TemplateResponse(
-            "user_bks.html",
-            {
-                "request": request,
-                "username": username,
-                "api_data": output,
-                "status": update_status,
-            },
-        )
-    else:
-        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-
-
 # Start my edits from here
 @app.get("/lib/{library}/", response_class=HTMLResponse)
 async def show_avail_bks(
@@ -203,113 +173,48 @@ async def show_avail_bks(
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-def update_bk_avail_supa(db, bid_no: str):
-    """
-    - Takes in single BID to get avail info
-    - Processes data for Supabase
-    - Delete existing Supabase data if necessary
-    - Inject new data into Supabase
-    """
-    try:
-        # Make API call on book availability
-        bk = n_api.get_bk_data("GetAvailabilityInfo", input_dict={"BRN": bid_no})
-        all_avail_bks = [p.process_bk_avail(i) for i in bk.get("items")]
-
-        if len(all_avail_bks) > 0:
-            s_db.delete_bk_avail(db=db, bid_no=bid_no)
-            s_db.add_avail_bks(db=db, books_avail=all_avail_bks)
-
-            return {"API call": True}
-        else:
-            # Something wrong with the NLB API and nothing is updated...
-            return {"API call": False}
-
-    except Exception:
-        return {"API call": False}
-
-
-@app.post("/update_book/{BID}", response_class=HTMLResponse)
-async def update_book(BID: str, db=Depends(get_db)):
-    api_result = update_bk_avail_supa(db, BID)
-    if api_result.get("API call"):
-        return RedirectResponse("/main", status_code=status.HTTP_302_FOUND)
-
-
-@app.post("/update_user_bks/", response_class=HTMLResponse)
-async def update_user_bks(
-    background_tasks: BackgroundTasks, db=Depends(get_db), user_info: str = Cookie(None)
-):
-    username = username_email_resol(user_info)
-    mdb = m_db.connect_mdb()
-    mdb = mdb["nlb"]
-    m_db.insert_status(mdb, username=username)
-    m_db.update_user_info(mdb, username, {"books_updated": 0})
-
-    """ Updates availability of all user's saved books """
-    background_tasks.add_task(update_all_user_bks, db, user_info)
-    return RedirectResponse("/lib/all", status_code=status.HTTP_302_FOUND)
-
-
-def update_all_user_bks(db, user_info):
-    """Update all books linked to user."""
-    username = username_email_resol(user_info)
-    user_bids = s_db.q_user_bks_bids(db=db, username=username)
-    user_bks_info = s_db.q_user_bks_info(username=username)
-
-    mdb = m_db.connect_mdb()
-    mdb = mdb["nlb"]
-    for i, bk in enumerate(user_bks_info):
-        bid_no = bk.get("BID")
-        title = bk.get("TitleName")
-        time.sleep(2)
-        update_bk_avail_supa(db, bid_no)
-
-        m_db.update_user_info(mdb, username, {"books_updated": i + 1, "title": title})
-    m_db.delete_status(mdb, username=username)
-    return {"message": "All user books updated!"}
-
-
 @app.get("/book_status/{book_saved}")
 async def book_status_progress_bar(
     request: Request, book_saved: int, db=Depends(get_db), user_info: str = Cookie(None)
 ):
-    try:
-        username = username_email_resol(user_info)
-        mdb = m_db.connect_mdb()
-        mdb = mdb["nlb"]
-        user_info = m_db.q_user_info(db=mdb, username=username)
-        books_updated = user_info.get("books_updated")
-        title = user_info.get("title")
-
-        print(books_updated)
-        print(title)
-
-        progress = 0
-        if books_updated > 0:
-            progress = (books_updated / book_saved) * 100
-
-        update_status = None
-        if m_db.q_status(db=mdb, username=username):
-            update_status = " "
-
-        return templates.TemplateResponse(
-            "/partials/update_status_text.html",
-            {
-                "request": request,
-                "progress": progress,
-                "TitleName": title,
-                "total_books": book_saved,
-                "book_count": books_updated,
-                "status": update_status,
-            },
-        )
-    except:
-        return templates.TemplateResponse(
-            "/partials/update_status_text.html",
-            {
-                "request": request,
-            },
-        )
+    return
+    # try:
+    #     username = username_email_resol(user_info)
+    #     mdb = m_db.connect_mdb()
+    #     mdb = mdb["nlb"]
+    #     user_info = m_db.q_user_info(db=mdb, username=username)
+    #     books_updated = user_info.get("books_updated")
+    #     title = user_info.get("title")
+    #
+    #     print(books_updated)
+    #     print(title)
+    #
+    #     progress = 0
+    #     if books_updated > 0:
+    #         progress = (books_updated / book_saved) * 100
+    #
+    #     update_status = None
+    #     if m_db.q_status(db=mdb, username=username):
+    #         update_status = " "
+    #
+    #     return templates.TemplateResponse(
+    #         "/partials/update_status_text.html",
+    #         {
+    #             "request": request,
+    #             "progress": progress,
+    #             "TitleName": title,
+    #             "total_books": book_saved,
+    #             "book_count": books_updated,
+    #             "status": update_status,
+    #         },
+    #     )
+    # except:
+    #     return templates.TemplateResponse(
+    #         "/partials/update_status_text.html",
+    #         {
+    #             "request": request,
+    #         },
+    #     )
 
 
 @app.post("/complete-update/", response_class=HTMLResponse)
@@ -413,66 +318,6 @@ async def ingest_books_navbar(
         {
             "request": request,
             "username": username,
-            "all_avail_books": all_avail_books,
-            "all_unique_books": all_unique_books,
-            "lib_book_summary": lib_book_summary,
-        },
-    )
-
-
-@app.delete("/delete_bk/{bid}", response_class=HTMLResponse)
-async def delete_bk(
-    request: Request, bid: int, db=Depends(get_db), user_info: str = Cookie(None)
-):
-    username = username_email_resol(user_info)
-    final_count = s_db.q_bid_counter(bid_no=str(bid))
-
-    # If book is only linked to one user,
-    # delete book available and info records
-    if final_count == 1:
-        s_db.delete_bk_avail(db=db, bid_no=bid)
-        s_db.delete_bk_info(db=db, bid_no=bid)
-    s_db.delete_user_bk(db=db, username=username, bid_no=bid)
-
-    return ""
-
-
-@app.post("/delete_bks", response_class=HTMLResponse)
-async def delete_bks(
-    request: Request,
-    bids: list = Form(...),
-    db=Depends(get_db),
-    user_info: str = Cookie(None),
-):
-    username = username_email_resol(user_info)
-    for bid in bids:
-        final_count = s_db.q_bid_counter(bid_no=str(bid))
-        # If book is only linked to one user,
-        # delete book available and info records
-        if final_count == 1:
-            s_db.delete_bk_avail(db=db, bid_no=bid)
-            s_db.delete_bk_info(db=db, bid_no=bid)
-        s_db.delete_user_bk(db=db, username=username, bid_no=bid)
-
-    output = []
-    if username:
-        output = s_db.q_user_bks_subset(username=username)
-        query = s_db.q_user_bks(username=username)
-        response = p.process_user_bks(query)
-
-        # Processing necessary statistics
-        all_unique_books = p.get_unique_bks(response)
-        all_avail_books = p.get_avail_bks(response)
-        unique_libs = p.get_unique_libs(response)
-        avail_bks_by_lib = p.get_avail_bks_by_lib(response)
-        lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
-
-    return templates.TemplateResponse(
-        "user_bks.html",
-        {
-            "request": request,
-            "username": username,
-            "api_data": output,
             "all_avail_books": all_avail_books,
             "all_unique_books": all_unique_books,
             "lib_book_summary": lib_book_summary,

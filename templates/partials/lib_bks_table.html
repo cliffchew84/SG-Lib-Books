@@ -25,7 +25,7 @@
                 <span class="badge badge-outline font-semibold bg-primary-content">{{ data['BranchName'] }}</span>
                 <b>Author:</b> {{ data['Author'] }}
             </p>
-            <form action="/update_book/{{ data['BID'] }}" method="POST">
+            <form action="/books/{{ data['BID'] }}" method="POST">
                 <button type="submit" class="hidden md:block bg-sky-700 px-3 py-1 rounded-lg
                         hover:text-white hover:bg-sky-500 text-white">
                     {{ data['UpdateTime'] }}</button>
