@@ -1,5 +1,5 @@
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/user_bks" hx-indicator="#head-spinner"
+    <a class="text-white hover:text-white hover:bg-sky-500" hx-get="/books" hx-indicator="#head-spinner"
         hx-target=".main_content" hx-swap="outerHTML"><i class="fas fa-book"></i>Books
     </a>
 </li>
@@ -11,14 +11,14 @@
 </li>
 
 <li>
-    <form class="form-inline hover:text-white hover:bg-sky-500" hx-post="/update_user_bks/" hx-indicator="#head-spinner"
+    <form class="form-inline hover:text-white hover:bg-sky-500" hx-put="/books" hx-indicator="#head-spinner"
         hx-target=".main_content" hx-swap="outerHTML"><button type="submit">
             <i class="fas fa-sync"></i> Book Status</button>
     </form>
 </li>
 
 <li>
-    <a class="hover:text-white text-white hover:bg-sky-500" href='/logout'>
+    <a class="hover:text-white text-white hover:bg-sky-500" href='/auth/logout'>
         <i class="fas fa-sign-out-alt"></i>Logout
     </a>
 </li>

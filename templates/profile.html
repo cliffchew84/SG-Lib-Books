@@ -9,7 +9,7 @@
         </div>
 
         <div>
-            <form hx-post="/update_user/{{username}}" hx-target=".main_content" hx-indicator='.update_status'>
+            <form hx-post="/user" hx-target=".main_content" hx-indicator='.update_status'>
                 <label class="italic">Username</label>
                 <input
                     class="mx-auto md:text-base text-sm form-control w-full rounded-lg p-2 my-2 border-2 border-sky-700"
@@ -115,7 +115,7 @@
                     <p class="py-4">Are you sure you want to delete the account?
                         This action cannot be reversed!</p>
                     <div class="modal-action">
-                        <form action="/delete_user/{{username}}" method="POST">
+                        <form action="/user" method="DELETE">
                             <button type="submit" class="bg-red-700 px-2 py-1 rounded-lg 
                             hover:text-white hover:bg-red-400 text-white">
                                 Delete Account

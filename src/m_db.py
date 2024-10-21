@@ -1,23 +1,21 @@
-from pymongo import mongo_client
-from typing import Dict, List
-from datetime import datetime
 import time
-import os
+from datetime import datetime
+from typing import Dict, List
+
+from pymongo import mongo_client
+
+from src.config import settings
 
 # This scripts focus on functions solely to interact with MongoDB. The good
 # thing is that MongoDB has no rate limiting. However, I need to improve on
 # debugging issues with MongoDB, which I actually figured should be at the NLB
 # API call portions of my code instead, which is under nlb_api.py
 
-# MongoDB credentials
-MONGO_PASSWORD = os.environ["mongo_pw"]
-base_url = "mongodb+srv://cliffchew84:"
-end_url = "cliff-nlb.t0whddv.mongodb.net/?retryWrites=true&w=majority"
-mongo_url = f"{base_url}{MONGO_PASSWORD}@{end_url}"
-
 
 def connect_mdb():
-    return mongo_client.MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
+    return mongo_client.MongoClient(
+        str(settings.MONGO_URL), serverSelectionTimeoutMS=5000
+    )
 
 
 # Add Methods

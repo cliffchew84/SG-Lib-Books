@@ -1,8 +1,8 @@
-import os
 import time
 import requests
-import pendulum
 from typing import Dict, List
+
+from src.config import settings
 
 # This script focuses on functions that interacts with the NLB API. I added
 # more robust code to check if code hits statusCode 429, which is the rate
@@ -15,8 +15,8 @@ from typing import Dict, List
 # than GetTitleDetails, but GetTitles do not use BRN
 
 # Add os.environ for authentication
-APPLICATION_ID = os.environ["nlb_rest_app_id"]
-API_KEY = os.environ["nlb_rest_api_key"]
+APPLICATION_ID = settings.nlb_rest_app_id
+API_KEY = settings.nlb_rest_api_key
 
 
 def auth_nlb(app_id, api_key):
