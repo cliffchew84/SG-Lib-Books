@@ -1,11 +1,7 @@
-import time
-from typing import Optional
-
 from fastapi import (
     FastAPI,
     status,
     Request,
-    Form,
     Depends,
     Cookie,
 )
@@ -16,7 +12,6 @@ from fastapi.staticfiles import StaticFiles
 
 from src import m_db
 from src import supa_db as s_db
-from src import nlb_api as n_api
 from src import process as p
 from src.api import api
 from src.api.deps import UsernameDep
@@ -120,49 +115,6 @@ async def main(request: Request, user_info: str = Cookie(None), db=Depends(get_d
 
     else:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
-
-
-@app.get("/book_status/{book_saved}")
-async def book_status_progress_bar(
-    request: Request, book_saved: int, db=Depends(get_db), user_info: str = Cookie(None)
-):
-    try:
-        username = username_email_resol(user_info)
-        mdb = m_db.connect_mdb()
-        mdb = mdb["nlb"]
-        user_info = m_db.q_user_info(db=mdb, username=username)
-        books_updated = user_info.get("books_updated")
-        title = user_info.get("title")
-
-        print(books_updated)
-        print(title)
-
-        progress = 0
-        if books_updated > 0:
-            progress = (books_updated / book_saved) * 100
-
-        update_status = None
-        if m_db.q_status(db=mdb, username=username):
-            update_status = " "
-
-        return templates.TemplateResponse(
-            "/partials/update_status_text.html",
-            {
-                "request": request,
-                "progress": progress,
-                "TitleName": title,
-                "total_books": book_saved,
-                "book_count": books_updated,
-                "status": update_status,
-            },
-        )
-    except:
-        return templates.TemplateResponse(
-            "/partials/update_status_text.html",
-            {
-                "request": request,
-            },
-        )
 
 
 # Main Page

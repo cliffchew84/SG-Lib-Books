@@ -1,6 +1,6 @@
 import time
 
-from fastapi import APIRouter, BackgroundTasks, Request, status
+from fastapi import APIRouter, BackgroundTasks, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 
@@ -40,6 +40,21 @@ def update_bk_avail_supa(db, bid_no: str) -> bool:
     return True
 
 
+def update_all_user_bks(db, mdb, username):
+    """Update all books linked to user."""
+    user_bks_info = s_db.q_user_bks_info(username=username)
+
+    for i, bk in enumerate(user_bks_info):
+        bid_no = bk.get("BID")
+        title = bk.get("TitleName")
+        time.sleep(2)
+        update_bk_avail_supa(db, bid_no)
+
+        m_db.update_user_info(mdb, username, {"books_updated": i + 1, "title": title})
+    m_db.delete_status(mdb, username=username)
+    return {"message": "All user books updated!"}
+
+
 @router.get("")
 async def get_books(request: Request, username: UsernameDep, mdb: MDBDep):
     """Render user books within main_content"""
@@ -60,19 +75,56 @@ async def get_books(request: Request, username: UsernameDep, mdb: MDBDep):
     )
 
 
-def update_all_user_bks(db, mdb, username):
-    """Update all books linked to user."""
-    user_bks_info = s_db.q_user_bks_info(username=username)
+@router.get("/status/{book_saved}")
+async def book_status_progress_bar(
+    request: Request, book_saved: int, mdb: MDBDep, username: UsernameDep
+):
+    if username is None:
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+    try:
+        user_info = m_db.q_user_info(db=mdb.nlb, username=username)
+        books_updated = user_info.get("books_updated") if user_info else None
+        title = user_info.get("title") if user_info else None
 
-    for i, bk in enumerate(user_bks_info):
-        bid_no = bk.get("BID")
-        title = bk.get("TitleName")
-        time.sleep(2)
-        update_bk_avail_supa(db, bid_no)
+        if books_updated is None or title is None:
+            return templates.TemplateResponse(
+                "/partials/update_status_text.html",
+                {
+                    "request": request,
+                },
+            )
 
-        m_db.update_user_info(mdb, username, {"books_updated": i + 1, "title": title})
-    m_db.delete_status(mdb, username=username)
-    return {"message": "All user books updated!"}
+        progress = 0
+        if books_updated > 0:
+            progress = (books_updated / book_saved) * 100
+
+        update_status = None
+        if m_db.q_status(db=mdb, username=username):
+            update_status = " "
+
+        return templates.TemplateResponse(
+            "/partials/update_status_text.html",
+            {
+                "request": request,
+                "progress": progress,
+                "TitleName": title,
+                "total_books": book_saved,
+                "book_count": books_updated,
+                "status": update_status,
+            },
+        )
+    except Exception:
+        return templates.TemplateResponse(
+            "/partials/update_status_text.html",
+            {
+                "request": request,
+            },
+        )
+
+
+@router.get("/complete", response_class=HTMLResponse)
+async def complete_update(request: Request):
+    return templates.TemplateResponse("complete_status.html", {"request": request})
 
 
 @router.post("", response_class=HTMLResponse)
