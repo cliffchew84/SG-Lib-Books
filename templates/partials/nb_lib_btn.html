@@ -3,7 +3,7 @@
         <summary class="hover:text-white hover:bg-sky-500">
             <i class="fas fa-city"></i>Libraries
         </summary>
-        <ul class="bg-sky-700 text-sm text-white w-56">
+        <ul class="bg-sky-700 text-sm text-white w-72">
             <li>
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-get="/update_header" hx-swap="outerHTML"
                     hx-target="#header" hx-indicator="#head-spinner">
@@ -13,19 +13,22 @@
             <li>
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-get="/lib/all" hx-target=".main_content"
                     hx-swap='outerHTML' hx-indicator="#head-spinner">
-                    <i class="fas fa-city"></i>
-                    All Libraries - {{all_avail_books|length}}
+                    All Libraries
+                    <div class="badge badge-lg w-8 text-xs">{{all_avail_books|length}}</div>
                 </a>
             </li>
 
             {% for lib in lib_book_summary %}
+            <!-- Remove Lee Kong Chian Reference from frontend -->
+            {% if lib.keys()|list|first|lower != "lee kong chian reference " %}
             <li>
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-target=".main_content" hx-swap='outerHTML'
                     hx-get="/lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
-                    {{lib.keys()|list|first}} -
-                    {{lib.values()|list|first}}
+                    {{lib.keys()|list|first}}
+                    <div class="badge badge-lg w-8 text-xs">{{lib.values()|list|first}}</div>
                 </a>
             </li>
+            {% endif %}
             {% endfor %}
         </ul>
     </details>
