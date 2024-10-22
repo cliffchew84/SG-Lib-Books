@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel
 
-from src.modals.base import ResponseBase, CreateBase
+from src.modals.base import ResponseBase, CreateBase, UpdateBase
 
 
 class UserSearchBase(BaseModel):
@@ -23,7 +23,12 @@ class UserSearchBase(BaseModel):
 
 class UserSearch(ResponseBase, UserSearchBase):
     table_name: ClassVar[str] = "user_search"
+    pk: ClassVar[str] = "UserName"
 
 
 class UserSearchCreate(CreateBase, UserSearch):
     """UserSearch model for creating new user-book relationship"""
+
+
+class UserSearchUpdate(UpdateBase, UserSearchBase):
+    """UserSearch model for updating user-book relationship"""

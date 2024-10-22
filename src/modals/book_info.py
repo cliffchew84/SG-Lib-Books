@@ -33,6 +33,7 @@ class BookInfoBase(BaseModel):
 
 class BookInfo(ResponseBase, BookInfoBase):
     table_name: ClassVar[str] = "books_info"
+    pk: ClassVar[str] = "BID"
 
 
 class BookInfoCreate(CreateBase, BookInfoBase):

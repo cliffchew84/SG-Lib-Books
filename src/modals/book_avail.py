@@ -53,6 +53,7 @@ class BookAvailBase(BaseModel):
 
 class BookAvail(ResponseBase, BookAvailBase):
     table_name: ClassVar[str] = "books_avail"
+    pk: ClassVar[str] = "ItemNo"
 
 
 class BookAvailCreate(CreateBase, BookAvailBase):
@@ -69,5 +70,5 @@ class BookAvailUpdateBase(BaseModel):
     DueDate: Optional[date] = None
 
 
-class BookInfoUpdate(UpdateBase, BookAvailUpdateBase):
+class BookAvailUpdate(UpdateBase, BookAvailUpdateBase):
     """BookAvail model for updating existing book availability"""

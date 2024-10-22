@@ -15,6 +15,7 @@ class ResponseBase(BaseModel):
     """Properties to return to client"""
 
     table_name: ClassVar[str] = "ResponseBase".lower()
+    pk: ClassVar[str] = "id"
     Config: ClassVar[ConfigDict] = ConfigDict(
         extra="ignore", arbitrary_types_allowed=True
     )
