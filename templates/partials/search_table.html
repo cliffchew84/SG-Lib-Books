@@ -2,12 +2,12 @@
     {% if pag_links %}
 
     {% if e_resources %}
-    {% set nav_search = '/navigate_search/?e_resources=True&' %}
+    {% set nav_search = '/search/results/?e_resources=True&' %}
     {% else %}
-    {% set nav_search = '/navigate_search/?' %}
+    {% set nav_search = '/search/results/?' %}
     {% endif %}
 
-    <form id="myForm" hx-post="/ingest_books_navbar" hx-indicator="#head-spinner" hx-target="#header"
+    <form id="myForm" hx-post="/books" hx-indicator="#head-spinner" hx-target="#header"
         hx-swap="outerHTML">
 
         <div class="join flex items-center justify-left">
