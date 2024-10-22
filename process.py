@@ -48,7 +48,7 @@ def get_lib_bk_summary(unique_libs, avail_bks_by_lib):
         lib_bk_summary.append({lib: book_count})
 
     lib_bk_summary = sorted(
-        lib_bk_summary, key=lambda x: list(x.values())[0], reverse=True)
+        lib_bk_summary, key=lambda x: list(x.keys())[0])
     return lib_bk_summary
 
 
