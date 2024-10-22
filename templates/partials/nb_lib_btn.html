@@ -14,7 +14,7 @@
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-get="/lib/all" hx-target=".main_content"
                     hx-swap='outerHTML' hx-indicator="#head-spinner">
                     All Libraries
-                    <div class="badge badge-lg w-8 text-xs">{{all_avail_books|length}}</div>
+                    <div class="badge badge-md w-8 text-xs">{{all_avail_books|length}}</div>
                 </a>
             </li>
 
@@ -25,7 +25,7 @@
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-target=".main_content" hx-swap='outerHTML'
                     hx-get="/lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
                     {{lib.keys()|list|first}}
-                    <div class="badge badge-lg w-8 text-xs">{{lib.values()|list|first}}</div>
+                    <div class="badge badge-md w-8 text-xs">{{lib.values()|list|first}}</div>
                 </a>
             </li>
             {% endif %}
