@@ -2155,20 +2155,12 @@ html {
   border-radius: var(--rounded-box, 1rem);
 }
 
-.badge-xs {
-  height: 0.75rem;
-  font-size: 0.75rem;
-  line-height: .75rem;
-  padding-left: 0.313rem;
-  padding-right: 0.313rem;
-}
-
-.badge-lg {
-  height: 1.5rem;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  padding-left: 0.688rem;
-  padding-right: 0.688rem;
+.badge-md {
+  height: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  padding-left: 0.563rem;
+  padding-right: 0.563rem;
 }
 
 .btn-sm {
@@ -2618,8 +2610,12 @@ html {
   width: 13rem;
 }
 
-.w-56 {
-  width: 14rem;
+.w-72 {
+  width: 18rem;
+}
+
+.w-8 {
+  width: 2rem;
 }
 
 .w-full {
@@ -2628,26 +2624,6 @@ html {
 
 .w-screen {
   width: 100vw;
-}
-
-.w-72 {
-  width: 18rem;
-}
-
-.w-12 {
-  width: 3rem;
-}
-
-.w-6 {
-  width: 1.5rem;
-}
-
-.w-10 {
-  width: 2.5rem;
-}
-
-.w-8 {
-  width: 2rem;
 }
 
 .max-w-screen-lg {
@@ -3315,6 +3291,10 @@ html {
     margin-left: calc(4rem * calc(1 - var(--tw-space-x-reverse)));
   }
 
+  .md\:p-4 {
+    padding: 1rem;
+  }
+
   .md\:text-base {
     font-size: 1rem;
     line-height: 1.5rem;
@@ -3322,12 +3302,20 @@ html {
 }
 
 @media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+
   .lg\:flex {
     display: flex;
   }
 
   .lg\:hidden {
     display: none;
+  }
+
+  .lg\:h-10 {
+    height: 2.5rem;
   }
 
   .lg\:w-1\/2 {
@@ -3337,6 +3325,11 @@ html {
   .lg\:px-8 {
     padding-left: 2rem;
     padding-right: 2rem;
+  }
+
+  .lg\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 }
 

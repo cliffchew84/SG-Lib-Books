@@ -3,10 +3,12 @@
     <div class="card-body">
         <div class="flex items-center">
             <p class="flex-grow px-2">
+                <!-- Mobile -->
                 <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                     class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
                     rel="noopener noreferrer">{{ data['TitleName'].split(" | ", 1)[0] }}</a>
 
+                <!-- Desktop -->
                 <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
                     class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
                     rel="noopener noreferrer">{{ data['TitleName'].split(" : ", 1)[0] }}</a>
@@ -22,7 +24,12 @@
 
                 {% endif %}
 
+                {% if library == 'all' %}
+
                 <span class="badge badge-outline font-semibold bg-primary-content">{{ data['BranchName'] }}</span>
+
+                {% endif %}
+
                 <b>Author:</b> {{ data['Author'] }}
             </p>
             <form action="/update_book/{{ data['BID'] }}" method="POST">
