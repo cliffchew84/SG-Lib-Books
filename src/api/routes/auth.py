@@ -7,7 +7,6 @@ from postgrest import APIError
 from urllib.parse import urlencode
 
 from src.api.deps import SDBDep
-from src import supa_db as s_db
 from src.config import settings
 from src.modals.users import UserCreate
 from src.crud.users import user_crud
