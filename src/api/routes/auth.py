@@ -1,12 +1,16 @@
-from fastapi import APIRouter, HTTPException, Response
-from fastapi.responses import RedirectResponse
+import logging
 
 import httpx
+from fastapi import APIRouter, HTTPException, Response
+from fastapi.responses import RedirectResponse
+from postgrest import APIError
 from urllib.parse import urlencode
 
 from src.api.deps import SDBDep
 from src import supa_db as s_db
 from src.config import settings
+from src.modals.users import UserCreate
+from src.crud.users import user_crud
 
 router = APIRouter()
 
@@ -66,21 +70,29 @@ async def auth_callback(code: str, response: Response, db: SDBDep):
         raise HTTPException(status_code=401, detail="Could not retrieve user info")
 
     try:
-        username = s_db.q_username_by_email(db, user_email)
-    except Exception:
-        # Sign-Up User as not found in Supabase
-        # TODO: Implement proper auth-signup with supabase
-        # https://supabase.com/docs/reference/python/auth-signup
-        username = user_email
-        db.table("users").insert(
-            {
-                "UserName": username,
-                "HashedPassword": "ThisIsGoogleLogin",
-                "email_address": username,
-            }
-        ).execute()
+        user = await user_crud.get_user_by_email(db, email=user_email)
+        if user is None:
+            # Sign-Up User as not found in Supabase
+            # TODO: Implement proper auth-signup with supabase
+            # https://supabase.com/docs/reference/python/auth-signup
+            new_user = UserCreate(
+                UserName=user_email,
+                email_address=user_email,
+                HashedPassword="ThisIsGoogleLogin",
+            )
+            user = await user_crud.create(db, obj_in=new_user)
+    except APIError as e:
+        # Catch error when user has been created
+        logging.error("Error in creating new user: ", e)
+        raise HTTPException(status_code=400, detail="Could not create new user")
+    except Exception as e:
+        # Catch general error
+        logging.error("Error in creating new user: ", e)
+        raise HTTPException(
+            status_code=500, detail="Could not retrieve user info or create new user"
+        )
 
-    user_info = user_email + " | " + username
+    user_info = user.email_address + " | " + user.UserName
 
     # Set the access token in a cookie
     response.set_cookie(

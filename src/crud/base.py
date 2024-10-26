@@ -21,7 +21,7 @@ class CRUDBase(Generic[ModelT, CreateSchemaT, UpdateSchemaT]):
             db.table(self.model.table_name).select("*").eq(self.model.pk, i).execute()
         )
         got = response.data
-        return self.model(**got[0]) if response.count else None
+        return self.model(**got[0]) if got else None
 
     async def get_all(self, db: Client) -> list[ModelT]:
         """get all by table_name"""
