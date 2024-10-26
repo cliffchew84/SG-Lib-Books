@@ -8,8 +8,8 @@ from urllib.parse import urlencode
 
 from src.api.deps import SDBDep
 from src.config import settings
-from src.modals.users import UserCreate
 from src.crud.users import user_crud
+from src.modals.users import UserCreate
 
 router = APIRouter()
 
