@@ -51,14 +51,24 @@ class CRUDBase(Generic[ModelT, CreateSchemaT, UpdateSchemaT]):
 
     async def update(self, db: Client, *, obj_in: UpdateSchemaT, i: str) -> ModelT:
         """update by UpdateSchemaT"""
-        data, _ = (
+        response = (
             db.table(self.model.table_name)
             .update(obj_in.model_dump(exclude_unset=True))
             .eq(self.model.pk, i)
             .execute()
         )
-        _, updated = data
+        updated = response.data
         return self.model(**updated[0])
+
+    async def upsert(self, db: Client, *, obj_ins: list[CreateSchemaT]) -> list[ModelT]:
+        """upsert by UpdateSchemaT"""
+        response = (
+            db.table(self.model.table_name)
+            .upsert([obj_in.model_dump() for obj_in in obj_ins])
+            .execute()
+        )
+        updateds = response.data
+        return [self.model(**updated) for updated in updateds]
 
     async def delete(self, db: Client, *, i: str) -> ModelT | None:
         """remove by UpdateSchemaT"""

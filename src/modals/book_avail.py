@@ -5,26 +5,6 @@ from pydantic import BaseModel
 
 from src.modals.base import ResponseBase, CreateBase, UpdateBase
 
-StatusDescName = Literal[
-    # List of item status name from (C003):
-    # https://openweb.nlb.gov.sg/api/References/Catalogue.html
-    "In-Process",
-    "In-Transit",
-    "Shelving",
-    "On Shelf",
-    "Reservation In-Transit",
-    "On-Hold",
-    "On-Loan",
-    "Claim Missing Parts",
-    "Claim Never Borrowed",
-    "Claim Returned",
-    "Lost",
-    "Missing",
-    "At binding",
-    "Unavailable",
-    "Weeding",
-]
-
 
 class BookAvailBase(BaseModel):
     """Book Availability Info"""
@@ -39,16 +19,16 @@ class BookAvailBase(BaseModel):
     BranchName: str
 
     """Item loan status"""
-    StatusDesc: StatusDescName
+    StatusDesc: Optional[str] = None
 
     """Database insert time (milliseconds after utc)"""
-    InsertTime: int
+    InsertTime: Optional[int] = None
 
     """Book ID (FK)"""
     BID: int
 
     """Due Date"""
-    DueDate: date
+    DueDate: Optional[date] = None
 
 
 class BookAvail(ResponseBase, BookAvailBase):
@@ -64,7 +44,7 @@ class BookAvailUpdateBase(BaseModel):
     ItemNo: str
     CallNumber: Optional[str] = None
     BranchName: Optional[str] = None
-    StatusDesc: Optional[StatusDescName] = None
+    StatusDesc: Optional[str] = None
     InsertTime: Optional[int] = None
     BID: Optional[str] = None
     DueDate: Optional[date] = None

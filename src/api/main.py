@@ -1,3 +1,5 @@
+from collections import Counter
+
 from fastapi import (
     APIRouter,
     status,
@@ -6,15 +8,16 @@ from fastapi import (
 from fastapi.responses import RedirectResponse, HTMLResponse
 
 from src import m_db
-from src import supa_db as s_db
-from src import process as p
-from src.api.deps import SDBDep, UsernameDep
+from src.api.deps import MDBDep, SDBDep, UsernameDep
 from src.api.routes.auth import router as auth_router
 from src.api.routes.books import router as books_router
 from src.api.routes.library import router as library_router
 from src.api.routes.nav import router as nav_router
 from src.api.routes.search import router as search_router
 from src.api.routes.user import router as user_router
+from src.crud.book_avail import book_avail_crud
+from src.crud.book_info import book_info_crud
+from src.crud.users import user_crud
 from src.utils import templates
 
 api_router = APIRouter()
@@ -27,50 +30,114 @@ api_router.include_router(user_router, prefix="/user", tags=["user"])
 
 
 @api_router.get("/main", response_class=HTMLResponse)
-async def main(request: Request, username: UsernameDep, db: SDBDep):
+async def main(request: Request, username: UsernameDep, db: SDBDep, mdb: MDBDep):
     if not username:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
+    # Get user_info if avail. Else redirect for proper sign-up
+    user_info = await user_crud.get(db, i=username)
+    if not user_info:
+        return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+
     # Continue to extract user book info
-    query = s_db.q_user_bks(username)
-    response = p.process_user_bks(query)
+    book_infos = await book_info_crud.get_multi_by_owner(db=db, username=username)
+    book_avails = await book_avail_crud.get_multi_by_owner(
+        db=db, username=username, BIDs=[book_info.BID for book_info in book_infos]
+    )
+    book_info_dict = {book_info.BID: book_info for book_info in book_infos}
+    api_data = [
+        {**book_avail.model_dump(), **book_info_dict[book_avail.BID].model_dump()}
+        for book_avail in book_avails
+    ]
+
     # Processing necessary statistics
-    all_unique_books = p.get_unique_bks(response)
-    all_avail_books = p.get_avail_bks(response)
-    unique_libs = p.get_unique_libs(response)
-    avail_bks_by_lib = p.get_avail_bks_by_lib(response)
-    lib_book_summary = p.get_lib_bk_summary(unique_libs, avail_bks_by_lib)
-    mdb = m_db.connect_mdb()
-    mdb = mdb["nlb"]
+    all_unique_books = [
+        book_info.TitleName for book_info in book_infos
+    ]  # List of book title
+    all_avail_books = [
+        book_info
+        for book_info in book_infos
+        if book_info.BID
+        in {
+            book_avail.BID
+            for book_avail in book_avails
+            if book_avail.StatusDesc == "Available"
+        }
+    ]  # List of book_info if book is available
+    all_avail_book_title = [
+        book_info.TitleName for book_info in all_avail_books
+    ]  # List of book title if book is available
+    lib_book_summary = Counter(
+        [
+            book_avail.BranchName.replace("Public", "").replace("Library", "").strip()
+            for book_avail in book_avails
+            if book_avail.StatusDesc == "Available"
+        ]
+    ).items()  # List of (lib_name: count)
+
+    # Count number of avail and all items in preferred lib if available
+    preferred_lib = user_info.preferred_lib
+    lib_avail_count = (
+        len(
+            [
+                book_info
+                for book_info in all_avail_books
+                if book_info.BID
+                in {
+                    book_avail.BID
+                    for book_avail in book_avails
+                    if (
+                        book_avail.BranchName.replace("Public", "")
+                        .replace("Library", "")
+                        .strip()
+                        .lower()
+                        == preferred_lib.lower()
+                    )
+                }
+            ]
+        )
+        if preferred_lib is not None
+        else len(all_avail_books)
+    )
+    lib_all_count = (
+        len(
+            [
+                book_info
+                for book_info in book_infos
+                if book_info.BID
+                in {
+                    book_avail.BID
+                    for book_avail in book_avails
+                    if (
+                        book_avail.BranchName.replace("Public", "")
+                        .replace("Library", "")
+                        .strip()
+                        .lower()
+                        == preferred_lib.lower()
+                    )
+                }
+            ]
+        )
+        if preferred_lib is not None
+        else len(book_infos)
+    )
+
     update_status = None
-    if m_db.q_status(db=mdb, username=username):
+    if m_db.q_status(db=mdb.nlb, username=username):
         update_status = " "
-    # Check if user has a default library
-    user_info = s_db.q_user_info(db, username)
-    preferred_lib = user_info.get("preferred_lib")
-    if preferred_lib:
-        preferred_lib = preferred_lib.lower()
-        output = []
-        for book in response:
-            if preferred_lib in book["BranchName"].lower():
-                output.append(book)
-    else:
-        preferred_lib = "all"
-        output = response
-    lib_avail = len(p.get_avail_bks(output))
-    lib_all = len(p.get_unique_bks(output))
+
     return templates.TemplateResponse(
         "main.html",
         {
             "request": request,
             "username": username,
-            "api_data": output,
-            "all_avail_books": all_avail_books,
+            "api_data": api_data,
+            "all_avail_books": all_avail_book_title,
             "all_unique_books": all_unique_books,
-            "avail_books": avail_bks_by_lib,
+            "avail_books": all_avail_books,
             "lib_book_summary": lib_book_summary,
-            "lib_avail": lib_avail,
-            "lib_all": lib_all,
+            "lib_avail": lib_avail_count,
+            "lib_all": lib_all_count,
             "library": preferred_lib,
             "status": update_status,
         },

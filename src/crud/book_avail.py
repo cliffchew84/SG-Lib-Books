@@ -1,6 +1,9 @@
+from typing import Optional
+
 from supabase import Client
 
 from src.crud.base import CRUDBase
+from src.crud.book_info import book_info_crud
 from src.modals.book_avail import (
     BookAvail,
     BookAvailCreate,
@@ -18,17 +21,24 @@ class CRUDBookAvail(CRUDBase[BookAvail, BookAvailCreate, BookAvailUpdate]):
     async def get_all(self, db: Client) -> list[BookAvail]:
         return await super().get_all(db)
 
-    async def get_multi_by_owner(self, db: Client, *, username: str) -> list[BookAvail]:
+    async def get_multi_by_owner(
+        self, db: Client, *, username: str, BIDs: Optional[list[int]] = None
+    ) -> list[BookAvail]:
+        if BIDs is None:
+            book_infos = await book_info_crud.get_multi_by_owner(db, username=username)
+            BIDs = [book_info.BID for book_info in book_infos]
         response = (
-            db.table(self.model.table_name)
-            .select("*, user_books(UserName)")
-            .eq("UserName", username)
-            .execute()
+            db.table(self.model.table_name).select("*").in_("BID", BIDs).execute()
         )
-        return [self.model(**item) for item in response.data]
+        return [BookAvail(**item) for item in response.data]
 
     async def update(self, db: Client, *, obj_in: BookAvailUpdate, i: str) -> BookAvail:
         return await super().update(db, obj_in=obj_in, i=i)
+
+    async def upsert(
+        self, db: Client, *, obj_ins: list[BookAvailCreate]
+    ) -> list[BookAvail]:
+        return await super().upsert(db, obj_ins=obj_ins)
 
     async def delete(self, db: Client, *, i: str) -> BookAvail | None:
         return await super().delete(db, i=i)

@@ -21,9 +21,8 @@
             {% for lib in lib_book_summary %}
             <li>
                 <a class="py-0.5 hover:text-white hover:bg-sky-500" hx-target=".main_content" hx-swap='outerHTML'
-                    hx-get="/lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
-                    {{lib.keys()|list|first}} -
-                    {{lib.values()|list|first}}
+                    hx-get="/lib/{{lib[0]|lower}}" hx-indicator="#head-spinner">
+                    {{lib[0]}} - {{lib[1]}}
                 </a>
             </li>
             {% endfor %}
