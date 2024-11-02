@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import defaultdict
 
 from fastapi import (
     APIRouter,
@@ -18,6 +18,7 @@ from src.api.routes.user import router as user_router
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
 from src.crud.users import user_crud
+from src.modals.book_response import BookResponse
 from src.utils import templates
 
 api_router = APIRouter()
@@ -38,88 +39,15 @@ async def main(request: Request, username: UsernameDep, db: SDBDep, mdb: MDBDep)
     user_info = await user_crud.get(db, i=username)
     if not user_info:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
+    preferred_lib = user_info.preferred_lib if user_info.preferred_lib else "all"
 
-    # Continue to extract user book info
+    # Extract user book info and compute book responses
     book_infos = await book_info_crud.get_multi_by_owner(db=db, username=username)
     book_avails = await book_avail_crud.get_multi_by_owner(
         db=db, username=username, BIDs=[book_info.BID for book_info in book_infos]
     )
-    book_info_dict = {book_info.BID: book_info for book_info in book_infos}
-    api_data = [
-        {**book_avail.model_dump(), **book_info_dict[book_avail.BID].model_dump()}
-        for book_avail in book_avails
-    ]
-
-    # Processing necessary statistics
-    all_unique_books = [
-        book_info.TitleName for book_info in book_infos
-    ]  # List of book title
-    all_avail_books = [
-        book_info
-        for book_info in book_infos
-        if book_info.BID
-        in {
-            book_avail.BID
-            for book_avail in book_avails
-            if book_avail.StatusDesc == "Available"
-        }
-    ]  # List of book_info if book is available
-    all_avail_book_title = [
-        book_info.TitleName for book_info in all_avail_books
-    ]  # List of book title if book is available
-    lib_book_summary = Counter(
-        [
-            book_avail.BranchName.replace("Public", "").replace("Library", "").strip()
-            for book_avail in book_avails
-            if book_avail.StatusDesc == "Available"
-        ]
-    ).items()  # List of (lib_name: count)
-
-    # Count number of avail and all items in preferred lib if available
-    preferred_lib = user_info.preferred_lib
-    lib_avail_count = (
-        len(
-            [
-                book_info
-                for book_info in all_avail_books
-                if book_info.BID
-                in {
-                    book_avail.BID
-                    for book_avail in book_avails
-                    if (
-                        book_avail.BranchName.replace("Public", "")
-                        .replace("Library", "")
-                        .strip()
-                        .lower()
-                        == preferred_lib.lower()
-                    )
-                }
-            ]
-        )
-        if preferred_lib is not None
-        else len(all_avail_books)
-    )
-    lib_all_count = (
-        len(
-            [
-                book_info
-                for book_info in book_infos
-                if book_info.BID
-                in {
-                    book_avail.BID
-                    for book_avail in book_avails
-                    if (
-                        book_avail.BranchName.replace("Public", "")
-                        .replace("Library", "")
-                        .strip()
-                        .lower()
-                        == preferred_lib.lower()
-                    )
-                }
-            ]
-        )
-        if preferred_lib is not None
-        else len(book_infos)
+    book_response = BookResponse(
+        book_infos=book_infos, book_avails=book_avails, library=preferred_lib
     )
 
     update_status = None
@@ -131,13 +59,13 @@ async def main(request: Request, username: UsernameDep, db: SDBDep, mdb: MDBDep)
         {
             "request": request,
             "username": username,
-            "api_data": api_data,
-            "all_avail_books": all_avail_book_title,
-            "all_unique_books": all_unique_books,
-            "avail_books": all_avail_books,
-            "lib_book_summary": lib_book_summary,
-            "lib_avail": lib_avail_count,
-            "lib_all": lib_all_count,
+            "api_data": book_response.api_data,
+            "all_avail_books": book_response.all_avail_books,
+            "all_unique_books": book_response.all_unique_books,
+            "avail_books": book_response.all_avail_books,
+            "lib_book_summary": book_response.lib_book_summary,
+            "lib_avail": len(book_response.lib_avail_books),
+            "lib_all": len(book_response.lib_all_books),
             "library": preferred_lib,
             "status": update_status,
         },

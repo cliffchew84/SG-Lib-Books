@@ -1,7 +1,9 @@
-from datetime import date
-from typing import ClassVar, Literal, Optional
+from datetime import datetime
+from typing import ClassVar, Optional
 
+import pendulum
 from pydantic import BaseModel
+from pydantic.fields import computed_field
 
 from src.modals.base import ResponseBase, CreateBase, UpdateBase
 
@@ -28,7 +30,19 @@ class BookAvailBase(BaseModel):
     BID: int
 
     """Due Date"""
-    DueDate: Optional[date] = None
+    DueDate: Optional[str] = None
+
+    @computed_field
+    @property
+    def UpdateTime(self) -> str | None:
+        """Compute insert time in desired format upon serialization"""
+        return (
+            datetime.fromtimestamp(
+                self.InsertTime / 1e3, pendulum.timezone("Asia/Singapore")
+            ).strftime("%d/%m %H:%M")
+            if self.InsertTime
+            else None
+        )
 
 
 class BookAvail(ResponseBase, BookAvailBase):
@@ -47,7 +61,7 @@ class BookAvailUpdateBase(BaseModel):
     StatusDesc: Optional[str] = None
     InsertTime: Optional[int] = None
     BID: Optional[str] = None
-    DueDate: Optional[date] = None
+    DueDate: Optional[str] = None
 
 
 class BookAvailUpdate(UpdateBase, BookAvailUpdateBase):

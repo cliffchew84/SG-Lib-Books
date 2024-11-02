@@ -36,10 +36,6 @@ class BookInfo(ResponseBase, BookInfoBase):
     pk: ClassVar[str] = "BID"
 
 
-class BookInfoWithCallNumber(BookInfo):
-    CallNumber: str
-
-
 class BookInfoCreate(CreateBase, BookInfoBase):
     """Framework model for creating new book_info"""
 
