@@ -1,9 +1,11 @@
+from typing import Optional
+
 from supabase import Client
 
 from src.crud.base import CRUDBase
+from src.modals.users import User
 from src.modals.book_info import (
     BookInfo,
-    BookInfoWithCallNumber,
     BookInfoCreate,
     BookInfoUpdate,
 )
@@ -11,13 +13,23 @@ from src.modals.user_books import UserBook, UserBookCreate
 
 
 class CRUDBookInfo(CRUDBase[BookInfo, BookInfoCreate, BookInfoUpdate]):
-    async def create(self, db: Client, *, obj_in: BookInfoCreate) -> BookInfo:
-        return await super().create(db, obj_in=obj_in)
+    async def create(
+        self,
+        db: Client,
+        *,
+        obj_in: BookInfoCreate,
+        excludes: Optional[set[str]] = None,
+    ) -> BookInfo:
+        return await super().create(db, obj_in=obj_in, excludes=excludes)
 
     async def create_book_by_user(
-        self, db: Client, obj_in: BookInfoCreate, username: str
+        self,
+        db: Client,
+        obj_in: BookInfoCreate,
+        username: str,
+        excludes: Optional[set[str]] = None,
     ) -> BookInfo:
-        result = await super().upsert(db, obj_ins=[obj_in])
+        result = await super().upsert(db, obj_ins=[obj_in], excludes=excludes)
 
         # Add user book relationship table
         user_book = UserBookCreate(UserName=username, BID=obj_in.BID)
@@ -44,10 +56,44 @@ class CRUDBookInfo(CRUDBase[BookInfo, BookInfoCreate, BookInfoUpdate]):
             if self.model.table_name in item
         ]
 
-    async def update(self, db: Client, *, obj_in: BookInfoUpdate, i: str) -> BookInfo:
-        return await super().update(db, obj_in=obj_in, i=i)
+    async def get_owners(self, db: Client, *, i: str) -> list[User]:
+        response = (
+            db.table("user_books")
+            .select(f"*, {User.table_name}(*)")
+            .eq("BID", i)
+            .execute()
+        )
+        return [
+            User(**item[User.table_name])
+            for item in response.data
+            if User.table_name in item
+        ]
+
+    async def update(
+        self,
+        db: Client,
+        *,
+        obj_in: BookInfoUpdate,
+        i: str,
+        excludes: Optional[set[str]] = None,
+    ) -> BookInfo:
+        return await super().update(db, obj_in=obj_in, i=i, excludes=excludes)
+
+    async def delete_owner(self, db: Client, *, i: str, username: str):
+        response = (
+            db.table("user_books")
+            .delete()
+            .eq("BID", i)
+            .eq("username", username)
+            .execute()
+        )
+        deleted = response.data
+        if not deleted:
+            return None
+        return self.model(**deleted[0])
 
     async def delete(self, db: Client, *, i: str) -> BookInfo | None:
+        db.table("user_books").delete().eq("BID", i).execute()
         return await super().delete(db, i=i)
 
 

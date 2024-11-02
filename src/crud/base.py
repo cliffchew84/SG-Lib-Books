@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from supabase import Client
 
@@ -39,32 +39,46 @@ class CRUDBase(Generic[ModelT, CreateSchemaT, UpdateSchemaT]):
         return [self.model(**item) for item in response.data]
 
     async def create(
-        self,
-        db: Client,
-        *,
-        obj_in: CreateSchemaT,
+        self, db: Client, *, obj_in: CreateSchemaT, excludes: Optional[set[str]] = None
     ) -> ModelT:
         """create by CreateSchemaT"""
-        response = db.table(self.model.table_name).insert(obj_in.model_dump()).execute()
+        response = (
+            db.table(self.model.table_name)
+            .insert(obj_in.model_dump(exclude=excludes))
+            .execute()
+        )
 
         return self.model(**response.data[0])
 
-    async def update(self, db: Client, *, obj_in: UpdateSchemaT, i: str) -> ModelT:
+    async def update(
+        self,
+        db: Client,
+        *,
+        obj_in: UpdateSchemaT,
+        i: str,
+        excludes: Optional[set[str]] = None,
+    ) -> ModelT:
         """update by UpdateSchemaT"""
         response = (
             db.table(self.model.table_name)
-            .update(obj_in.model_dump(exclude_unset=True))
+            .update(obj_in.model_dump(exclude=excludes, exclude_unset=True))
             .eq(self.model.pk, i)
             .execute()
         )
         updated = response.data
         return self.model(**updated[0])
 
-    async def upsert(self, db: Client, *, obj_ins: list[CreateSchemaT]) -> list[ModelT]:
+    async def upsert(
+        self,
+        db: Client,
+        *,
+        obj_ins: list[CreateSchemaT],
+        excludes: Optional[set[str]] = None,
+    ) -> list[ModelT]:
         """upsert by UpdateSchemaT"""
         response = (
             db.table(self.model.table_name)
-            .upsert([obj_in.model_dump() for obj_in in obj_ins])
+            .upsert([obj_in.model_dump(exclude=excludes) for obj_in in obj_ins])
             .execute()
         )
         updateds = response.data
@@ -72,10 +86,10 @@ class CRUDBase(Generic[ModelT, CreateSchemaT, UpdateSchemaT]):
 
     async def delete(self, db: Client, *, i: str) -> ModelT | None:
         """remove by UpdateSchemaT"""
-        data, _ = (
+        response = (
             db.table(self.model.table_name).delete().eq(self.model.pk, i).execute()
         )
-        _, deleted = data
+        deleted = response.data
         if not deleted:
             return None
         return self.model(**deleted[0])

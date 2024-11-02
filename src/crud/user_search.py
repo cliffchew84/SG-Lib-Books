@@ -1,3 +1,5 @@
+from typing import Optional
+
 from supabase import Client
 
 from src.crud.base import CRUDBase
@@ -9,8 +11,14 @@ from src.modals.user_search import (
 
 
 class CRUDUserSearch(CRUDBase[UserSearch, UserSearchCreate, UserSearchUpdate]):
-    async def create(self, db: Client, *, obj_in: UserSearchCreate) -> UserSearch:
-        return await super().create(db, obj_in=obj_in)
+    async def create(
+        self,
+        db: Client,
+        *,
+        obj_in: UserSearchCreate,
+        excludes: Optional[set[str]] = None,
+    ) -> UserSearch:
+        return await super().create(db, obj_in=obj_in, excludes=excludes)
 
     async def get(self, db: Client, *, i: str) -> UserSearch | None:
         return await super().get(db, i=i)
@@ -30,9 +38,14 @@ class CRUDUserSearch(CRUDBase[UserSearch, UserSearchCreate, UserSearchUpdate]):
         return [self.model(**item) for item in response.data]
 
     async def update(
-        self, db: Client, *, obj_in: UserSearchUpdate, i: str
+        self,
+        db: Client,
+        *,
+        obj_in: UserSearchUpdate,
+        i: str,
+        excludes: Optional[set[str]] = None,
     ) -> UserSearch:
-        return await super().update(db, obj_in=obj_in, i=i)
+        return await super().update(db, obj_in=obj_in, i=i, excludes=excludes)
 
     async def delete(self, db: Client, *, i: str) -> UserSearch | None:
         return await super().delete(db, i=i)

@@ -12,8 +12,14 @@ from src.modals.book_avail import (
 
 
 class CRUDBookAvail(CRUDBase[BookAvail, BookAvailCreate, BookAvailUpdate]):
-    async def create(self, db: Client, *, obj_in: BookAvailCreate) -> BookAvail:
-        return await super().create(db, obj_in=obj_in)
+    async def create(
+        self,
+        db: Client,
+        *,
+        obj_in: BookAvailCreate,
+        excludes: Optional[set[str]] = {"UpdateTime"},
+    ) -> BookAvail:
+        return await super().create(db, obj_in=obj_in, excludes=excludes)
 
     async def get(self, db: Client, *, i: str) -> BookAvail | None:
         return await super().get(db, i=i)
@@ -32,13 +38,24 @@ class CRUDBookAvail(CRUDBase[BookAvail, BookAvailCreate, BookAvailUpdate]):
         )
         return [BookAvail(**item) for item in response.data]
 
-    async def update(self, db: Client, *, obj_in: BookAvailUpdate, i: str) -> BookAvail:
-        return await super().update(db, obj_in=obj_in, i=i)
+    async def update(
+        self,
+        db: Client,
+        *,
+        obj_in: BookAvailUpdate,
+        i: str,
+        excludes: Optional[set[str]] = {"UpdateTime"},
+    ) -> BookAvail:
+        return await super().update(db, obj_in=obj_in, i=i, excludes=excludes)
 
     async def upsert(
-        self, db: Client, *, obj_ins: list[BookAvailCreate]
+        self,
+        db: Client,
+        *,
+        obj_ins: list[BookAvailCreate],
+        excludes: Optional[set[str]] = {"UpdateTime"},
     ) -> list[BookAvail]:
-        return await super().upsert(db, obj_ins=obj_ins)
+        return await super().upsert(db, obj_ins=obj_ins, excludes=excludes)
 
     async def delete(self, db: Client, *, i: str) -> BookAvail | None:
         return await super().delete(db, i=i)
