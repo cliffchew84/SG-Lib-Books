@@ -21,6 +21,20 @@ class BookResponse(BaseModel):
 
     @computed_field
     @cached_property
+    def all_unique_libs(self) -> list[str]:
+        """Return list of unique library, sorted in ascending order"""
+        return ["all"] + sorted(
+            {
+                book_avail.BranchName.replace("Public", "")
+                .replace("Library", "")
+                .strip()
+                .lower()
+                for book_avail in self.book_avails
+            }
+        )
+
+    @computed_field
+    @cached_property
     def avail_bids(self) -> set[int]:
         """Return set of BID of books available"""
         return {
