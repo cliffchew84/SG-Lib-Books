@@ -1,4 +1,6 @@
 import re
+import time
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Request, status
@@ -6,10 +8,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 
 from src.api.deps import SDBDep, MDBDep, UsernameDep
-from src import supa_db as s_db
 from src import m_db
 from src import process as p
 from src import nlb_api as n_api
+from src.crud.book_info import book_info_crud
+from src.crud.user_search import user_search_crud
+from src.modals.user_search import UserSearchCreate
 from src.utils import templates
 
 
@@ -61,7 +65,7 @@ async def htmx_search(
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
     if not book_search and not author:
-        # return as no book_search or author is provided
+        # return as no book_search and author is provided
         return
 
     bk_output = []
@@ -83,8 +87,16 @@ async def htmx_search(
         return
 
     # Track user search in db
-    s_db.user_search_tracking(
-        db, table_name="user_search", username=username, search_params=search_input
+    await user_search_crud.create(
+        db,
+        obj_in=UserSearchCreate(
+            UserName=username,
+            search_time=int(
+                time.mktime(datetime.now().timetuple()),
+            ),
+            Title=search_input.get("Title", ""),
+            Author=search_input.get("Author", ""),
+        ),
     )
 
     total_records = titles.get("totalRecords", None)
@@ -101,8 +113,8 @@ async def htmx_search(
         )
     )
     # Search user book BIDs and disable add book if user saved the book
-    user_books = s_db.q_user_bks(username=username)
-    bid_checks = set(i.get("BID") for i in user_books)
+    book_infos = await book_info_crud.get_multi_by_owner(db, username=username)
+    bid_checks = set(book_info.BID for book_info in book_infos)
     for bk in final_titles:
         bid = str(bk.get("BID") if bk.get("DigitalID") is None else bk.get("DigitalID"))
         title = bk.get("TitleName", " / ").split(" / ", 1)[0].strip()

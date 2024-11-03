@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from pydantic import BaseModel
 
@@ -15,10 +15,10 @@ class UserSearchBase(BaseModel):
     search_time: int
 
     """Search title"""
-    Title: str
+    Title: Optional[str]
 
     """Search author"""
-    Author: str
+    Author: Optional[str]
 
 
 class UserSearch(ResponseBase, UserSearchBase):

@@ -57,6 +57,7 @@ class CRUDBookInfo(CRUDBase[BookInfo, BookInfoCreate, BookInfoUpdate]):
         ]
 
     async def get_owners(self, db: Client, *, i: str) -> list[User]:
+        """Get users that owns the given bid"""
         response = (
             db.table("user_books")
             .select(f"*, {User.table_name}(*)")
