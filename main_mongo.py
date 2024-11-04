@@ -27,9 +27,6 @@ import m_db
 SECRET_KEY = os.environ["mongo_secret_key"]
 ACCESS_TOKEN_EXPIRY = 240
 
-# APPLICATION_ID = os.environ['nlb_rest_app_id']
-# API_KEY = os.environ['nlb_rest_api_key']
-
 manager = LoginManager(SECRET_KEY, token_url="/login", use_cookie=True)
 manager.cookie_name = "auth"
 
@@ -70,12 +67,12 @@ def auth_user(username: str,
     return user
 
 
-class NotAuthenticationException(Exception):
-    pass
-
-
-def not_authenticated_exception_handler(request, exception):
-    return RedirectResponse("/")
+# class NotAuthenticationException(Exception):
+#     pass
+#
+#
+# def not_authenticated_exception_handler(request, exception):
+#     return RedirectResponse("/")
 
 
 # Application code
@@ -83,20 +80,20 @@ app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
 templates = Jinja2Templates(directory='templates')
 
-manager.not_authenticated_exception = NotAuthenticationException
-app.add_exception_handler(NotAuthenticationException,
-                          not_authenticated_exception_handler)
+# manager.not_authenticated_exception = NotAuthenticationException
+# app.add_exception_handler(NotAuthenticationException,
+#                           not_authenticated_exception_handler)
 
 # Define an error handler to render the error page
-@app.exception_handler(HTTPException)
-async def handle_http_exception(request: Request, exc: HTTPException):
-    return templates.TemplateResponse("error.html", {"request": request})
+# @app.exception_handler(HTTPException)
+# async def handle_http_exception(request: Request, exc: HTTPException):
+#     return templates.TemplateResponse("error.html", {"request": request})
 
 
 # Example route that triggers an internal server error
-@app.get("/trigger-error")
-def trigger_error():
-    raise HTTPException(status_code=500, detail="Internal Server Error")
+# @app.get("/trigger-error")
+# def trigger_error():
+    # raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 # Logout
@@ -118,7 +115,7 @@ def get_register(request: Request, username: str):
 @app.get("/check_user_register/", response_class=HTMLResponse)
 async def check_user_register(username):
     db = s_db.connect_sdb()
-    user = s_db.q_username(db=db, username=username)
+    user = s_db.q_username(db=db_nlb, username=username)
     if user:
         dup_user_msg = f"{username} is already registered"
 
@@ -155,7 +152,6 @@ def register_user(request: Request,
             resp = RedirectResponse("/register_complete/" +
                                     urllib.parse.quote(username),
                                     status_code=status.HTTP_302_FOUND)
-            # [TODO]
             s_db.event_tracking(db, 'users', username, "registered_time")
             s_db.event_tracking(db, 'users', username, 'latest_login')
             manager.set_cookie(resp, access_token)
@@ -195,9 +191,7 @@ def login(request: Request,
         data={"sub": user.get("UserName")},
         expires=access_token_expires)
 
-    resp = RedirectResponse(
-        f"/{user.get('UserName')}/main/", status_code=status.HTTP_302_FOUND)
-
+    resp = RedirectResponse("/main", status_code=status.HTTP_302_FOUND)
     manager.set_cookie(resp, access_token)
     s_db.event_tracking(db, 'users', user.get("UserName"), 'latest_login')
     return resp
@@ -229,13 +223,13 @@ async def reset_password(request: Request,
     return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@app.get("/{username}/main")
+@app.get("/main")
 async def htmx_main(request: Request,
                     db=Depends(get_db),
                     username=Depends(manager)):
 
     username=username.get("UserName")
-    query = s_db.q_user_bks(username)
+    query = s_db.q_user_bks(username=username)
     response = p.process_user_bks(query)
 
     # Processing necessary statistics
@@ -280,7 +274,8 @@ async def htmx_main(request: Request,
         "status": update_status
     })
 
-@app.get("/{username}/user_bks")
+
+@app.get("/user_bks")
 async def current_bks(request: Request,
                       db=Depends(get_db),
                       username=Depends(manager)):
@@ -303,7 +298,7 @@ async def current_bks(request: Request,
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
 
 
-@app.get("/{username}/lib/{library}/", response_class=HTMLResponse)
+@app.get("/lib/{library}/", response_class=HTMLResponse)
 async def show_avail_m_books(request: Request,
                              library: Optional[str],
                              db=Depends(get_db),
@@ -349,19 +344,19 @@ async def show_avail_m_books(request: Request,
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-def update_bk_avail_supa(db, bid_no: str):
+def update_bk_avail_in_mongo(db, bid_no: str):
     """ 
     Takes in single BID to get its avail info
-    Processes data for Supabase
+    Processes data for mongoDB
 
     # Should separate these functions!
-    Delete existing Supabase data if found
-    Inject new data into Supabase 
+    Delete existing MongoDB data if found
+    Inject new data into MongoDB
     """
     try:
         # Make API call on book availability
-        bk = n_api.get_bk_data(
-            "GetAvailabilityInfo", input_dict={"BRN": bid_no})
+        bk = n_api.get_bk_data("GetAvailabilityInfo", 
+                               input_dict={"BRN": bid_no})
         all_avail_bks = [p.process_bk_avail(i) for i in bk.get("items")]
 
         if len(all_avail_bks) > 0:
@@ -384,39 +379,40 @@ async def update_book(BID: str,
                       db=Depends(get_db),
                       username=Depends(manager)):
 
-    api_result = update_bk_avail_supa(db, BID)
+    api_result = update_bk_avail_in_mongo(db, BID)
     if api_result.get("API call"):
         return RedirectResponse(f"/{username.get('UserName')}/main",
                                 status_code=status.HTTP_302_FOUND)
 
 
-def update_all_user_books(db, username):
+def update_all_user_bks(db, username):
     """ Update all books linked to user."""
-    username = username.get("UserName")
-
     user_bids = s_db.q_user_bks_bids(db=db, username=username)
-    s_db.insert_status(db, username=username)
-    s_db.update_user_info(db, username, {'books_updated': 0})
-    for i, ubid in enumerate(user_bids):
-        bid_no = ubid.get("BID")
-        print(bid_no)
+    user_bks_info = s_db.q_user_bks_info(username=username)
 
+    mdb = m_db.connect_mdb()
+    mdb = mdb['nlb']
+    for i, bk in enumerate(user_bks_info):
+        bid_no = bk.get("BID")
+        title = bk.get("TitleName")
         time.sleep(2)
         update_bk_avail_supa(db, bid_no)
 
-        s_db.update_user_info(db, username, {'books_updated': i+1})
-    s_db.delete_status(db, username=username)
+        m_db.update_user_info(mdb, username,
+                              {'books_updated': i+1,
+                               'title': title
+                               })
+    m_db.delete_status(mdb, username=username)
     return {"message": "All user books updated!"}
 
 
-@app.post("/m_update_user_books/{username}", response_class=HTMLResponse)
-async def update_user_saved_bks(background_tasks: BackgroundTasks,
-                                db=Depends(get_db),
-                                username=Depends(manager)):
+@app.post("/update_user_bks", response_class=HTMLResponse)
+async def update_user_bks(background_tasks: BackgroundTasks,
+                          db=Depends(get_db),
+                          username=Depends(manager)):
     """ Updates availability of all user's saved books """
-    background_tasks.add_task(update_all_user_books, db, username)
-    return RedirectResponse(f"/{username.get('UserName')}/lib/all",
-                            status_code=status.HTTP_302_FOUND)
+    background_tasks.add_task(update_all_user_bks, db, username)
+    return RedirectResponse("/lib/all", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/book_status/{book_saved}")
@@ -426,8 +422,8 @@ async def book_status_progress_bar(request: Request,
                                    username=Depends(manager)):
 
     username = username.get("UserName")
-    books_updated = s_db.q_user_info(
-        db=db, username=username).get("books_updated")
+    books_updated = s_db.q_user_info(db=db, 
+                                     username=username).get("books_updated")
 
     progress = 0
     if books_updated > 0:
@@ -504,17 +500,18 @@ async def ingest_books_navbar(request: Request,
                               username=Depends(manager)):
     username = username.get("UserName")
     for bid in bids:
-        print(bid)
+        BID = str(bid)
+        print(BID)
         # Makes API to bk info and bk avail and ingest the data into DB
-        bk_title = n_api.get_process_bk_info(bid_no=bid)
+        bk_title = n_api.get_process_bk_info(bid_no=BID)
 
         time.sleep(2)
-        update_bk_avail_supa(db, bid)
+        update_bk_avail_in_mongo(db, BID)
 
         # Do all the adding at the end, after everything is confirmed
         # This also doesn't require any time.sleep() as this is with my own DB
-        s_db.add_user_book(db=db, username=username, bid_no=bid)
-        s_db.add_book_info(db=db, books_info=bk_title)
+        s_db.add_user_book(db=db, username=username, bid_no=BID)
+        s_db.add_book_info(db=db, books_info_input=bk_title)
 
         print("print started book_available update")
 
@@ -543,15 +540,22 @@ async def delete_bk(request: Request,
                     bid: int,
                     db=Depends(get_db),
                     username=Depends(manager)):
-    username=username.get("UserName") 
-    final_count = s_db.q_bid_counter(bid_no=str(bid)) 
+    username=username.get("UserName")
+    BID = str(bid)
+    # Check BID is linked to more than 1 user
+    counter = db.user_books.aggregate([
+        {"$match": {"BID": BID}},
+        {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+        {"$project": {"_id": 0}}
+    ])
+    final_count = counter.next().get("BID")
 
     # If book is only linked to one user,
     # delete book available and info records
     if final_count == 1:
-        s_db.delete_bk_avail(db=db, bid_no=bid)
-        s_db.delete_bk_info(db=db, bid_no=bid)
-    s_db.delete_user_bk(db=db, username=username, bid_no=bid)
+        s_db.delete_bk_avail(db=db, bid_no=BID)
+        s_db.delete_bk_info(db=db, bid_no=BID)
+    s_db.delete_user_bk(db=db, username=username, bid_no=BID)
 
     return ""
 
@@ -563,13 +567,21 @@ async def delete_books(request: Request,
                        username=Depends(manager)):
     username=username.get("UserName")
     for bid in bids:
-        final_count = s_db.q_bid_counter(bid_no=str(bid)) 
+        BID = str(bid)
+        # Check BID is linked to more than 1 user
+        counter = db.user_books.aggregate([
+            {"$match": {"BID": BID}},
+            {"$group": {"_id": 0, "BID": {"$sum": 1}}},
+            {"$project": {"_id": 0}}
+        ])
+        final_count = counter.next().get("BID")
+
         # If book is only linked to one user,
         # delete book available and info records
         if final_count == 1:
-            s_db.delete_bk_avail(db=db, bid_no=bid)
-            s_db.delete_bk_info(db=db, bid_no=bid)
-        s_db.delete_user_bk(db=db, username=username, bid_no=bid)
+            s_db.delete_bk_avail(db=db, bid_no=BID)
+            s_db.delete_bk_info(db=db, bid_no=BID)
+        s_db.delete_user_bk(db=db, username=username, bid_no=BID)
 
     output = []
     if username:
@@ -621,10 +633,6 @@ async def htmx_bk_search(request: Request,
         more_records = titles.get("hasMoreRecords", None)
         pag_links = p.pg_links(0, total_records)
         search_params = {"Title": book_search, 'Author' : author}
-        s_db.user_search_tracking(
-            db, table_name="user_search", 
-            username=username, 
-            search_params=search_params)
 
         errors = [400, 404, 500, 401, 405, 429]
         if titles.get("statusCode") in errors or titles.get("totalRecords") == 0:
@@ -647,6 +655,7 @@ async def htmx_bk_search(request: Request,
                 final_titles += ebooks
 
             # Search user book BIDs and disable add book if user saved the book
+            # [TODO] - Refactor this to just call user_books BIDs
             user_books = s_db.q_user_bks(username=username)
             bid_checks = set(i.get("BID") for i in user_books)
             for bk in final_titles:
@@ -760,7 +769,7 @@ async def htmx_paginate_bk_search(request: Request,
     })
 
 
-@app.get("/{username}/search/", response_class=HTMLResponse)
+@app.get("/search", response_class=HTMLResponse)
 async def search_books(request: Request,
                          book_search: Optional[str] = None,
                          author: Optional[str] = None,
@@ -779,7 +788,7 @@ async def search_books(request: Request,
     })
 
 
-@app.get("/{username}/profile", response_class=HTMLResponse)
+@app.get("/profile", response_class=HTMLResponse)
 async def user_profile(request: Request,
                          db=Depends(get_db),
                          username=Depends(manager)):

@@ -1,4 +1,4 @@
-<header id="header" class="mx-auto pt-2 pb-8 bg-sky-700 fixed top-0 w-full z-50">
+<header id="header" class="mx-auto pt-2 pb-8 lg:pb-10 bg-sky-700 fixed top-0 w-full z-50">
     {% if not username %}
 
     <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
@@ -9,21 +9,13 @@
 
     <div class="flex justify-center lg:h-10 h-8 mx-auto" hx-trigger='load'>
         <ul class="menu menu-horizontal space-x-6 mx-1 items-center">
-            <div>
+            <div class="hidden lg:block">
                 <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-lg"></span>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
+                htmx-indicator loading loading-ball loading-lg hidden lg:block"></span>
             </div>
             {% include 'partials/navbar_library_button.html' %}
             {% include 'partials/navbar_general_buttons.html' %}
             <div>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
                 <span id='head-spinner' class="text-white justify-center pt-2 px-2 
                 htmx-indicator loading loading-ball loading-lg"></span>
             </div>
