@@ -7,6 +7,7 @@ module.exports = {
         "./src/templates/**/*.html",
     ],
     theme: {
+        darkMode: false,
         extend: {},
     },
     plugins: [require("daisyui")],
