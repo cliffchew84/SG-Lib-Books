@@ -3,7 +3,7 @@
     {% if status %}
     {% include 'update_status.html' %}
     {% endif %}
-    <div class="w-full overflow-x-auto my-3 mt-18 pt-20 px-6">
+    <div class="w-full overflow-x-auto my-3 mt-18 pt-20 px-6 border-2">
         <div x-data="{
             items: {{ api_data }},
             search: '',
@@ -27,9 +27,10 @@
             }">
 
             <input id="UserBookSearch" type="text" placeholder="Search your books by titles!" x-model="search"
-                class="px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800">
+                class="px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-sky-700">
             <div class="flex flex-col space-y-1">
-                <select class="select select-bordered border-sky-700 w-1/4 select-sm max-w-xs" x-model="type">
+                <select class="select select-bordered w-1/4 select-sm max-w-xs border-2 border-sky-700 mb-1"
+                    x-model="type">
                     <option value="asc.TitleName">Title (Asc)</option>
                     <option value="desc.TitleName">Title (Desc)</option>
                     <option value="asc.CallNumber">CallNumber (Asc)</option>
@@ -41,7 +42,8 @@
 
             <div x-sort.items="type">
                 <template x-for="(item, index) in filteredItems()">
-                    <div x-data="{ open: false }" class="mt-1 card w-full card-bordered border-sky-700 card-compact">
+                    <div x-data="{ open: false }"
+                        class="mt-1 card w-full card-bordered border-sky-700 card-compact border-2 my-2">
                         <div class="card-body">
                             <div class="flex items-center">
                                 <p class="flex-grow px-2">
