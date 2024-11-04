@@ -115,7 +115,7 @@
                     <p class="py-4">Are you sure you want to delete the account?
                         This action cannot be reversed!</p>
                     <div class="modal-action">
-                        <form action="/delete_user" method="POST">
+                        <form action="/delete_user/{{username}}" method="POST">
                             <button type="submit" class="bg-red-700 px-2 py-1 rounded-lg 
                             hover:text-white hover:bg-red-400 text-white">
                                 Delete Account
