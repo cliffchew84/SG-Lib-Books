@@ -18,31 +18,31 @@
             <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
                 hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset=0"
                 class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
-                First
-            </button>
+                << </button>
 
-            <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
-                hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.previous }}"
-                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
-                Previous
-            </button>
+                    <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
+                        hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.previous }}"
+                        class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
+                        < </button>
 
-            <button class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm" distabled>
-                {{ pag_links.current + 1 }} - {{ total_records if pag_links.next == None else
-                pag_links.next }} of {{ total_records }}** records
-            </button>
+                            <button
+                                class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm"
+                                distabled>
+                                {{ pag_links.current + 1 }} - {{ total_records if pag_links.next == None else
+                                pag_links.next }} of {{ total_records }}** records
+                            </button>
 
-            <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.next == None else '' }} btn-sm"
-                hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.next }}">
-                Next
-            </button>
+                            <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+                                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.next == None else '' }} btn-sm"
+                                hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.next }}">
+                                >
+                            </button>
 
-            <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.last == None else '' }} btn-sm"
-                hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.last }}">
-                End
-            </button>
+                            <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
+                                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.last == None else '' }} btn-sm"
+                                hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.last }}">
+                                >>
+                            </button>
         </div>
 
         {% endif %}
