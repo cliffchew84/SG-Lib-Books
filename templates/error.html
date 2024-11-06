@@ -1,21 +1,35 @@
-{% include 'header.html' %}
-{% include 'navbar.html' %}
+{% include 'header.html' %} {% include 'navbar.html' %}
 
-<div class="h-[120vh] md:h-[90vh] flex flex-col mx-auto pt-10 mt-14 text-blue-800 items-center justify-start">
-    <div class="text-3xl font-semibold pt-10 pb-4 px-10">404 - Oops, we hit an error!</div>
-    <div class="flex flex-row mb-2 w-3/4 text-xl rounded-lg justify-center">
-        <a class="py-2 rounded items-center justify-center" href="https://imgbox.com/wx4HlVJC" target="_blank">
-            <img src="https://images2.imgbox.com/22/14/wx4HlVJC_o.jpg" alt="image host" width='250' height='450' />
-        </a>
-        <p class="pb-2 pl-4 w-3/4">Thanks for using this web app. Unfortunately, you
-            seeing this means a few things might have caused the web app to
-            face some issues. Head back to the previous page, or directly back to the
-            <button>
-                <a class="hover:text-white hover:bg-sky-300 underline" href='/'>homepage</a>
-            </button>.
-        </p>
-    </div>
+<div
+  class="mx-auto mt-14 flex h-[120vh] flex-col items-center justify-start pt-10 text-blue-800 md:h-[90vh]"
+>
+  <div class="px-10 pb-4 pt-10 text-3xl font-semibold">
+    404 - Oops, we hit an error!
+  </div>
+  <div class="mb-2 flex w-3/4 flex-row justify-center rounded-lg text-xl">
+    <a
+      class="items-center justify-center rounded py-2"
+      href="https://imgbox.com/wx4HlVJC"
+      target="_blank"
+    >
+      <img
+        src="https://images2.imgbox.com/22/14/wx4HlVJC_o.jpg"
+        alt="image host"
+        width="250"
+        height="450"
+      />
+    </a>
+    <p class="w-3/4 pb-2 pl-4">
+      Thanks for using this web app. Unfortunately, you seeing this means a few
+      things might have caused the web app to face some issues. Head back to the
+      previous page, or directly back to the
+      <button>
+        <a class="underline hover:bg-sky-300 hover:text-white" href="/"
+          >homepage</a
+        ></button
+      >.
+    </p>
+  </div>
 </div>
-
 
 {% include 'footer.html' %}

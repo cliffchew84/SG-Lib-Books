@@ -1,38 +1,56 @@
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500 
-       p-2 text-sm lg:text-lg md:p-4" hx-post="/update_user_bks" hx-indicator="#head-spinner" hx-target=".main_content"
-        hx-swap='outerHTML'>
-        <i class="fas fa-sync"></i>
-        <p class="hidden lg:block"> Book Status</p>
-    </a>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-post="/update_user_bks"
+    hx-indicator="#head-spinner"
+    hx-target=".main_content"
+    hx-swap="outerHTML"
+  >
+    <i class="fas fa-sync"></i>
+    <p class="hidden lg:block">Book Status</p>
+  </a>
 </li>
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500 
-       p-2 text-sm lg:text-lg md:p-4" hx-get="/user_bks" hx-indicator="#head-spinner" hx-target=".main_content"
-        hx-swap="outerHTML">
-        <i class="fas fa-book"></i>
-        <p class="hidden lg:block">Books</p>
-    </a>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-get="/user_bks"
+    hx-indicator="#head-spinner"
+    hx-target=".main_content"
+    hx-swap="outerHTML"
+  >
+    <i class="fas fa-book"></i>
+    <p class="hidden lg:block">Books</p>
+  </a>
 </li>
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500 
-       p-2 text-sm lg:text-lg md:p-4" hx-get="/search" hx-indicator="#head-spinner" hx-target=".main_content"
-        hx-swap='outerHTML'>
-        <i class="fas fa-search"></i>
-        <p class="hidden lg:block">NLB</p>
-    </a>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-get="/search"
+    hx-indicator="#head-spinner"
+    hx-target=".main_content"
+    hx-swap="outerHTML"
+  >
+    <i class="fas fa-search"></i>
+    <p class="hidden lg:block">NLB</p>
+  </a>
 </li>
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500 
-       p-2 text-sm lg:text-lg md:p-4" hx-get="/profile" hx-target=".main_content" hx-indicator="#head-spinner">
-        <i class="fas fa-user"></i>
-        <p class="hidden lg:block">Profile</p>
-    </a>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-get="/profile"
+    hx-target=".main_content"
+    hx-indicator="#head-spinner"
+  >
+    <i class="fas fa-user"></i>
+    <p class="hidden lg:block">Profile</p>
+  </a>
 </li>
 <li>
-    <a class="text-white hover:text-white hover:bg-sky-500 
-       p-2 text-sm lg:text-lg md:p-4" href='/logout'>
-        <i class="fas fa-sign-out-alt"></i>
-        <p class="hidden lg:block">Logout</p>
-    </a>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    href="/logout"
+  >
+    <i class="fas fa-sign-out-alt"></i>
+    <p class="hidden lg:block">Logout</p>
+  </a>
 </li>
