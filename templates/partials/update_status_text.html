@@ -1,10 +1,9 @@
 <div class="book_text">
-    <div class="card w-full bg-gray-300 card-bordered card-compact">
-        <div class="card-body">
-            {% if TitleName %}
-            {% set title = TitleName.split(';') %}
-            <p>{{ book_count }} of {{ total_books }} Books - {{ title[0] }}</p>
-            {% endif %}
-        </div>
+  <div class="card card-bordered card-compact w-full bg-gray-300">
+    <div class="card-body">
+      {% if TitleName %} {% set title = TitleName.split(';') %}
+      <p>{{ book_count }} of {{ total_books }} Books - {{ title[0] }}</p>
+      {% endif %}
     </div>
+  </div>
 </div>

@@ -1,39 +1,34 @@
 <div class="w-full overflow-x-auto">
-    {% if api_data|length == 0 %}
-    {% include 'starter.html' %}
-    {% else %}
+  {% if api_data|length == 0 %} {% include 'starter.html' %} {% else %}
 
-    <!-- Add empty status_bar div -->
-    <!-- When trigger update book, this div gets replaced -->
-    <!-- When done, this status_bar becomes empty again -->
+  <!-- Add empty status_bar div -->
+  <!-- When trigger update book, this div gets replaced -->
+  <!-- When done, this status_bar becomes empty again -->
 
-    <!-- Current this is working, not the bar above -->
-    {% if status %}
-    {% include 'update_status.html' %}
-    {% endif %}
+  <!-- Current this is working, not the bar above -->
+  {% if status %} {% include 'update_status.html' %} {% endif %}
 
-    <input id="myInput" type="text" placeholder="Search your books by titles!"
-        class="bg-white text-black px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-blue-800">
+  <input
+    id="myInput"
+    type="text"
+    placeholder="Search your books by titles!"
+    class="form-control my-2 w-full rounded-lg border-2 border-blue-800 bg-white px-2 py-2 text-sm text-black md:text-base"
+  />
 
-    <h3 class="bg-sky-700 text-white font-semibold py-4 px-6 text-lg rounded-lg">
-        <i class="fas fa-building"></i>
+  <h3 class="rounded-lg bg-sky-700 px-6 py-4 text-lg font-semibold text-white">
+    <i class="fas fa-building"></i>
 
-        {% if library == 'all' %}
+    {% if library == 'all' %} {{library|title}} - {{all_avail_books|length}} /
+    {{all_unique_books|length}} {% else %} {{library|title}} - {{ lib_avail }} /
+    {{ lib_all }} {% endif %}
+  </h3>
+  <div class="py-2">
+    <input
+      class="toggle toggle-xs mx-1 border-sky-700 bg-sky-700 [--tglbg:white] hover:bg-sky-400"
+      type="checkbox"
+      id="availableCheckbox"
+    />Available Books
+  </div>
 
-        {{library|title}} - {{all_avail_books|length}} / {{all_unique_books|length}}
-
-        {% else %}
-
-        {{library|title}} - {{ lib_avail }} / {{ lib_all }}
-
-        {% endif %}
-    </h3>
-    <div class='py-2'>
-        <input class="mx-1 toggle toggle-xs [--tglbg:white] border-sky-700
-            bg-sky-700 hover:bg-sky-400" type="checkbox" id="availableCheckbox">Available Books
-    </div>
-
-    {% include "partials/lib_bks_table.html" %}
-
-    {% endif %}
+  {% include "partials/lib_bks_table.html" %} {% endif %}
 </div>

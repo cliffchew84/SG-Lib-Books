@@ -1,111 +1,141 @@
 <div class="search_table">
-    {% if pag_links %}
+  {% if pag_links %} {% if e_resources %} {% set nav_search =
+  '/navigate_search/?e_resources=True&' %} {% else %} {% set nav_search =
+  '/navigate_search/?' %} {% endif %}
 
-    {% if e_resources %}
-    {% set nav_search = '/navigate_search/?e_resources=True&' %}
-    {% else %}
-    {% set nav_search = '/navigate_search/?' %}
-    {% endif %}
+  <form
+    id="myForm"
+    hx-post="/ingest_books_navbar"
+    hx-indicator="#head-spinner"
+    hx-target="#header"
+    hx-swap="outerHTML"
+  >
+    <div class="justify-left join flex items-center">
+      <button
+        type="submit"
+        id="submitButton"
+        class="my-1 rounded-lg bg-sky-500 px-2 py-1 text-white hover:bg-sky-200 hover:text-white disabled:bg-gray-400 disabled:hover:bg-gray-400"
+        disabled
+      >
+        Add
+      </button>
+      <button
+        hx-indicator="#head-spinner"
+        hx-target=".search_table"
+        hx-swap="outerHTML"
+        hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset=0"
+        class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}"
+      >
+        <<
+      </button>
 
-    <form id="myForm" hx-post="/ingest_books_navbar" hx-indicator="#head-spinner" hx-target="#header"
-        hx-swap="outerHTML">
+      <button
+        hx-indicator="#head-spinner"
+        hx-target=".search_table"
+        hx-swap="outerHTML"
+        hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.previous }}"
+        class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}"
+      >
+        <
+      </button>
 
-        <div class="join flex items-center justify-left">
-            <button type="submit" id="submitButton"
-                class="bg-sky-500 px-2 my-1 py-1 rounded-lg hover:text-white hover:bg-sky-200 text-white disabled:bg-gray-400 disabled:hover:bg-gray-400"
-                disabled>Add
-            </button>
-            <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
-                hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset=0"
-                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
-                << </button>
+      <button
+        class="btn join-item btn-sm bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100"
+        distabled
+      >
+        {{ pag_links.current + 1 }} - {{ total_records if pag_links.next == None
+        else pag_links.next }} of {{ total_records }}** records
+      </button>
 
-                    <button hx-indicator='#head-spinner' hx-target=".search_table" hx-swap="outerHTML"
-                        hx-get="{{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.previous }}"
-                        class="join-item btn bg-sky-700 hover:bg-sky-500 text-white btn-sm {{ 'btn-disabled' if pag_links.previous == None else '' }}">
-                        < </button>
+      <button
+        hx-indicator="#head-spinner"
+        hx-swap="outerHTML"
+        hx-target=".search_table"
+        class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.next == None else '' }} btn-sm"
+        hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.next }}"
+      >
+        >
+      </button>
 
-                            <button
-                                class="join-item bg-sky-700 text-white hover:bg-sky-700 disabled:opacity-100 btn btn-sm"
-                                distabled>
-                                {{ pag_links.current + 1 }} - {{ total_records if pag_links.next == None else
-                                pag_links.next }} of {{ total_records }}** records
-                            </button>
+      <button
+        hx-indicator="#head-spinner"
+        hx-swap="outerHTML"
+        hx-target=".search_table"
+        class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.last == None else '' }} btn-sm"
+        hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.last }}"
+      >
+        >>
+      </button>
+    </div>
 
-                            <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-                                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.next == None else '' }} btn-sm"
-                                hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.next }}">
-                                >
-                            </button>
+    {% endif %} {% for data in api_data %} {% set TitleName, BID =
+    data['TitleName'].split(' | ') %} {% set year = data['PublishYear'] |
+    replace("]", "") | replace("[", "") | replace(".", "") %} {% set disable,
+    BID = data['BID'].split(' | ') %} {% if disable %} {% set card_class = "card
+    w-full bg-gray-300 card-bordered card-compact" %} {% else %} {% set
+    card_class = "card w-full card-bordered card-compact" %} {% endif %}
 
-                            <button hx-indicator='#head-spinner' hx-swap="outerHTML" hx-target=".search_table"
-                                class="join-item btn bg-sky-700 hover:bg-sky-500 text-white {{ 'btn-disabled' if pag_links.last == None else '' }} btn-sm"
-                                hx-get=" {{ nav_search }}book_search={{ keyword }}&author={{ author }}&offset={{ pag_links.last }}">
-                                >>
-                            </button>
+    <div class="{{card_class}}">
+      <div class="card-body">
+        <div class="justify-left flex items-center">
+          {% if data['type'] == "Book" %}
+
+          <input
+            type="checkbox"
+            name="bids"
+            value="{{BID}}"
+            class="checkbox-info checkbox checkbox-xs border-sky-500 px-1 hover:bg-sky-500"
+            onchange="checkSelection()"
+            {{
+            disable
+            }}
+          />
+          <i class="fas fa-book px-1 text-sky-800"></i>
+          <a
+            href="https://catalogue.nlb.gov.sg/search/card?recordId={{ BID }}"
+            class="font-semibold text-blue-800 underline hover:text-blue-600"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ TitleName }}</a
+          >
+
+          {% else %}
+
+          <i class="fas fa-tablet-alt py-1 text-sky-800"></i>
+          <a
+            href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
+            class="px-1 font-semibold text-blue-800 underline hover:text-blue-600"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ TitleName }}
+          </a>
+
+          {% endif %}
         </div>
-
-        {% endif %}
-
-        {% for data in api_data %}
-
-        {% set TitleName, BID = data['TitleName'].split(' | ') %}
-        {% set year = data['PublishYear'] | replace("]", "") | replace("[", "") | replace(".", "") %}
-        {% set disable, BID = data['BID'].split(' | ') %}
-
-        {% if disable %}
-        {% set card_class = "card w-full bg-gray-300 card-bordered card-compact" %}
-        {% else %}
-        {% set card_class = "card w-full card-bordered card-compact" %}
-        {% endif %}
-
-        <div class="{{card_class}}">
-            <div class="card-body">
-                <div class="flex items-center justify-left">
-
-                    {% if data['type'] == "Book" %}
-
-                    <input type="checkbox" name='bids' value='{{BID}}'
-                        class="px-1 checkbox checkbox-xs checkbox-info hover:bg-sky-500 border-sky-500"
-                        onchange="checkSelection()" {{ disable }} />
-                    <i class="px-1 fas fa-book text-sky-800"></i>
-                    <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{ BID }}"
-                        class="text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                        rel="noopener noreferrer">{{ TitleName }}</a>
-
-                    {% else %}
-
-                    <i class="py-1 fas fa-tablet-alt text-sky-800"></i>
-                    <a href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
-                        class="text-blue-800 hover:text-blue-600 font-semibold underline px-1" target="_blank"
-                        rel="noopener noreferrer">{{ TitleName }}
-                    </a>
-
-                    {% endif %}
-                </div>
-                <div>
-                    <b>Author:</b> {{ data['Author'] }} |
-                    <b>PublishYear:</b> {{ year }}
-                </div>
-            </div>
+        <div>
+          <b>Author:</b> {{ data['Author'] }} | <b>PublishYear:</b> {{ year }}
         </div>
-        {% endfor %}
-    </form>
+      </div>
+    </div>
+    {% endfor %}
+  </form>
 </div>
 
 <script>
-    document.getElementById('myForm').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevents the form from submitting normally
+  document
+    .getElementById("myForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevents the form from submitting normally
 
-        // Get all checkboxes inside the form
-        var checkboxes = this.querySelectorAll('input[type="checkbox"]');
+      // Get all checkboxes inside the form
+      var checkboxes = this.querySelectorAll('input[type="checkbox"]');
 
-        // Loop through checkboxes
-        checkboxes.forEach(function (checkbox) {
-            if (checkbox.checked) {
-                checkbox.disabled = true; // Disable the checked checkboxes
-            }
-        });
-        document.getElementById('submitButton').disabled = true;
+      // Loop through checkboxes
+      checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+          checkbox.disabled = true; // Disable the checked checkboxes
+        }
+      });
+      document.getElementById("submitButton").disabled = true;
     });
 </script>
