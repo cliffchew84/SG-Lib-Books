@@ -38,3 +38,4 @@ python-dotenv
 python-jose
 ruff
 pre-commit
+nlb-catalogue-client==0.1.3
