@@ -12,7 +12,6 @@ from nlb_catalogue_client.models.get_titles_response_v2 import GetTitlesResponse
 
 from src.api.deps import SDBDep, MDBDep, UsernameDep, NLBClientDep
 from src import m_db
-from src import process as p
 from src.crud.book_info import book_info_crud
 from src.crud.user_search import user_search_crud
 from src.modals.user_search import UserSearchCreate
