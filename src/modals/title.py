@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from pydantic.fields import computed_field
 
 from nlb_catalogue_client.models import Title as NLBTitle
 
