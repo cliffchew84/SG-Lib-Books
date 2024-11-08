@@ -17,7 +17,7 @@ from src.crud.book_info import book_info_crud
 from src.crud.user_search import user_search_crud
 from src.modals.user_search import UserSearchCreate
 from src.modals.title import Title
-from src.utils import templates
+from src.utils import templates, pg_links
 
 
 router = APIRouter()
@@ -109,7 +109,7 @@ async def htmx_search(
     total_records = response.parsed.total_records
     more_records = response.parsed.has_more_records
     # BUG: Total_records does not tally as filterning is not done during API call
-    pag_links = p.pg_links(offset, total_records)  # "all_unique_books": user_bids,.
+    pag_links = pg_links(offset, total_records)  # "all_unique_books": user_bids,.
     all_titles = (
         [Title.from_nlb(t) for t in response.parsed.titles]
         if response.parsed.titles
