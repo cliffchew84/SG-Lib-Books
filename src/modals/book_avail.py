@@ -66,6 +66,7 @@ class BookAvailCreate(CreateBase, BookAvailBase):
 
     @staticmethod
     def from_nlb(book_item: Item) -> "BookAvailCreate":
+        """Process book avail output from NLB API - GetAvailabilityInfo"""
         book_avail = BookAvailCreate(
             ItemNo=book_item.item_id if book_item.item_id else "",
             CallNumber=book_item.call_number if book_item.call_number else "Unknown",
