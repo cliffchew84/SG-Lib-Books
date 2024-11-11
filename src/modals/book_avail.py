@@ -1,12 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import ClassVar, Optional
+from zoneinfo import ZoneInfo
 
-import pendulum
 from pydantic import BaseModel
 from pydantic.fields import computed_field
 from nlb_catalogue_client.models.item import Item
 
 from src.modals.base import ResponseBase, CreateBase, UpdateBase
+
+SingaporeTZ = ZoneInfo("Asia/Singapore")
 
 
 class BookAvailBase(BaseModel):
@@ -38,9 +40,9 @@ class BookAvailBase(BaseModel):
     def UpdateTime(self) -> str | None:
         """Compute insert time in desired format upon serialization"""
         return (
-            datetime.fromtimestamp(
-                self.InsertTime, pendulum.timezone("Asia/Singapore")
-            ).strftime("%d/%m %H:%M")
+            datetime.fromtimestamp(self.InsertTime, tz=timezone.utc)
+            .astimezone(SingaporeTZ)
+            .strftime("%d/%m %H:%M")
             if self.InsertTime
             else None
         )
@@ -73,7 +75,7 @@ class BookAvailCreate(CreateBase, BookAvailBase):
             BranchName=book_item.location.name,
             StatusDesc=book_item.transaction_status.name,
             DueDate=None,
-            InsertTime=pendulum.now(tz="UTC").int_timestamp,
+            InsertTime=int(datetime.now(tz=timezone.utc).timestamp()),
             BID=book_item.brn if book_item.brn else 0,
         )
 
