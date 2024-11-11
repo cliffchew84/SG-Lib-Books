@@ -4,6 +4,7 @@ from typing import ClassVar, Optional
 import pendulum
 from pydantic import BaseModel
 from pydantic.fields import computed_field
+from nlb_catalogue_client.models.item import Item
 
 from src.modals.base import ResponseBase, CreateBase, UpdateBase
 
@@ -38,10 +39,20 @@ class BookAvailBase(BaseModel):
         """Compute insert time in desired format upon serialization"""
         return (
             datetime.fromtimestamp(
-                self.InsertTime / 1e3, pendulum.timezone("Asia/Singapore")
+                self.InsertTime, pendulum.timezone("Asia/Singapore")
             ).strftime("%d/%m %H:%M")
             if self.InsertTime
             else None
+        )
+
+    @computed_field
+    @property
+    def StatusDescWithDueDate(self) -> str:
+        """Add Due Date to StatusDesc if available"""
+        return (self.StatusDesc if self.StatusDesc else "Unknown") + (
+            f" [{datetime.strptime(self.DueDate, '%Y-%m-%d').strftime('%d/%m')}]"
+            if self.DueDate
+            else ""
         )
 
 
@@ -52,6 +63,28 @@ class BookAvail(ResponseBase, BookAvailBase):
 
 class BookAvailCreate(CreateBase, BookAvailBase):
     """BookAvail model for creating new book availability"""
+
+    @staticmethod
+    def from_nlb(book_item: Item) -> "BookAvailCreate":
+        """Process book avail output from NLB API - GetAvailabilityInfo"""
+        book_avail = BookAvailCreate(
+            ItemNo=book_item.item_id if book_item.item_id else "",
+            CallNumber=book_item.call_number if book_item.call_number else "Unknown",
+            BranchName=book_item.location.name,
+            StatusDesc=book_item.transaction_status.name,
+            DueDate=None,
+            InsertTime=pendulum.now(tz="UTC").int_timestamp,
+            BID=book_item.brn if book_item.brn else 0,
+        )
+
+        if book_avail.StatusDesc == "On Loan":
+            book_avail.DueDate = (
+                book_item.transaction_status.date.strftime("%Y-%m-%d")
+                if book_item.transaction_status.date
+                else None
+            )
+
+        return book_avail
 
 
 class BookAvailUpdateBase(BaseModel):

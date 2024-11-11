@@ -1,6 +1,9 @@
 from typing import ClassVar, Optional
 
 from pydantic import BaseModel
+from nlb_catalogue_client.models.get_title_details_response_v2 import (
+    GetTitleDetailsResponseV2,
+)
 
 from src.modals.base import ResponseBase, CreateBase, UpdateBase
 
@@ -13,22 +16,22 @@ class BookInfoBase(BaseModel):
     BID: int
 
     """Book author"""
-    TitleName: str
+    TitleName: str | None
 
     """Book author"""
-    Author: str
+    Author: str | None
 
     """List of publish years"""
-    PublishYear: str  # List[int]
+    PublishYear: str | None  # List[int]
 
     """List of publishers"""
-    Publisher: str
+    Publisher: str | None
 
     """List of subjects seperated by | """
-    Subjects: str  # List[str]
+    Subjects: str | None  # List[str]
 
     """List of isbns"""
-    isbns: str  # List[int]
+    isbns: str | None  # List[int]
 
 
 class BookInfo(ResponseBase, BookInfoBase):
@@ -38,6 +41,24 @@ class BookInfo(ResponseBase, BookInfoBase):
 
 class BookInfoCreate(CreateBase, BookInfoBase):
     """Framework model for creating new book_info"""
+
+    @staticmethod
+    def from_nlb(item: GetTitleDetailsResponseV2) -> "BookInfoCreate":
+        """Process book info output from NLB API - GetTitleDetails"""
+        subjects = " | ".join(
+            {subject.replace(".", "") for subject in item.subjects or []}
+        )
+        book_info = BookInfoCreate(
+            BID=item.brn if item.brn else 0,
+            TitleName=item.title if item.title else None,
+            Author=item.author if item.author else None,
+            PublishYear=item.publish_date if item.publish_date else None,
+            Subjects=subjects if subjects else None,
+            Publisher=str(item.publisher) if item.publisher else None,
+            isbns=str(item.isbns) if item.isbns else None,
+        )
+
+        return book_info
 
 
 class BookInfoUpdateBase(BaseModel):

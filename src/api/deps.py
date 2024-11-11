@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import Cookie, Depends
 from pymongo import MongoClient
 from supabase import create_client, Client
+from nlb_catalogue_client import AuthenticatedClient
 
 from src import m_db
 from src.config import settings
@@ -43,3 +44,17 @@ def username_email_resol(user_info: Annotated[str | None, Cookie()] = None):
 
 
 UsernameDep = Annotated[str | None, Depends(username_email_resol)]
+
+
+def get_nlb_api_client():
+    """Return authenticated client to access NLB API"""
+    yield AuthenticatedClient(
+        base_url="https://openweb.nlb.gov.sg/api/v2/Catalogue/",
+        auth_header_name="X-API-KEY",
+        token=settings.nlb_rest_api_key,
+        prefix="",
+        headers={"X-APP-Code": settings.nlb_rest_app_id},
+    )
+
+
+NLBClientDep = Annotated[AuthenticatedClient, Depends(get_nlb_api_client)]

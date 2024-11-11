@@ -5,16 +5,18 @@ from typing import Optional
 
 from fastapi import APIRouter, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from nlb_catalogue_client.types import UNSET
+from nlb_catalogue_client.api.catalogue import get_get_titles
+from nlb_catalogue_client.models.get_titles_response_v2 import GetTitlesResponseV2
 
 
-from src.api.deps import SDBDep, MDBDep, UsernameDep
+from src.api.deps import SDBDep, MDBDep, UsernameDep, NLBClientDep
 from src import m_db
-from src import process as p
-from src import nlb_api as n_api
 from src.crud.book_info import book_info_crud
 from src.crud.user_search import user_search_crud
 from src.modals.user_search import UserSearchCreate
-from src.utils import templates
+from src.modals.title import Title
+from src.utils import templates, pg_links
 
 
 router = APIRouter()
@@ -52,6 +54,7 @@ async def search_books(
 async def htmx_search(
     request: Request,
     db: SDBDep,
+    nlb: NLBClientDep,
     username: UsernameDep,
     e_resources: Optional[str] = None,
     book_search: Optional[str] = None,
@@ -68,19 +71,22 @@ async def htmx_search(
         # return as no book_search and author is provided
         return
 
-    bk_output = []
     search_input = dict(
         Title=re.sub(r"[^a-zA-Z0-9\s]", " ", book_search) if book_search else None,
         Author=re.sub(r"[^a-zA-Z0-9\s]", " ", author) if author else None,
     )
 
     # Get titles from NLB API
-    titles = n_api.get_bk_data(
-        ext_url="GetTitles", input_dict=search_input.copy(), offset=offset
+    response = await get_get_titles.asyncio_detailed(
+        client=nlb,
+        title=search_input["Title"] if search_input["Title"] else UNSET,
+        author=search_input["Author"] if search_input["Author"] else UNSET,
+        offset=offset if offset else UNSET,
     )
+
     if (
-        titles.get("statusCode") in [400, 404, 500, 401, 405, 429]
-        or titles.get("totalRecords") == 0
+        not isinstance(response.parsed, GetTitlesResponseV2)  # ErrorResponse
+        or response.parsed.total_records == 0
     ):
         # Return empty table
         # TODO: Display from NLP api to frontend if any
@@ -99,30 +105,28 @@ async def htmx_search(
         ),
     )
 
-    total_records = titles.get("totalRecords", None)
-    more_records = titles.get("hasMoreRecords", None)
+    total_records = response.parsed.total_records
+    more_records = response.parsed.has_more_records
     # BUG: Total_records does not tally as filterning is not done during API call
-    pag_links = p.pg_links(offset, total_records)  # "all_unique_books": user_bids,.
-    all_titles = p.process_title(titles)
+    pag_links = pg_links(offset, total_records)  # "all_unique_books": user_bids,.
+    all_titles = (
+        [Title.from_nlb(t) for t in response.parsed.titles]
+        if response.parsed.titles
+        else []
+    )
 
     # Filter whether E-resources are included
     final_titles = list(
         filter(
-            lambda t: t["type"] in ["Book"] + (["Ebook"] if e_resources else []),
+            lambda t: t.type in ["Book"] + (["Ebook"] if e_resources else []),
             all_titles,
         )
     )
     # Search user book BIDs and disable add book if user saved the book
     book_infos = await book_info_crud.get_multi_by_owner(db, username=username)
-    bid_checks = set(book_info.BID for book_info in book_infos)
+    bid_checks = set(str(book_info.BID) for book_info in book_infos)
     for bk in final_titles:
-        bid = str(bk.get("BID") if bk.get("DigitalID") is None else bk.get("DigitalID"))
-        title = bk.get("TitleName", " / ").split(" / ", 1)[0].strip()
-        # Enable disable button if book is already saved
-        disable = "disabled" if bid in bid_checks else ""
-        bk["TitleName"] = title + " | " + bid
-        bk["BID"] = disable + " | " + bid
-        bk_output.append(bk)
+        bk.disabled = bk.BID in bid_checks
 
     return templates.TemplateResponse(
         "partials/search_table.html",
@@ -131,7 +135,7 @@ async def htmx_search(
             "keyword": book_search,
             "author": author,
             "username": username,
-            "api_data": bk_output,
+            "api_data": [title.model_dump() for title in final_titles],
             "total_records": total_records,
             "more_records": more_records,
             "pag_links": pag_links,

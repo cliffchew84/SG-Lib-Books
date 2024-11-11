@@ -1,12 +1,18 @@
-import time
-
 from fastapi import APIRouter, BackgroundTasks, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
+from nlb_catalogue_client.api.catalogue import (
+    get_get_availability_info,
+    get_get_title_details,
+)
+from nlb_catalogue_client.models.get_availability_info_response_v2 import (
+    GetAvailabilityInfoResponseV2,
+)
+from nlb_catalogue_client.models.get_title_details_response_v2 import (
+    GetTitleDetailsResponseV2,
+)
 
 from src import m_db
-from src import nlb_api as n_api
-from src import process as p
-from src.api.deps import SDBDep, MDBDep, UsernameDep
+from src.api.deps import SDBDep, MDBDep, UsernameDep, NLBClientDep
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
 from src.modals.book_avail import BookAvailCreate
@@ -17,7 +23,7 @@ from src.utils import templates
 router = APIRouter()
 
 
-async def update_bk_avail_supa(db, bid_no: int) -> bool:
+async def update_bk_avail_supa(db, nlb, bid_no: int) -> bool:
     """
     - Takes in single BID to get avail info
     - Processes data for Supabase
@@ -26,8 +32,21 @@ async def update_bk_avail_supa(db, bid_no: int) -> bool:
     """
     try:
         # Make API call on book availability
-        bk = n_api.get_bk_data("GetAvailabilityInfo", input_dict={"BRN": bid_no})
-        all_avail_bks = [p.process_bk_avail(i) for i in bk.get("items", [])]
+        response = await get_get_availability_info.asyncio_detailed(
+            client=nlb, brn=bid_no
+        )
+        if (
+            not isinstance(
+                response.parsed, GetAvailabilityInfoResponseV2
+            )  # ErrorResponse
+            or response.parsed.total_records == 0
+        ):
+            # Return empty table
+            # TODO: Display from NLP api to frontend if any
+            return False
+        all_avail_bks = [
+            BookAvailCreate.from_nlb(item) for item in response.parsed.items or []
+        ]
 
         if len(all_avail_bks) == 0:
             return False
@@ -35,18 +54,7 @@ async def update_bk_avail_supa(db, bid_no: int) -> bool:
         # Inser and Update if conflict on book availability
         await book_avail_crud.upsert(
             db,
-            obj_ins=[
-                BookAvailCreate(
-                    ItemNo=str(bk.get("ItemNo")),
-                    CallNumber=str(bk.get("CallNumber")),
-                    BranchName=str(bk.get("BranchName")),
-                    StatusDesc=bk.get("StatusDesc"),
-                    DueDate=bk.get("DueDate"),
-                    InsertTime=bk.get("InsertTime"),
-                    BID=bk.get("BID", 0),
-                )
-                for bk in all_avail_bks
-            ],
+            obj_ins=all_avail_bks,
         )
 
     except Exception as error:
@@ -56,12 +64,12 @@ async def update_bk_avail_supa(db, bid_no: int) -> bool:
     return True
 
 
-async def update_all_user_bks(db, mdb, username):
+async def update_all_user_bks(db, mdb, nlb, username):
     """Update all books linked to user."""
     book_infos = await book_info_crud.get_multi_by_owner(db, username=username)
 
     for i, bk in enumerate(book_infos):
-        await update_bk_avail_supa(db, bk.BID)
+        await update_bk_avail_supa(db, nlb, bk.BID)
         m_db.update_user_info(
             mdb, username, {"books_updated": i + 1, "title": bk.TitleName}
         )
@@ -150,6 +158,7 @@ async def complete_update(request: Request):
 async def ingest_books_navbar(
     request: Request,
     db: SDBDep,
+    nlb: NLBClientDep,
     username: UsernameDep,
     bids: list = Form(...),
 ):
@@ -158,26 +167,19 @@ async def ingest_books_navbar(
 
     for bid in bids:
         # Makes API to bk info and bk avail and ingest the data into DB
-        bk_title = n_api.get_process_bk_info(bid_no=bid)
-        time.sleep(1)
+        response = await get_get_title_details.asyncio_detailed(client=nlb, brn=bid)
+        if not isinstance(response.parsed, GetTitleDetailsResponseV2):
+            # TODO: Log error response
+            continue
 
         # Do all the adding at the end, after everything is confirmed
-        # This also doesn't require any time.sleep() as this is with my own DB
         await book_info_crud.create_book_by_user(
             db,
-            obj_in=BookInfoCreate(
-                BID=bk_title["BID"],
-                TitleName=bk_title["TitleName"],
-                Author=bk_title["Author"],
-                PublishYear=bk_title["PublishYear"],
-                Subjects=bk_title["Subjects"],
-                Publisher=str(bk_title["Publisher"]),
-                isbns=str(bk_title["isbns"]),
-            ),
+            obj_in=BookInfoCreate.from_nlb(response.parsed),
             username=username,
         )
 
-        await update_bk_avail_supa(db, bid)
+        await update_bk_avail_supa(db, nlb, bid)
 
         print("print started book_available update")
 
@@ -204,7 +206,11 @@ async def ingest_books_navbar(
 
 @router.put("", response_class=HTMLResponse)
 async def update_books(
-    background_tasks: BackgroundTasks, db: SDBDep, mdb: MDBDep, username: UsernameDep
+    background_tasks: BackgroundTasks,
+    db: SDBDep,
+    mdb: MDBDep,
+    nlb: NLBClientDep,
+    username: UsernameDep,
 ):
     """Updates availability of all user's saved books"""
     if not username:
@@ -214,15 +220,15 @@ async def update_books(
     m_db.update_user_info(mdb.nlb, username, {"books_updated": 0})
 
     # Set background task to query and update all user's books
-    background_tasks.add_task(update_all_user_bks, db, mdb.nlb, username)
+    background_tasks.add_task(update_all_user_bks, db, mdb.nlb, nlb, username)
 
     # Redirect to library all page
     return RedirectResponse("/lib/all", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
 @router.put("/{BID}", response_class=HTMLResponse)
-async def update_book(BID: int, db: SDBDep):
-    success = await update_bk_avail_supa(db, BID)
+async def update_book(BID: int, db: SDBDep, nlb: NLBClientDep):
+    success = await update_bk_avail_supa(db, nlb, BID)
     if success:
         return RedirectResponse("/lib/all", status_code=status.HTTP_303_SEE_OTHER)
 

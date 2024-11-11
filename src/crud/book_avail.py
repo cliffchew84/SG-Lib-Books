@@ -17,7 +17,7 @@ class CRUDBookAvail(CRUDBase[BookAvail, BookAvailCreate, BookAvailUpdate]):
         db: Client,
         *,
         obj_in: BookAvailCreate,
-        excludes: Optional[set[str]] = {"UpdateTime"},
+        excludes: Optional[set[str]] = {"UpdateTime", "StatusDescWithDueDate"},
     ) -> BookAvail:
         return await super().create(db, obj_in=obj_in, excludes=excludes)
 
@@ -44,7 +44,7 @@ class CRUDBookAvail(CRUDBase[BookAvail, BookAvailCreate, BookAvailUpdate]):
         *,
         obj_in: BookAvailUpdate,
         i: str,
-        excludes: Optional[set[str]] = {"UpdateTime"},
+        excludes: Optional[set[str]] = {"UpdateTime", "StatusDescWithDueDate"},
     ) -> BookAvail:
         return await super().update(db, obj_in=obj_in, i=i, excludes=excludes)
 
@@ -53,7 +53,7 @@ class CRUDBookAvail(CRUDBase[BookAvail, BookAvailCreate, BookAvailUpdate]):
         db: Client,
         *,
         obj_ins: list[BookAvailCreate],
-        excludes: Optional[set[str]] = {"UpdateTime"},
+        excludes: Optional[set[str]] = {"UpdateTime", "StatusDescWithDueDate"},
     ) -> list[BookAvail]:
         return await super().upsert(db, obj_ins=obj_ins, excludes=excludes)
 

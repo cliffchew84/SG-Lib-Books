@@ -47,9 +47,10 @@
 
         {% for data in api_data %}
 
-        {% set TitleName, BID = data['TitleName'].split(' | ') %}
+        {% set BID = data['BID'] %}
+        {% set TitleName = data['TitleName'] %}
         {% set year = data['PublishYear'] | replace("]", "") | replace("[", "") | replace(".", "") %}
-        {% set disable, BID = data['BID'].split(' | ') %}
+        {% set disable = data['disabled'] %}
 
         {% if disable %}
         {% set card_class = "card w-full bg-gray-300 card-bordered card-compact" %}
@@ -65,7 +66,7 @@
 
                     <input type="checkbox" name='bids' value='{{BID}}'
                         class="px-1 checkbox checkbox-xs checkbox-info hover:bg-sky-500 border-sky-500"
-                        onchange="checkSelection()" {{ disable }} />
+                        onchange="checkSelection()" {{ 'disabled' if disable else ''}} />
                     <i class="px-1 fas fa-book text-sky-800"></i>
                     <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{ BID }}"
                         class="text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
