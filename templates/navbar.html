@@ -1,77 +1,43 @@
-<header id="header" class="mx-auto pt-2 pb-8 bg-sky-700 fixed top-0 w-full z-50">
-    {% if not username %}
+<header
+  id="header"
+  class="fixed top-0 z-50 mx-auto w-full bg-sky-700 pb-8 pt-2 lg:pb-10"
+>
+  {% if not username %}
 
-    <div class="flex mx-auto sm:px-20 xl:px-40 px-10 flex-1 pt-8">
-        <a class="text-white text-2xl">SGLibReads [Beta]</a>
-    </div>
+  <div class="mx-auto flex flex-1 px-10 pt-8 sm:px-20 xl:px-40">
+    <a class="text-2xl text-white">SGLibReads [Beta]</a>
+  </div>
 
-    {% else %}
+  {% else %}
 
-    <!-- Mobile -->
-    <div class="flex justify-between h-2 mx-auto" hx-trigger='load'>
-        <ul class="menu menu-horizontal mx-1 items-center lg:hidden">
-            <div class="dropdown">
-                <label tabindex="0" class="btn btn-ghost lg:hidden text-white hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h8m-8 6h16" />
-                    </svg>
-                </label>
-                <ul tabindex="0"
-                    class="bg-sky-700 text-white menu menu-sm dropdown-content mt-3 z-50 p-2 rounded-box w-52">
-
-                    {% include 'partials/nb_lib_btn.html' %}
-                    {% include 'partials/nb_bk_search_logout_btns.html' %}
-
-                </ul>
-            </div>
-            {% include 'partials/nb_profile_btn.html' %}
-            <div class="lg:hidden">
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-xs"></span>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
-                <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-lg"></span>
-            </div>
-        </ul>
-    </div>
-
-    <!-- Desktop -->
-    <div class="flex justify-between py-2 h-8 mx-auto" hx-trigger="load">
-        <nav class="w-screen flex items-center justify-between py-4">
-            <ul class="menu menu-horizontal mx-auto z-50 text-lg text-white items-center hidden lg:flex">
-                <div class="hidden lg:flex">
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-lg"></span>
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-xs"></span>
-                </div>
-
-                {% include 'partials/nb_profile_btn.html' %}
-                {% include 'partials/nb_lib_btn.html' %}
-                {% include 'partials/nb_bk_search_logout_btns.html' %}
-
-                <div class="hidden lg:flex">
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-xs"></span>
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-sm"></span>
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-md"></span>
-                    <span id='head-spinner' class="text-white justify-center pt-2 px-2 
-                htmx-indicator loading loading-ball loading-lg"></span>
-                </div>
-            </ul>
-        </nav>
-    </div>
-    {% endif %}
-
+  <div class="mx-auto flex h-8 justify-center lg:h-10" hx-trigger="load">
+    <ul class="menu menu-horizontal mx-1 items-center space-x-6">
+      <div class="hidden lg:block">
+        <span
+          id="head-spinner"
+          class="htmx-indicator loading loading-ball loading-lg hidden justify-center px-2 pt-2 text-white lg:block"
+        ></span>
+      </div>
+      {% include 'partials/navbar_library_button.html' %} {% include
+      'partials/navbar_general_buttons.html' %}
+      <div>
+        <span
+          id="head-spinner"
+          class="htmx-indicator loading loading-ball loading-lg justify-center px-2 pt-2 text-white"
+        ></span>
+      </div>
+    </ul>
+  </div>
+  {% endif %}
 </header>
+
+<script>
+  window.addEventListener("click", function (e) {
+    document.querySelectorAll(".dropdown").forEach(function (dropdown) {
+      if (!dropdown.contains(e.target)) {
+        // Click was outside the dropdown, close it
+        dropdown.open = false;
+      }
+    });
+  });
+</script>

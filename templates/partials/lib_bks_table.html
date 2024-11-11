@@ -1,37 +1,59 @@
 {% for data in api_data %}
-<div class="card w-full card-bordered card-compact">
-    <div class="card-body">
-        <div class="flex items-center">
-            <p class="flex-grow px-2">
-                <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
-                    class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                    rel="noopener noreferrer">{{ data['TitleName'].split(" | ", 1)[0] }}</a>
+<div
+  class="card card-bordered card-compact my-2 w-full border-2 border-sky-700"
+>
+  <div class="card-body">
+    <div class="flex items-center">
+      <p class="flex-grow px-2">
+        <!-- Mobile -->
+        <a
+          href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
+          class="hidden font-semibold text-blue-800 underline hover:text-blue-600 md:block"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ data['TitleName'].split(" | ", 1)[0] }}</a
+        >
 
-                <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
-                    class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                    rel="noopener noreferrer">{{ data['TitleName'].split(" : ", 1)[0] }}</a>
+        <!-- Desktop -->
+        <a
+          href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
+          class="block font-semibold text-blue-800 underline hover:text-blue-600 md:hidden"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ data['TitleName'].split(" : ", 1)[0] }}</a
+        >
 
-                <span class="badge badge-outline font-semibold">{{ data['CallNumber'] }}</span>
+        <span class="badge badge-outline font-semibold"
+          >{{ data['CallNumber'] }}</span
+        >
 
-                {% if data["StatusDesc"] == "Available" %}
-                <span class="badge badge-outline font-semibold text-green-700 bg-green-100">
-                    {{ data['StatusDesc'] }}</span>
+        {% if data["StatusDesc"] == "Available" %}
+        <span
+          class="badge badge-outline bg-green-100 font-semibold text-green-700"
+        >
+          {{ data['StatusDesc'] }}</span
+        >
 
-                {% else %}
-                <span class="badge badge-outline font-semibold text-red-700 bg-red-100">{{ data['StatusDescWithDueDate'] }}</span>
+        {% else %}
+        <span class="badge badge-outline bg-red-100 font-semibold text-red-700"
+          >{{ data['StatusDescWithDueDate'] }}</span
+        >
 
-                {% endif %}
+        {% endif %}
+        {% if library == 'all' %}
 
-                <span class="badge badge-outline font-semibold bg-primary-content">{{ data['BranchName'] }}</span>
+        <span class="badge badge-outline font-semibold bg-primary-content">{{ data['BranchName'] }}</span>
+
+        {% endif %}
                 <b>Author:</b> {{ data['Author'] }}
-            </p>
-            <button hx-put="/books/{{ data['BID'] }}" hx-indicator="#head-spinner" hx-target=".main_content"
+      </p>
+      <button hx-put="/books/{{ data['BID'] }}" hx-indicator="#head-spinner" hx-target=".main_content"
                 class="bg-sky-700 px-3 py-1 rounded-lg hover:text-white hover:bg-sky-500 text-white">
                 <span class="md:block hidden">{{ data['UpdateTime'] }}</span>
                 <i class="md:hidden block fas fa-sync items-center justify-center"></i>
-            </button>
-        </div>
+      </button>
     </div>
+  </div>
 </div>
 
 {% endfor %}

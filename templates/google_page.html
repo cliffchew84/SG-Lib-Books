@@ -1,33 +1,30 @@
 {% include 'header.html' %}
 {% include 'navbar.html' %}
 
-<div class="pt-8 mt-20 pb-3 px-10 sm:px-20 xl:px-40 text-gray-600">
-    <div>
-        <p class="text-xl">A library-centric view of your favourite Singapore library books!</p>
-        <div class='md:flex text-base py-3 space-x-1'>
-            <div>
-                <p>
-                    Using the <a class="font-semibold underline" target="_blank"
-                        href="https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs">official NLB
-                        REST v2 APIs</a> <span class="font-bold italic">(29-11-2023)</span>, this site aims to provide
-                    an easier, single view of all your saved Singapore library books. Best viewed on desktop, but kinda
-                    mobile friendly. Read about this project <a target="_blank"
-                        class="text-gray-600 hover:text-gray-500 font-semibold underline"
-                        href="https://medium.com/@cliffy-gardens/my-singapore-library-app-is-live-b63fc9f5ae9a"><i
-                            class="fab fa-medium fa-lg"></i></a> Connect professionally <a
-                        href="https://www.linkedin.com/in/cliff-chew-kt/" target="_blank"
-                        class="text-gray-600 hover:text-gray-500"><i class="fab fa-linkedin fa-lg"></i>
-                    </a>
-                </p>
-                <p class='pt-2'>
-                    As of 10th Oct 2024, I have included Google OAuth login flow
-                    into my web app, under <b>"3rd Party Signup / Login"</b>.
-                    The old login flow is currently under maintanence. Existing
-                    users can port over to this new Google login flow by sending me
-                    your gmail through Linkedin, as I respond the fastest there!
-                    I am working to add the old login flow back soon!
-                </p>
-            </div>
+<div class="h-[120vh] md:h-[90vh] pt-8 mt-20 pb-3 px-10 sm:px-20 xl:px-40 text-gray-600">
+    <p class="text-xl">A library-centric view of your favourite Singapore library books!</p>
+    <div class='md:flex text-base py-3 space-x-1'>
+        <div>
+            <p>
+                Using the <a class="font-semibold underline" target="_blank"
+                    href="https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs">official NLB
+                    REST v2 APIs</a> <span class="font-bold italic">(29-11-2023)</span>, this site aims to provide
+                an easier, single view of all your saved Singapore library books. Best viewed on desktop, but kinda
+                mobile friendly. Read about this project <a target="_blank"
+                    class="text-gray-600 hover:text-gray-500 font-semibold underline"
+                    href="https://medium.com/@cliffy-gardens/my-singapore-library-app-is-live-b63fc9f5ae9a"><i
+                        class="fab fa-medium fa-lg"></i></a> Connect professionally <a
+                    href="https://www.linkedin.com/in/cliff-chew-kt/" target="_blank"
+                    class="text-gray-600 hover:text-gray-500"><i class="fab fa-linkedin fa-lg"></i>
+                </a>
+            </p>
+            <p class='pt-2'>
+                As of 10th Oct 2024, I switched to a new Google OAuth login.
+                I will try to implement back this password login flow in the
+                near future. Current users can port over to this new Google
+                login flow by sending me your gmail through Linkedin, as I
+                respond the fastest there!
+            </p>
         </div>
     </div>
 
@@ -42,6 +39,7 @@
                             Google login
                         </button>
                     </li>
+                    <!-- DO NOT DELETE - KEEPING THESE FOR FUTURE ADDITION OF OTHER LOGIN FLOWS-->
                     <!-- <li @click="currentTab = 1"> -->
                     <!--     <button :class="currentTab === 1 ? 'bg-gray-300 text-black' : 'bg-white text-gray-700'" -->
                     <!--         class="px-4 py-2 border border-gray-300 rounded-t hover:bg-gray-100 transition duration-300"> -->
@@ -86,72 +84,6 @@
                             </form>
                         </div>
                     </div>
-                    <!-- <div x-show="currentTab === 1"> -->
-                    <!--     <!-- Login Form -->
-                    <!--     <form action="/login" method="POST"> -->
-                    <!--         <div class="mb-3"> -->
-                    <!--             <label for="username" class="mx-3 text-sm font-semibold">Username</label> -->
-                    <!--             <input type="text" id="username" name="username" required -->
-                    <!--                 class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base text-sm rounded-lg border border-black" /> -->
-                    <!--         </div> -->
-                    <!---->
-                    <!--         <label for="password" class="mx-3 text-sm font-semibold">Password</label> -->
-                    <!--         <div class="relative w-full mt-2"> -->
-                    <!--             <!-- Password show and hide button --> -->
-                    <!--             <div class="absolute inset-y-0 right-0 flex items-center px-4"> -->
-                    <!--                 <input class="hidden js-password-toggle" id="login-toggle" type="checkbox" /> -->
-                    <!--                 <label for="login-toggle" -->
-                    <!--                     class="bg-white rounded-lg px-2 mx-1 text-xs text-gray-600 font-semibold cursor-pointer js-password-label">show</label> -->
-                    <!--             </div> -->
-                    <!---->
-                    <!--             <input type="password" id="password" name="password" required -->
-                    <!--                 class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base text-sm rounded-lg border border-black js-password" /> -->
-                    <!--         </div> -->
-                    <!--         <div class="flex mt-4"> -->
-                    <!--             <button type="submit" -->
-                    <!--                 class="bg-blue-700 text-white rounded-lg py-1.5 px-3 mx-3">Login</button> -->
-                    <!--             <a href="/forgot_password" -->
-                    <!--                 class="text-blue-700 italic underline py-1.5 mx-3 px-3">Forgot -->
-                    <!--                 Password</a> -->
-                    <!--         </div> -->
-                    <!--     </form> -->
-                    <!---->
-                    <!-- </div> -->
-                    <!-- <div> -->
-                    <!--     <div x-show="currentTab === 2"> -->
-                    <!--         <!-- Registration Form -->
-                    <!--         <form action="/" method="POST"> -->
-                    <!--             <div class="mb-3"> -->
-                    <!--                 <label for="username" class="mx-3 text-sm font-semibold">Username</label> -->
-                    <!--                 <input type="text" id="username" name="username" required -->
-                    <!--                     class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base text-sm rounded-lg border border-black" -->
-                    <!--                     hx-get="/check_user_register/" hx-trigger="change, keyup delay:500ms" -->
-                    <!--                     hx-target="next .dup_user" /> -->
-                    <!--             </div> -->
-                    <!---->
-                    <!--             <label for="password" class="mx-3 text-sm font-semibold">Password</label> -->
-                    <!--             <div class="relative w-full mt-2"> -->
-                    <!--                 <!-- Password show and hide button -->
-                    <!--                 <div class="absolute inset-y-0 right-0 flex items-center px-4"> -->
-                    <!--                     <input class="hidden js-password-toggle_2" id="register-toggle" -->
-                    <!--                         type="checkbox" /> -->
-                    <!--                     <label for="register-toggle" class="bg-white rounded-lg px-2 mx-1 text-xs font-semibold  -->
-                    <!--         text-gray-600 cursor-pointer js-password-label_2">show</label> -->
-                    <!--                 </div> -->
-                    <!--                 <input type="password" class="flex px-2 py-2 mt-2 mx-3 w-11/12 md:text-base -->
-                    <!--     text-sm rounded-lg border border-black js-password_2" id="password" name="password" required /> -->
-                    <!--             </div> -->
-                    <!---->
-                    <!--             <div class="dup_user flex mt-4"> -->
-                    <!--                 <button type="submit" -->
-                    <!--                     class="bg-red-400 text-white rounded-lg py-1.5 px-3 mx-3">Register</button> -->
-                    <!--             </div> -->
-                    <!--         </form> -->
-                    <!--         {% if register_invalid %} -->
-                    <!--         <!-- Error message or form feedback can go here -->
-                    <!--         {% endif %} -->
-                    <!--     </div> -->
-                    <!-- </div> -->
                 </div>
             </div>
         </div>

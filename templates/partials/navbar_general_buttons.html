@@ -1,0 +1,56 @@
+<li>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-put="/books"
+    hx-indicator="#head-spinner"
+    hx-target=".main_content"
+    hx-swap="outerHTML"
+  >
+    <i class="fas fa-sync"></i>
+    <p class="hidden lg:block">Book Status</p>
+  </a>
+</li>
+<li>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-get="/books"
+    hx-indicator="#head-spinner"
+    hx-target=".main_content"
+    hx-swap="outerHTML"
+  >
+    <i class="fas fa-book"></i>
+    <p class="hidden lg:block">Books</p>
+  </a>
+</li>
+<li>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-get="/search"
+    hx-indicator="#head-spinner"
+    hx-target=".main_content"
+    hx-swap="outerHTML"
+  >
+    <i class="fas fa-search"></i>
+    <p class="hidden lg:block">NLB</p>
+  </a>
+</li>
+<li>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    hx-get="/user"
+    hx-target=".main_content"
+    hx-indicator="#head-spinner"
+  >
+    <i class="fas fa-user"></i>
+    <p class="hidden lg:block">Profile</p>
+  </a>
+</li>
+<li>
+  <a
+    class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
+    href="/auth/logout"
+  >
+    <i class="fas fa-sign-out-alt"></i>
+    <p class="hidden lg:block">Logout</p>
+  </a>
+</li>
