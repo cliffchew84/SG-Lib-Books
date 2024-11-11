@@ -108,16 +108,21 @@ class BookResponse(BaseModel):
     @computed_field
     @cached_property
     def lib_book_summary(self) -> list[tuple[str, int]]:
-        """Return list of tuple of cleaned library name and count of available books, sorted in ascending order"""
-        book_counter: dict[str, int] = defaultdict(int)
+        """Return list of tuple of cleaned library name and count of unqiue available books, sorted in ascending order"""
+        book_counter: dict[str, set[int]] = defaultdict(
+            set
+        )  # { library: Set of unqiue book ids }
         for book_avail in self.book_avails:
             branchName = (
                 book_avail.BranchName.replace("Public", "")
                 .replace("Library", "")
                 .strip()
             )
-            book_counter[branchName] += 1 if book_avail.BID in self.lib_bids else 0
-        return sorted(book_counter.items())  # List of (lib_name: count)
+            if book_avail.BID in self.lib_bids:
+                book_counter[branchName].add(book_avail.BID)
+        return sorted(
+            [(k, len(v)) for k, v in book_counter.items()]
+        )  # List of (lib_name: count)
 
     @computed_field
     @cached_property
