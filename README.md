@@ -42,34 +42,23 @@ supabase start
 4. Copy and Update the `.env` file with the Supabase API Key before beginning of any development.
 
 ### FastAPI Server
-1. Create and activate virtual environment with `venv`.
+1. Install `uv` in your local machine. Please follow the [official guide](https://docs.astral.sh/uv/getting-started/installation/) for more information.
 
-    ```bash
-    python -m venv venv
-    source venv/bin/activate
-    ```
-
-2. Install dependencies with pip.
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3. Update `.env` file with APIKeys from `.env.example` template.
+2. Update `.env` file with APIKeys from `.env.example` template.
 
     ```bash
     cp .env.example .env
     ```
-4. Start-up Supabase server with supabase-cli and docker.
+3. Start-up Supabase server with supabase-cli and docker.
 
     ```bash
     supabase start
     ```
 
-5. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose.
+4. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose. This command will install create virtual environment in `.venv` and install all dependencies before starting the server.
 
     ```bash
-    uvicorn src.main:app --reload
+    uv run -- uvicorn src.main:app --reload
     ```
 
 ### Code Linting and Formating
