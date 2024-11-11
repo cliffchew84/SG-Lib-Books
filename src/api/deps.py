@@ -5,16 +5,16 @@ FastAPI dependencies
 from typing import Annotated
 
 from fastapi import Cookie, Depends
-from supabase import Client
 from pymongo import MongoClient
+from supabase import create_client, Client
 
-from src import supa_db
 from src import m_db
+from src.config import settings
 
 
 def get_sdb():
     """Return supabase db client connection"""
-    client = supa_db.connect_sdb()
+    client: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
     try:
         yield client
     finally:
