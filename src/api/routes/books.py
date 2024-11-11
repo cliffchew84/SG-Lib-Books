@@ -126,7 +126,7 @@ async def book_status_progress_bar(
             progress = (books_updated / book_saved) * 100
 
         update_status = None
-        if m_db.q_status(db=mdb, username=username):
+        if m_db.q_status(db=mdb.nlb, username=username):
             update_status = " "
 
         return templates.TemplateResponse(
@@ -223,7 +223,7 @@ async def update_books(
     background_tasks.add_task(update_all_user_bks, db, mdb.nlb, nlb, username)
 
     # Redirect to library all page
-    return RedirectResponse("/lib/all", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return RedirectResponse("/lib/all", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.put("/{BID}", response_class=HTMLResponse)
