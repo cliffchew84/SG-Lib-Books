@@ -9,6 +9,8 @@ jobs:
       - uses: astral-sh/ruff-action@v1
         with:
           args: "format --check"
-        # Check for code linting with ruff check
-      # - uses: astral-sh/ruff-action@v1
+      # Check for code linting with ruff check
+      - uses: astral-sh/ruff-action@v1
+        with:
+          src: "./src"
 
