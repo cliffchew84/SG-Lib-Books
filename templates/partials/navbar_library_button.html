@@ -1,67 +1,50 @@
 <li>
-  <details class="dropdown">
-    <summary
-      class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg"
-    >
-      <i class="fas fa-city"></i>
-      <p class="hidden lg:block">Libraries</p>
-    </summary>
-    <ul class="w-72 bg-sky-700 text-sm text-white">
-      <li>
-        <a
-          class="py-0.5 hover:bg-sky-500 hover:text-white"
-          hx-get="/update_header"
-          hx-swap="outerHTML"
-          hx-target="#header"
-          hx-indicator="#head-spinner"
-        >
-          Update Book Count
-        </a>
-      </li>
-      <li>
-        <a
-          class="py-0.5 hover:bg-sky-500 hover:text-white"
-          hx-get="/lib/all"
-          hx-target=".main_content"
-          hx-swap="outerHTML"
-          hx-indicator="#head-spinner"
-        >
-          All Libraries
-          <div class="badge badge-md w-8 bg-white text-xs text-black">
-            {{all_avail_books|length}}
-          </div>
-        </a>
-      </li>
+    <details class="dropdown">
+        <summary class="p-2 text-sm text-white hover:bg-sky-500 hover:text-white md:p-4 lg:text-lg">
+            <i class="fas fa-city"></i>
+            <p class="hidden lg:block">Libraries</p>
+        </summary>
+        <ul class="w-72 bg-sky-700 text-sm text-white">
+            <li>
+                <a class="py-0.5 hover:bg-sky-500 hover:text-white" hx-get="/update_header" hx-swap="outerHTML"
+                    hx-target="#header" hx-indicator="#head-spinner">
+                    Update Book Count
+                </a>
+            </li>
+            <li>
+                <a class="py-0.5 hover:bg-sky-500 hover:text-white" hx-get="/lib/all" hx-target=".main_content"
+                    hx-swap="outerHTML" hx-indicator="#head-spinner">
+                    All Libraries
+                    <div class="badge badge-md w-8 bg-white text-xs text-black">
+                        {{all_avail_books|length}}
+                    </div>
+                </a>
+            </li>
 
-      {% for lib in lib_book_summary %}
-      <!-- Remove Lee Kong Chian Reference from frontend -->
-      {% if lib.keys()|list|first|lower != "lee kong chian reference " %}
-      <li>
-        <a
-          class="py-0.5 hover:bg-sky-500 hover:text-white"
-          hx-target=".main_content"
-          hx-swap="outerHTML"
-          hx-get="/lib/{{lib.keys()|list|first|lower}}"
-          hx-indicator="#head-spinner"
-        >
-          {{lib.keys()|list|first}}
-          <div class="badge badge-md w-8 bg-white text-xs text-black">
-            {{lib.values()|list|first}}
-          </div>
-        </a>
-      </li>
-      {% endif %} {% endfor %}
-    </ul>
-  </details>
+            {% for lib in lib_book_summary %}
+            <!-- Remove Lee Kong Chian Reference from frontend -->
+            {% if lib.keys()|list|first|lower != "lee kong chian reference " %}
+            <li>
+                <a class="py-0.5 hover:bg-sky-500 hover:text-white" hx-target=".main_content" hx-swap="outerHTML"
+                    hx-get="/lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
+                    {{lib.keys()|list|first}}
+                    <div class="badge badge-md w-8 bg-white text-xs text-black">
+                        {{lib.values()|list|first}}
+                    </div>
+                </a>
+            </li>
+            {% endif %} {% endfor %}
+        </ul>
+    </details>
 </li>
 
 <script>
-  window.addEventListener("click", function (e) {
-    document.querySelectorAll(".dropdown").forEach(function (dropdown) {
-      if (!dropdown.contains(e.target)) {
-        // Click was outside the dropdown, close it
-        dropdown.open = false;
-      }
+    window.addEventListener("click", function (e) {
+        document.querySelectorAll(".dropdown").forEach(function (dropdown) {
+            if (!dropdown.contains(e.target)) {
+                // Click was outside the dropdown, close it
+                dropdown.open = false;
+            }
+        });
     });
-  });
 </script>
