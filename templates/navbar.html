@@ -1,43 +1,36 @@
-<header
-  id="header"
-  class="fixed top-0 z-50 mx-auto w-full bg-sky-700 pb-8 pt-2 lg:pb-10"
->
-  {% if not username %}
+<header id="header" class="fixed top-0 z-50 mx-auto w-full bg-sky-700 pb-8 pt-2 lg:pb-10">
+    {% if not username %}
 
-  <div class="mx-auto flex flex-1 px-10 pt-8 sm:px-20 xl:px-40">
-    <a class="text-2xl text-white">SGLibReads [Beta]</a>
-  </div>
+    <div class="mx-auto flex flex-1 px-10 pt-8 sm:px-20 xl:px-40">
+        <a class="text-2xl text-white">SGLibReads [Beta]</a>
+    </div>
 
-  {% else %}
+    {% else %}
 
-  <div class="mx-auto flex h-8 justify-center lg:h-10" hx-trigger="load">
-    <ul class="menu menu-horizontal mx-1 items-center space-x-6">
-      <div class="hidden lg:block">
-        <span
-          id="head-spinner"
-          class="htmx-indicator loading loading-ball loading-lg hidden justify-center px-2 pt-2 text-white lg:block"
-        ></span>
-      </div>
-      {% include 'partials/navbar_library_button.html' %} {% include
-      'partials/navbar_general_buttons.html' %}
-      <div>
-        <span
-          id="head-spinner"
-          class="htmx-indicator loading loading-ball loading-lg justify-center px-2 pt-2 text-white"
-        ></span>
-      </div>
-    </ul>
-  </div>
-  {% endif %}
+    <div class="mx-auto flex h-8 justify-center lg:h-10" hx-trigger="load">
+        <ul class="menu menu-horizontal mx-1 items-center space-x-6">
+            <div class="hidden lg:block">
+                <span id="head-spinner"
+                    class="htmx-indicator loading loading-ball loading-lg hidden justify-center px-2 pt-2 text-white lg:block"></span>
+            </div>
+            {% include 'partials/navbar_library_button.html' %} {% include
+            'partials/navbar_general_buttons.html' %}
+            <div>
+                <span id="head-spinner"
+                    class="htmx-indicator loading loading-ball loading-lg justify-center px-2 pt-2 text-white"></span>
+            </div>
+        </ul>
+    </div>
+    {% endif %}
 </header>
 
 <script>
-  window.addEventListener("click", function (e) {
-    document.querySelectorAll(".dropdown").forEach(function (dropdown) {
-      if (!dropdown.contains(e.target)) {
-        // Click was outside the dropdown, close it
-        dropdown.open = false;
-      }
+    window.addEventListener("click", function (e) {
+        document.querySelectorAll(".dropdown").forEach(function (dropdown) {
+            if (!dropdown.contains(e.target)) {
+                // Click was outside the dropdown, close it
+                dropdown.open = false;
+            }
+        });
     });
-  });
 </script>
