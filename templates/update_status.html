@@ -1,7 +1,17 @@
-<div class="status_bar" hx-trigger="done" hx-get='complete-update' hx-swap='outerHTML' hx-target='.this'>
-    <div hx-get="/book_status/{{all_unique_books|length}}" hx-trigger="every 1s" hx-target='.book_text'>
-        <div class='flex mx-auto justify-center items-center text-blue-700 w-3/4'>
-            <div class="book_text"></div>
-        </div>
+<div
+  class="status_bar"
+  hx-trigger="done"
+  hx-get="complete-update"
+  hx-swap="outerHTML"
+  hx-target=".this"
+>
+  <div
+    hx-get="/book_status/{{all_unique_books|length}}"
+    hx-trigger="every 1s"
+    hx-target=".book_text"
+  >
+    <div class="mx-auto flex w-3/4 items-center justify-center text-blue-700">
+      <div class="book_text"></div>
     </div>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-<div class="main_content">
+<div class="main_content bg-white">
     <!-- Current this is working, not the bar above -->
     {% if status %}
     {% include 'update_status.html' %}
@@ -28,11 +28,12 @@
 
             <!-- Search Bar -->
             <input id="UserBookSearch" type="text" placeholder="Search your books by titles!" x-model="search"
-                class="px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-sky-700">
+                class="bg-white text-black px-2 py-2 md:text-base text-sm form-control w-full rounded-lg my-2 border-2 border-sky-700">
 
             <!-- Sorting input -->
             <div class="flex flex-col space-y-1">
-                <select class="select select-bordered w-1/4 select-sm max-w-xs border-2 border-sky-700 mb-1 min-w-48"
+                <select
+                    class="bg-white select select-bordered w-1/4 select-sm max-w-xs border-2 border-sky-700 mb-1 min-w-48"
                     x-model="type">
                     <option value="asc.TitleName">Title (Asc)</option>
                     <option value="desc.TitleName">Title (Desc)</option>

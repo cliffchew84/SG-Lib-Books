@@ -1,72 +1,102 @@
-<div class='main_content'>
-    <div class='pt-2 mt-20 items-center justify-center px-2 h-full'>
-        <form method="GET" hx-target="next .search_table" hx-get="/htmx_search" hx-indicator="#head-spinner">
+<div class="main_content bg-white">
+  <div class="mt-20 h-full items-center justify-center px-2 pt-2">
+    <form
+      method="GET"
+      hx-target="next .search_table"
+      hx-get="/htmx_search"
+      hx-indicator="#head-spinner"
+    >
+      <div class="flex items-center justify-center space-x-2 pt-2">
+        <input
+          type="checkbox"
+          id="e_resources"
+          name="e_resources"
+          value="True"
+          class="checkbox-info checkbox form-control checkbox-xs border-sky-500 hover:bg-sky-500"
+        />
+        <label for="e_resources">Include eResources**</label>
+      </div>
 
-            <div class="flex justify-center items-center space-x-2 pt-2">
-                <input type="checkbox" id="e_resources" name="e_resources" value=True
-                    class="form-control checkbox checkbox-xs checkbox-info hover:bg-sky-500 border-sky-500" />
-                <label for="e_resources">Include eResources**</label>
-            </div>
+      <div class="form-inline join flex items-center justify-center">
+        {% if keyword %}
+        <input
+          placeholder="Title / ISBN"
+          type="search"
+          id="book_search"
+          name="book_search"
+          class="form-control join-item mt-2 flex w-1/2 rounded-lg border-2 border-sky-700 bg-white px-2 py-2 text-sm md:text-base"
+          value="{{keyword|safe}}"
+        />
 
-            <div class="join form-inline flex items-center justify-center">
-                {% if keyword %}
-                <input placeholder="Title / ISBN" type="search" id="book_search" name="book_search"
-                    class="join-item flex mt-2 px-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700"
-                    value="{{keyword|safe}}" />
+        {% else %}
 
-                {% else %}
+        <input
+          placeholder="Title / ISBN"
+          type="search"
+          id="book_search"
+          name="book_search"
+          class="form-control join-item mt-2 flex w-1/2 rounded-lg border-2 border-sky-700 bg-white px-2 py-2 text-sm md:text-base"
+        />
 
-                <input placeholder="Title / ISBN" type="search" id="book_search" name="book_search"
-                    class="join-item flex mt-2 px-2 py-2 w-1/2 md:text-base text-sm form-control rounded-lg border-2 border-sky-700" />
+        {% endif %} {% if author %}
+        <input
+          placeholder="Author (Optional)"
+          type="search"
+          id="author"
+          name="author"
+          value="{{author|safe}}"
+          class="form-control join-item mt-2 flex w-1/2 rounded-lg border-2 border-sky-700 bg-white px-2 py-2 text-sm md:w-1/4 md:text-base"
+        />
 
-                {% endif %}
+        {% else %}
 
-                {% if author %}
-                <input placeholder="Author (Optional)" type="search" id="author" name="author" value="{{author|safe}}"
-                    class="join-item flex mt-2 px-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm
-                           form-control rounded-lg border-2 border-sky-700" />
+        <input
+          placeholder="Author (Optional)"
+          type="search"
+          id="author"
+          name="author"
+          class="form-control join-item mt-2 flex w-1/2 rounded-lg border-2 border-sky-700 bg-white px-2 py-2 text-sm md:w-1/4 md:text-base"
+        />
 
-                {% else %}
+        {% endif %}
 
-                <input placeholder="Author (Optional)" type="search" id="author" name="author" class="join-item flex mt-2 px-2 py-2 md:w-1/4 w-1/2 md:text-base text-sm 
-                    form-control rounded-lg border-2 border-sky-700" />
+        <!--Search button-->
+        <button
+          type="submit"
+          class="join-item mt-2 flex items-center rounded-lg bg-sky-700 px-2 py-2 text-white hover:bg-sky-500 hover:text-white"
+        >
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </form>
 
-                {% endif %}
+    <p class="mx-auto flex justify-center px-2 text-sm italic">
+      *Search is provided by NLB. Please use [ISBN] OR [Title] OR [Author] to
+      refine search results.
+    </p>
+  </div>
 
-                <!--Search button-->
-                <button type="submit" class="join-item flex items-center bg-sky-700 mt-2 px-2 py-2 rounded-lg 
-                                             hover:text-white hover:bg-sky-500 text-white">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </form>
+  <div class="mx-auto mt-3 max-w-screen-lg px-4">
+    <div class="search_table"></div>
+  </div>
 
-        <p class='mx-auto flex justify-center text-sm italic px-2'>
-            *Search is provided by NLB. Please use [ISBN] OR [Title] OR [Author] to refine search results.
-        </p>
-    </div>
+  <script>
+    function checkSelection() {
+      var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      var submitButton = document.getElementById("submitButton");
+      var atLeastOneChecked = false;
 
-    <div class="mx-auto max-w-screen-lg px-4 mt-3">
-        <div class="search_table"></div>
-    </div>
-
-    <script>
-        function checkSelection() {
-            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            var submitButton = document.getElementById("submitButton");
-            var atLeastOneChecked = false;
-
-            checkboxes.forEach(function (checkbox) {
-                if (checkbox.checked) {
-                    atLeastOneChecked = true;
-                }
-            });
-
-            if (atLeastOneChecked) {
-                submitButton.disabled = false;
-            } else {
-                submitButton.disabled = true;
-            }
+      checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+          atLeastOneChecked = true;
         }
-    </script>
+      });
+
+      if (atLeastOneChecked) {
+        submitButton.disabled = false;
+      } else {
+        submitButton.disabled = true;
+      }
+    }
+  </script>
 </div>

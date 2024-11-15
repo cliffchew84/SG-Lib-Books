@@ -1,49 +1,71 @@
 {% for data in api_data %}
-<div class="card w-full card-bordered border-2 border-sky-700 card-compact my-2">
-    <div class="card-body">
-        <div class="flex items-center">
-            <p class="flex-grow px-2">
-                <!-- Mobile -->
-                <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
-                    class="hidden md:block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                    rel="noopener noreferrer">{{ data['TitleName'].split(" | ", 1)[0] }}</a>
+<div
+  class="card card-bordered card-compact my-2 w-full border-2 border-sky-700"
+>
+  <div class="card-body">
+    <div class="flex items-center">
+      <p class="flex-grow px-2">
+        <!-- Mobile -->
+        <a
+          href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
+          class="hidden font-semibold text-blue-800 underline hover:text-blue-600 md:block"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ data['TitleName'].split(" | ", 1)[0] }}</a
+        >
 
-                <!-- Desktop -->
-                <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
-                    class="md:hidden block text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
-                    rel="noopener noreferrer">{{ data['TitleName'].split(" : ", 1)[0] }}</a>
+        <!-- Desktop -->
+        <a
+          href="https://catalogue.nlb.gov.sg/search/card?recordId={{data['BID']}}"
+          class="block font-semibold text-blue-800 underline hover:text-blue-600 md:hidden"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ data['TitleName'].split(" : ", 1)[0] }}</a
+        >
 
-                <span class="badge badge-outline font-semibold">{{ data['CallNumber'] }}</span>
+        <span class="badge badge-outline font-semibold"
+          >{{ data['CallNumber'] }}</span
+        >
 
-                {% if data["StatusDesc"] == "Available" %}
-                <span class="badge badge-outline font-semibold text-green-700 bg-green-100">
-                    {{ data['StatusDesc'] }}</span>
+        {% if data["StatusDesc"] == "Available" %}
+        <span
+          class="badge badge-outline bg-green-100 font-semibold text-green-700"
+        >
+          {{ data['StatusDesc'] }}</span
+        >
 
-                {% else %}
-                <span class="badge badge-outline font-semibold text-red-700 bg-red-100">{{ data['StatusDesc'] }}</span>
+        {% else %}
+        <span class="badge badge-outline bg-red-100 font-semibold text-red-700"
+          >{{ data['StatusDesc'] }}</span
+        >
 
-                {% endif %}
+        {% endif %} {% if library == 'all' %}
 
-                {% if library == 'all' %}
+        <span class="badge badge-outline bg-primary-content font-semibold"
+          >{{ data['BranchName'] }}</span
+        >
 
-                <span class="badge badge-outline font-semibold bg-primary-content">{{ data['BranchName'] }}</span>
+        {% endif %}
 
-                {% endif %}
+        <b>Author:</b> {{ data['Author'] }}
+      </p>
+      <form action="/update_book/{{ data['BID'] }}" method="POST">
+        <button
+          type="submit"
+          class="hidden rounded-lg bg-sky-700 px-3 py-1 text-white hover:bg-sky-500 hover:text-white md:block"
+        >
+          {{ data['UpdateTime'] }}
+        </button>
 
-                <b>Author:</b> {{ data['Author'] }}
-            </p>
-            <form action="/update_book/{{ data['BID'] }}" method="POST">
-                <button type="submit" class="hidden md:block bg-sky-700 px-3 py-1 rounded-lg
-                        hover:text-white hover:bg-sky-500 text-white">
-                    {{ data['UpdateTime'] }}</button>
-
-                <button type="submit" class="md:hidden block bg-sky-700 px-3 py-1 rounded-lg
-                        hover:text-white hover:bg-sky-500 text-white">
-                    <i class="fas fa-sync items-center justify-center"></i>
-                </button>
-            </form>
-        </div>
+        <button
+          type="submit"
+          class="block rounded-lg bg-sky-700 px-3 py-1 text-white hover:bg-sky-500 hover:text-white md:hidden"
+        >
+          <i class="fas fa-sync items-center justify-center"></i>
+        </button>
+      </form>
     </div>
+  </div>
 </div>
 
 {% endfor %}

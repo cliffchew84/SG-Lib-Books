@@ -1,54 +1,60 @@
-<div class="main_content">
-    <div class="pt-8 mt-16 px-2 flex flex-col">
-        {% include 'partials/lib_bks.html' %}
-    </div>
+<div class="main_content bg-white">
+  <div class="mt-16 flex flex-col px-2 pt-8">
+    {% include 'partials/lib_bks.html' %}
+  </div>
 
-    <script>
-        $(document).ready(function () {
-            const cards = $('.card'); // Select all card elements
-            const availableCheckbox = $("#availableCheckbox");
-            const searchInput = $("#myInput");
+  <script>
+    $(document).ready(function () {
+      const cards = $(".card"); // Select all card elements
+      const availableCheckbox = $("#availableCheckbox");
+      const searchInput = $("#myInput");
 
-            // Function to handle filtering by "Available" status
-            function filterByAvailability() {
-                const checked = availableCheckbox.is(":checked");
-                const searchValue = searchInput.val().toLowerCase();
-                cards.each(function () {
-                    const status = $(this).find('span').text().toLowerCase(); // Adjust to find the 'Available' or 'Not Available' text in card
-                    const cardText = $(this).text().toLowerCase(); // Search inside the card's text
-                    if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && cardText.indexOf(searchValue) === -1)) {
-                        $(this).hide();
-                    } else {
-                        $(this).show();
-                    }
-                });
-            }
-
-            // Function to handle real-time search
-            function filterBySearch() {
-                const checked = availableCheckbox.is(":checked");
-                const searchValue = searchInput.val().toLowerCase();
-                cards.each(function () {
-                    const cardText = $(this).text().toLowerCase();
-                    const status = $(this).find('span').text().toLowerCase(); // Adjust to find 'Available' status in card
-                    if ((checked && status.indexOf("available") === -1) || (searchValue.length > 0 && cardText.indexOf(searchValue) === -1)) {
-                        $(this).hide();
-                    } else {
-                        $(this).show();
-                    }
-                });
-            }
-
-            // Attach event handlers to both the checkbox and the input field
-            availableCheckbox.change(function () {
-                filterByAvailability();
-                filterBySearch();
-            });
-
-            searchInput.on("keyup", function () {
-                filterByAvailability();
-                filterBySearch();
-            });
+      // Function to handle filtering by "Available" status
+      function filterByAvailability() {
+        const checked = availableCheckbox.is(":checked");
+        const searchValue = searchInput.val().toLowerCase();
+        cards.each(function () {
+          const status = $(this).find("span").text().toLowerCase(); // Adjust to find the 'Available' or 'Not Available' text in card
+          const cardText = $(this).text().toLowerCase(); // Search inside the card's text
+          if (
+            (checked && status.indexOf("available") === -1) ||
+            (searchValue.length > 0 && cardText.indexOf(searchValue) === -1)
+          ) {
+            $(this).hide();
+          } else {
+            $(this).show();
+          }
         });
-    </script>
+      }
+
+      // Function to handle real-time search
+      function filterBySearch() {
+        const checked = availableCheckbox.is(":checked");
+        const searchValue = searchInput.val().toLowerCase();
+        cards.each(function () {
+          const cardText = $(this).text().toLowerCase();
+          const status = $(this).find("span").text().toLowerCase(); // Adjust to find 'Available' status in card
+          if (
+            (checked && status.indexOf("available") === -1) ||
+            (searchValue.length > 0 && cardText.indexOf(searchValue) === -1)
+          ) {
+            $(this).hide();
+          } else {
+            $(this).show();
+          }
+        });
+      }
+
+      // Attach event handlers to both the checkbox and the input field
+      availableCheckbox.change(function () {
+        filterByAvailability();
+        filterBySearch();
+      });
+
+      searchInput.on("keyup", function () {
+        filterByAvailability();
+        filterBySearch();
+      });
+    });
+  </script>
 </div>
