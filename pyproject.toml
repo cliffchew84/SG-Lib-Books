@@ -20,4 +20,6 @@ dependencies = [
     "uvicorn>=0.32.0",
     "dnspython>=2.7.0",
     "pydantic>=2.9.2",
+    "python-jose>=3.3.0",
+    "python-dateutil>=2.9.0.post0",
 ]
