@@ -1,7 +1,6 @@
 # New stuff to ignore
 main_mongo.py
 poetry.lock 
-pyproject.toml
 templates/homepage.html
 
 # Tailwindcss ignores
