@@ -1,0 +1,23 @@
+[project]
+name = "uv-nlb"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.4",
+    "fastapi-blog>=0.6.0",
+    "fastapi-login>=1.10.2",
+    "bcrypt>=4.2.0",
+    "passlib>=1.7.4",
+    "mongo>=0.2.0",
+    "supabase>=2.9.1",
+    "psycopg2-binary>=2.9.10",
+    "pendulum>=3.0.0",
+    "requests>=2.32.3",
+    "python-dotenv>=1.0.1",
+    "python-multipart>=0.0.17",
+    "uvicorn>=0.32.0",
+    "dnspython>=2.7.0",
+    "pydantic>=2.9.2",
+]
