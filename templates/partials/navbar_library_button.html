@@ -21,21 +21,26 @@
                 </a>
             </li>
 
-            {% for lib in lib_book_summary %}
-            <!-- Remove Lee Kong Chian Reference from frontend -->
-            {% if lib.keys()|list|first|lower != "lee kong chian reference " %}
-            <li>
-                <a class="py-0.5 hover:bg-sky-500 hover:text-white" hx-target=".main_content" hx-swap="outerHTML"
-                    hx-get="/lib/{{lib.keys()|list|first|lower}}" hx-indicator="#head-spinner">
-                    {{lib.keys()|list|first}}
-                    <div class="badge badge-md w-8 bg-white text-xs text-black">
-                        {{lib.values()|list|first}}
-                    </div>
-                </a>
-            </li>
-            {% endif %} {% endfor %}
-        </ul>
-    </details>
+      {% for lib in lib_book_summary %}
+      <!-- Remove Lee Kong Chian Reference from frontend -->
+      {% if lib[0]|lower != "lee kong chian reference " %}
+      <li>
+        <a
+          class="py-0.5 hover:bg-sky-500 hover:text-white"
+          hx-target=".main_content"
+          hx-swap="outerHTML"
+          hx-get="/lib/{{lib[0]|lower}}"
+          hx-indicator="#head-spinner"
+        >
+          {{lib[0]}}
+          <div class="badge badge-md w-8 bg-white text-xs text-black">
+            {{lib[1]}}
+          </div>
+        </a>
+      </li>
+      {% endif %} {% endfor %}
+    </ul>
+  </details>
 </li>
 
 <script>

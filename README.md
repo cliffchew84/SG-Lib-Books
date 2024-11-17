@@ -19,3 +19,59 @@ This side project is also a way for me to continue to learn and apply more techn
 1. Availability of eBooks
 2. Linking to NLB Events from EventBrite
 3. Recommending books
+
+## Getting Started
+The following section details the step it takes to start-up a local Supabase and FastAPI server for development purpose.
+
+### Prerequisite: Supabase CLI
+The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage the database schema and seed data. Please follow the instructions below:
+
+1. Install Supabase CLI using the official guide in your local machine [here](https://supabase.com/docs/guides/cli/getting-started#installing-the-supabase-cli).
+
+
+2. Authenticate Supabase CLI with the following command:
+```bash
+supabase login
+```
+
+3. Run supabase start to take note of the local Supabase URL and API Key. 
+```bash
+supabase start
+```
+
+4. Copy and Update the `.env` file with the Supabase API Key before beginning of any development.
+
+### FastAPI Server
+1. Install `uv` in your local machine. Please follow the [official guide](https://docs.astral.sh/uv/getting-started/installation/) for more information.
+
+2. Update `.env` file with APIKeys from `.env.example` template.
+
+    ```bash
+    cp .env.example .env
+    ```
+3. Start-up Supabase server with supabase-cli and docker.
+
+    ```bash
+    supabase start
+    ```
+
+4. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose. This command will install create virtual environment in `.venv` and install all dependencies before starting the server.
+
+    ```bash
+    uv run -- uvicorn src.main:app --reload
+    ```
+
+### Code Linting and Formating
+
+This project uses [ruff](https://github.com/astral-sh/ruff) as Python code linter and formatter.
+
+To integrate this seamlessly to your development workflow, we recommend using [pre-commit](https://pre-commit.com/) to run the formatter and linter before commiting to the repo.
+
+1. run `pre-commit install` to set up the git hook scripts
+
+    ```bash
+    $ pre-commit install
+    pre-commit installed at .git/hooks/pre-commit
+    ```
+
+2. run `git commit` as usual to commit your changes.

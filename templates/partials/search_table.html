@@ -1,11 +1,14 @@
 <div class="search_table">
-  {% if pag_links %} {% if e_resources %} {% set nav_search =
-  '/navigate_search/?e_resources=True&' %} {% else %} {% set nav_search =
-  '/navigate_search/?' %} {% endif %}
+    {% if pag_links %}
+    {% if e_resources %}
+    {% set nav_search = '/search/results/?e_resources=True&' %}
+    {% else %}
+    {% set nav_search = '/search/results/?' %}
+    {% endif %}
 
   <form
     id="myForm"
-    hx-post="/ingest_books_navbar"
+    hx-post="/books"
     hx-indicator="#head-spinner"
     hx-target="#header"
     hx-swap="outerHTML"
@@ -68,52 +71,52 @@
       </button>
     </div>
 
-    {% endif %} {% for data in api_data %} {% set TitleName, BID =
-    data['TitleName'].split(' | ') %} {% set year = data['PublishYear'] |
-    replace("]", "") | replace("[", "") | replace(".", "") %} {% set disable,
-    BID = data['BID'].split(' | ') %} {% if disable %} {% set card_class = "card
-    w-full bg-gray-300 card-bordered card-compact" %} {% else %} {% set
-    card_class = "card w-full card-bordered card-compact" %} {% endif %}
 
-    <div class="{{card_class}}">
-      <div class="card-body">
-        <div class="justify-left flex items-center">
-          {% if data['type'] == "Book" %}
+        {% endif %}
 
-          <input
-            type="checkbox"
-            name="bids"
-            value="{{BID}}"
-            class="checkbox-info checkbox checkbox-xs border-sky-500 px-1 hover:bg-sky-500"
-            onchange="checkSelection()"
-            {{
-            disable
-            }}
-          />
-          <i class="fas fa-book px-1 text-sky-800"></i>
-          <a
-            href="https://catalogue.nlb.gov.sg/search/card?recordId={{ BID }}"
-            class="font-semibold text-blue-800 underline hover:text-blue-600"
-            target="_blank"
-            rel="noopener noreferrer"
-            >{{ TitleName }}</a
-          >
 
-          {% else %}
+        {% for data in api_data %}
 
-          <i class="fas fa-tablet-alt py-1 text-sky-800"></i>
-          <a
-            href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
-            class="px-1 font-semibold text-blue-800 underline hover:text-blue-600"
-            target="_blank"
-            rel="noopener noreferrer"
-            >{{ TitleName }}
-          </a>
+        {% set BID = data['BID'] %}
+        {% set TitleName = data['TitleName'] %}
+        {% set year = data['PublishYear'] | replace("]", "") | replace("[", "") | replace(".", "") %}
+        {% set disable = data['disabled'] %}
 
-          {% endif %}
-        </div>
-        <div>
-          <b>Author:</b> {{ data['Author'] }} | <b>PublishYear:</b> {{ year }}
+        {% if disable %}
+        {% set card_class = "card w-full bg-gray-300 card-bordered card-compact" %}
+        {% else %}
+        {% set card_class = "card w-full card-bordered card-compact" %}
+        {% endif %}
+
+        <div class="{{card_class}}">
+            <div class="card-body">
+                <div class="flex items-center justify-left">
+
+                    {% if data['type'] == "Book" %}
+
+                    <input type="checkbox" name='bids' value='{{BID}}'
+                        class="px-1 checkbox checkbox-xs checkbox-info hover:bg-sky-500 border-sky-500"
+                        onchange="checkSelection()" {{ 'disabled' if disable else ''}} />
+                    <i class="px-1 fas fa-book text-sky-800"></i>
+                    <a href="https://catalogue.nlb.gov.sg/search/card?recordId={{ BID }}"
+                        class="text-blue-800 hover:text-blue-600 font-semibold underline" target="_blank"
+                        rel="noopener noreferrer">{{ TitleName }}</a>
+
+                    {% else %}
+
+                    <i class="py-1 fas fa-tablet-alt text-sky-800"></i>
+                    <a href="http://singapore.lib.overdrive.com/ContentDetails.htm?ID={{ data['DigitalID'] }}"
+                        class="text-blue-800 hover:text-blue-600 font-semibold underline px-1" target="_blank"
+                        rel="noopener noreferrer">{{ TitleName }}
+                    </a>
+
+                    {% endif %}
+                </div>
+                <div>
+                    <b>Author:</b> {{ data['Author'] }} |
+                    <b>PublishYear:</b> {{ year }}
+                </div>
+            </div>
         </div>
       </div>
     </div>

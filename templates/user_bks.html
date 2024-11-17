@@ -70,7 +70,7 @@
                                     <span><b>Author: </b><span x-text="item.Author"></span>
                                         <span>
                                             <button class="text-sky-700 hover:text-red-400"
-                                                x-bind:hx-delete="'/delete_bk/' + item.BID" hx-swap='outerHTML'
+                                                x-bind:hx-delete="'/books/' + item.BID" hx-swap='outerHTML'
                                                 hx-indicator="#head-spinner" hx-target="closest .card">
                                                 <i class="fas fa-trash"></i>
                                             </button>
