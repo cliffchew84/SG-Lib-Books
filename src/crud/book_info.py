@@ -81,17 +81,13 @@ class CRUDBookInfo(CRUDBase[BookInfo, BookInfoCreate, BookInfoUpdate]):
         return await super().update(db, obj_in=obj_in, i=i, excludes=excludes)
 
     async def delete_owner(self, db: Client, *, i: str, username: str):
-        response = (
+        (
             db.table("user_books")
             .delete()
             .eq("BID", i)
-            .eq("username", username)
+            .eq("UserName", username)
             .execute()
         )
-        deleted = response.data
-        if not deleted:
-            return None
-        return self.model(**deleted[0])
 
     async def delete(self, db: Client, *, i: str) -> BookInfo | None:
         db.table("user_books").delete().eq("BID", i).execute()
