@@ -119,5 +119,18 @@ def logout(
     response: Response,
 ):
     # response = RedirectResponse("/")
-    response.delete_cookie("user_info")
+    response.set_cookie(
+        "user_info",
+        value="",
+        httponly=True,
+        secure=True,  # Set to True if using HTTPS in production
+        domain=(
+            "localhost"
+            if "localhost" in settings.GOOGLE_REDIRECT_URI
+            else "sg-nlb-available-books.onrender.com"
+        ),
+        path="/",  # Make sure it's available for the whole app
+        samesite="lax",
+        expires=1,  # Set it to expires
+    )
     return RedirectResponse("/", status_code=303, headers=response.headers)
