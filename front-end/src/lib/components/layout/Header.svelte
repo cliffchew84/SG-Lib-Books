@@ -8,13 +8,15 @@
 	let { isLoggedIn = true } = $props();
 </script>
 
-<header class="flex flex-row justify-between p-2 border shadow-border items-center">
+<header class="flex flex-row justify-between p-2 border shadow items-center">
 	<a href="/">SG Lib Books</a>
 
 	{#if isLoggedIn}
 		<!-- User is logged in -->
 		<!-- Desktop View -->
-		<nav class="hidden md:flex bg-background items-center space-x-6 rounded-md border px-4 py-2">
+		<nav
+			class="hidden md:flex bg-background items-center space-x-6 rounded-md border px-4 py-2 shadow"
+		>
 			<Button variant="ghost" href="/library">
 				<LibraryBig class="mr-2 h-4 w-4" />
 				<span>Library</span>
@@ -33,40 +35,18 @@
 			</Button>
 		</nav>
 
-		<div class="hidden md:block">
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					<Avatar.Root>
-						<Avatar.Fallback>CN</Avatar.Fallback>
-					</Avatar.Root>
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content>
-					<DropdownMenu.Group>
-						<DropdownMenu.Label>My Account</DropdownMenu.Label>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item href="/settings">
-							<Settings class="mr-2 h-4 w-4" />
-							<span>Settings</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Item href="/sign-out">
-							<LogOut class="mr-2 h-4 w-4" />
-							<span>Log out</span>
-						</DropdownMenu.Item>
-					</DropdownMenu.Group>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
-		</div>
-
-		<!-- Mobile View -->
-		<div class="block md:hidden">
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					<Button variant="outline">
-						<Menu class="h-4 w-4" />
-					</Button>
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content>
-					<DropdownMenu.Group>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				<Avatar.Root class="hidden md:block">
+					<Avatar.Fallback>CN</Avatar.Fallback>
+				</Avatar.Root>
+				<Button variant="outline" class="block md:hidden">
+					<Menu class="h-4 w-4" />
+				</Button>
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content>
+				<DropdownMenu.Group>
+					<div class="block md:hidden">
 						<DropdownMenu.Label>Navigation</DropdownMenu.Label>
 						<DropdownMenu.Item href="/library">
 							<LibraryBig class="mr-2 h-4 w-4" />
@@ -81,20 +61,21 @@
 							<span>Books</span>
 						</DropdownMenu.Item>
 						<DropdownMenu.Separator />
-						<DropdownMenu.Label>My Account</DropdownMenu.Label>
-						<DropdownMenu.Separator />
-						<DropdownMenu.Item href="/settings">
-							<Settings class="mr-2 h-4 w-4" />
-							<span>Settings</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Item href="/sign-out">
-							<LogOut class="mr-2 h-4 w-4" />
-							<span>Log out</span>
-						</DropdownMenu.Item>
-					</DropdownMenu.Group>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
-		</div>
+					</div>
+
+					<DropdownMenu.Label>My Account</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Item href="/settings">
+						<Settings class="mr-2 h-4 w-4" />
+						<span>Settings</span>
+					</DropdownMenu.Item>
+					<DropdownMenu.Item href="/sign-out">
+						<LogOut class="mr-2 h-4 w-4" />
+						<span>Log out</span>
+					</DropdownMenu.Item>
+				</DropdownMenu.Group>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
 	{:else}
 		<!-- User is not logged in -->
 		<Button variant="outline" href="/sign-in" class="ml-auto">
