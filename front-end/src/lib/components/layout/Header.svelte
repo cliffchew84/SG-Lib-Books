@@ -69,7 +69,7 @@
 						<Settings class="mr-2 h-4 w-4" />
 						<span>Settings</span>
 					</DropdownMenu.Item>
-					<DropdownMenu.Item href="/sign-out">
+					<DropdownMenu.Item href="/auth/sign-out">
 						<LogOut class="mr-2 h-4 w-4" />
 						<span>Log out</span>
 					</DropdownMenu.Item>
@@ -78,7 +78,7 @@
 		</DropdownMenu.Root>
 	{:else}
 		<!-- User is not logged in -->
-		<Button variant="outline" href="/sign-in" class="ml-auto">
+		<Button variant="outline" href="/auth/sign-in" class="ml-auto">
 			<LogIn class="mr-2 h-4 w-4" />
 			<span>Sign In</span>
 		</Button>
