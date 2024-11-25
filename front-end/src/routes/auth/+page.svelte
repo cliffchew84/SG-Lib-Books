@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 
-	goto('/dashboard');
+	// Redirect to /auth/sign-in
+	goto('/auth/sign-in');
 </script>
-

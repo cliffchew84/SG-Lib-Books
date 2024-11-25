@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { SupabaseClient } from '@supabase/supabase-js';
 	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 
 	import { Button } from '$lib/components/ui/button';
@@ -8,23 +9,37 @@
 
 	import { cn } from '$lib/utils.js';
 
-	let { class: className = undefined, ...restProps }: { class: string | undefined | null } =
-		$props();
-
+	let {
+		class: className = undefined,
+		supabase,
+		...restProps
+	}: { class: string | undefined | null; supabase: SupabaseClient } = $props();
 	let isLoading = $state(false);
+	let email = $state('');
+	let errorMessage = $state('');
 
-	async function onSubmit(e: SubmitEvent) {
+	async function onSubmitEmail(e: SubmitEvent) {
 		e.preventDefault();
 		isLoading = true;
-
-		setTimeout(() => {
+		const { error } = await supabase.auth.signInWithOtp({
+			email: email,
+			options: {
+				// set this to false if you do not want the user to be automatically signed up
+				shouldCreateUser: true,
+				// TODO: Change this based on locahost or not
+				emailRedirectTo: 'http://localhost:5173/dashboard'
+			}
+		});
+		if (error) {
 			isLoading = false;
-		}, 3000);
+			errorMessage = error.message;
+			return;
+		}
 	}
 </script>
 
 <div class={cn('grid gap-6', className)} {...restProps}>
-	<form onsubmit={onSubmit}>
+	<form onsubmit={onSubmitEmail}>
 		<div class="grid gap-2">
 			<div class="grid gap-1">
 				<Label class="sr-only" for="email">Email</Label>
@@ -35,6 +50,7 @@
 					autocapitalize="none"
 					autocomplete="email"
 					autocorrect="off"
+					bind:value={email}
 					disabled={isLoading}
 				/>
 			</div>
@@ -44,6 +60,9 @@
 				{/if}
 				Sign In with Email
 			</Button>
+			{#if errorMessage}
+				<p class="">{errorMessage}</p>
+			{/if}
 		</div>
 	</form>
 	<div class="relative">
@@ -54,5 +73,9 @@
 			<span class="bg-background text-muted-foreground px-2"> Or continue with </span>
 		</div>
 	</div>
-	<SignInWithGoogle />
+	<SignInWithGoogle
+		onClickFunction={() => {
+			supabase.auth.signInWithOAuth({ provider: 'google' });
+		}}
+	/>
 </div>

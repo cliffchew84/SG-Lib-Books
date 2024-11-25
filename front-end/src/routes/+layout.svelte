@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { onMount, type Snippet } from 'svelte';
+	import { invalidate } from '$app/navigation';
+	import type { LayoutData } from './$types';
 	import '../app.css';
 
 	let { children, data: loadData }: { children: Snippet; data: LayoutData } = $props();
