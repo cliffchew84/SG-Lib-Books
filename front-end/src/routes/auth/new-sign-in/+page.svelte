@@ -5,7 +5,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	if (!data.user || !data.session) {
+	if (!data.user || !data.session || data.user?.user_metadata.name !== undefined) {
 		// Redirect to dashboard if user is already logged in
 		goto('/auth/sign-in');
 	}
