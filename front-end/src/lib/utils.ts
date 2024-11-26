@@ -60,3 +60,13 @@ export const flyAndScale = (
 		easing: cubicOut
 	};
 };
+
+export const getInitials = (name: string) => {
+	var array = name.split(" ");
+	switch (array.length) {
+		case 1:
+			return array[0].charAt(0).toUpperCase();
+		default:
+			return array[0].charAt(0).toUpperCase() + array[array.length - 1].charAt(0).toUpperCase();
+	}
+}

@@ -8,6 +8,7 @@
 	import SignInWithGoogle from '$lib/components/icons/sign-in-with-google.svelte';
 
 	import { cn } from '$lib/utils.js';
+	import { goto } from '$app/navigation';
 
 	let {
 		class: className = undefined,
@@ -35,6 +36,8 @@
 			errorMessage = error.message;
 			return;
 		}
+		await supabase.auth.refreshSession();
+		goto('/auth/email-confirmation');
 	}
 </script>
 
@@ -61,7 +64,7 @@
 				Sign In with Email
 			</Button>
 			{#if errorMessage}
-				<p class="">{errorMessage}</p>
+				<p class="text-sm text-red-600">{errorMessage}</p>
 			{/if}
 		</div>
 	</form>

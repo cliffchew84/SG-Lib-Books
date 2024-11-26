@@ -1,11 +1,15 @@
 <script lang="ts">
-	import { Menu, Book, Settings, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
+	import type { User } from '@supabase/supabase-js';
 
+	import { Menu, Book, Settings, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { getInitials } from '$lib/utils';
 
-	let { isLoggedIn = true } = $props();
+	let { user }: { user: User | null } = $props();
+	let isLoggedIn: boolean = $derived(user !== null);
+	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
 </script>
 
 <header class="flex flex-row justify-between p-2 border shadow items-center">
@@ -38,7 +42,7 @@
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger>
 				<Avatar.Root class="hidden md:block">
-					<Avatar.Fallback>CN</Avatar.Fallback>
+					<Avatar.Fallback>{username}</Avatar.Fallback>
 				</Avatar.Root>
 				<Button variant="outline" class="block md:hidden">
 					<Menu class="h-4 w-4" />
