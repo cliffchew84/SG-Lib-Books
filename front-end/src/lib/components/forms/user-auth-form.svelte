@@ -5,7 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import SignInWithGoogle from '$lib/components/icons/sign-in-with-google.svelte';
+	import SignInWithGoogle from '$lib/components/buttons/sign-in-with-google.svelte';
 
 	import { cn } from '$lib/utils.js';
 	import { goto } from '$app/navigation';
