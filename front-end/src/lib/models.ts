@@ -7,9 +7,9 @@ export interface Library {
 	noAvail: number;
 	openingHoursDesc: string;
 	favourite: boolean;
+	imageLink?: string;
 }
 
-export interface LibraryCardProp extends Library {
+export interface LibraryProp extends Library {
 	onFavourite: MouseEventHandler<HTMLButtonElement>;
-	imageLink?: string;
 }

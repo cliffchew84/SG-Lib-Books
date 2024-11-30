@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LibraryCardProp } from '$lib/models.ts';
+	import type { LibraryProp } from '$lib/models.ts';
 	import { BookCheck, Clock4, Star, StarOff } from 'lucide-svelte';
 
 	let {
@@ -11,7 +11,7 @@
 		favourite = false,
 		onFavourite = () => {},
 		imageLink
-	}: LibraryCardProp = $props();
+	}: LibraryProp = $props();
 
 	let availabilityStatus = $derived(
 		[noAvail ? `${noAvail} Available` : '', noOnLoan ? `${noOnLoan} On-Loan` : ''].join(' · ')
