@@ -4,6 +4,7 @@
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 
 	let book = {
+		brn: 1,
 		title: 'Elon Musk',
 		author: 'Walter Issacson',
 		publishYear: '2023',
