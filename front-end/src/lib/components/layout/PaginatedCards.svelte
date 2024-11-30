@@ -1,8 +1,9 @@
 <script lang="ts">
 	import * as Pagination from '$lib/components/ui/pagination';
-	import BookCard from './BookCard.svelte';
+	import BookCard from '$lib/components/layout/BookCard.svelte';
+	import type { Book } from '$lib/models';
 
-	let { books = [], perPage = 25 }: { books: { [key: string]: any }[]; perPage: number } = $props();
+	let { books = [], perPage = 25 }: { books: Book[]; perPage: number } = $props();
 	let page = $state(0); // Current page number
 	let count = $derived(books.length); // Total items
 	let filteredBooks = $derived(books.slice(page * perPage, Math.min((page + 1) * perPage, count))); // Slice of books based on page changes
@@ -10,8 +11,8 @@
 
 <section class="flex flex-col gap-3">
 	<div class="grid md:grid-cols-5 sm:grid-cols-3 grid-cols-1 gap-3">
-		{#each filteredBooks as bookEle, id}
-			<BookCard brn={id} {...bookEle} />
+		{#each filteredBooks as book}
+			<BookCard {...book} onBookMarked={() => {}} />
 		{/each}
 	</div>
 	<Pagination.Root {count} {perPage} bind:page let:pages let:currentPage>

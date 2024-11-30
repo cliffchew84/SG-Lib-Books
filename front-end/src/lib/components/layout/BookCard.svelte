@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { type MouseEventHandler } from 'svelte/elements';
 	import {
 		ExternalLink,
 		Calendar,
@@ -9,19 +8,7 @@
 		BookMarked,
 		Bookmark
 	} from 'lucide-svelte';
-
-	// TODO: migrate book modals into interface file
-	interface CardProps {
-		title: string;
-		brn: number;
-		author: string;
-		publishYear: string;
-		callNumber: string;
-		branches: string[];
-		imageLink: string;
-		bookmarked: boolean;
-		onBookMarked: MouseEventHandler<HTMLButtonElement>;
-	}
+	import type { BookProp } from '$lib/models';
 
 	let {
 		brn,
@@ -33,7 +20,7 @@
 		imageLink = '',
 		bookmarked = false,
 		onBookMarked = () => {}
-	}: CardProps = $props();
+	}: BookProp = $props();
 
 	let externalLink = $derived(`https://catalogue.nlb.gov.sg/search/card?recordId=${brn}`);
 	let branchesName = $derived(branches.join(', '));
