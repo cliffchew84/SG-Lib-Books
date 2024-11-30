@@ -11,7 +11,7 @@
 	} from 'lucide-svelte';
 
 	// TODO: migrate book modals into interface file
-	interface PageProps {
+	interface CardProps {
 		title: string;
 		brn: number;
 		author: string;
@@ -33,7 +33,7 @@
 		imageLink = '',
 		bookmarked = false,
 		onBookMarked = () => {}
-	}: PageProps = $props();
+	}: CardProps = $props();
 
 	let externalLink = $derived(`https://catalogue.nlb.gov.sg/search/card?recordId=${brn}`);
 	let branchesName = $derived(branches.join(', '));
