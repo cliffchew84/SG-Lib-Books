@@ -10,9 +10,9 @@
 		isLoading = $bindable()
 	}: { books: Book[]; perPage: number; isLoading: boolean } = $props();
 
-	let page = $state(0); // Current page number
+	let page = $state(1); // Current page number, from 1
 	let count = $derived(books.length); // Total items
-	let filteredBooks = $derived(books.slice(page * perPage, Math.min((page + 1) * perPage, count))); // Slice of books based on page changes
+	let filteredBooks = $derived(books.slice((page - 1) * perPage, Math.min(page * perPage, count))); // Slice of books based on page changes
 </script>
 
 <section class="flex flex-col gap-3">
