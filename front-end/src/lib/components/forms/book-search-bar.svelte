@@ -1,11 +1,30 @@
 <script lang="ts">
 	import { X, Search } from 'lucide-svelte';
 	import { Input } from '$lib/components/ui/input';
+	import type { Book } from '$lib/models';
 
+	let { isLoading = $bindable(), books = $bindable() }: { isLoading: boolean; books: Book[] } =
+		$props();
 	let searchValue = $state('');
+
+	const book = {
+		brn: 1,
+		title: 'Elon Musk',
+		author: 'Walter Issacson',
+		publishYear: '2023',
+		callNumber: '338.092 ISA -[BIZ]',
+		branches: ['Bedok Library', 'The LLibrary', 'The Chinatown Library'],
+		imageLink: 'https://m.media-amazon.com/images/I/71iWxmst49L._AC_UF1000,1000_QL80_.jpg',
+		bookmarked: false
+	};
 
 	function onSubmit(e: SubmitEvent) {
 		e.preventDefault();
+		isLoading = true;
+		setTimeout(() => {
+			isLoading = false;
+			books = Array(100).fill(book);
+		}, 1000);
 	}
 </script>
 
