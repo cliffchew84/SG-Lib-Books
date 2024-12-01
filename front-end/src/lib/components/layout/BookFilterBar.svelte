@@ -8,7 +8,7 @@
 <div class="bg-background/95 backdrop-blur rounded relative">
 	<Search class="text-muted-foreground absolute left-2 top-[50%] h-4 w-4 translate-y-[-50%]" />
 	<Input
-		placeholder="Filter Book from Title, Author, or Call Number"
+		placeholder="Filter Book with Title, Author, or Call Number"
 		class="px-8"
 		bind:value={searchValue}
 	/>
