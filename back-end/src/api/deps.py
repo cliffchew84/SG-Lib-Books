@@ -9,7 +9,6 @@ from pymongo import MongoClient
 from supabase import create_client, Client
 from nlb_catalogue_client import AuthenticatedClient
 
-from src import m_db
 from src.config import settings
 
 
@@ -23,14 +22,6 @@ def get_sdb():
 
 
 SDBDep = Annotated[Client, Depends(get_sdb)]
-
-
-async def get_mdb():
-    """Return mongo db client connection"""
-    yield m_db.connect_mdb()
-
-
-MDBDep = Annotated[MongoClient, Depends(get_mdb)]
 
 
 def username_email_resol(user_info: Annotated[str | None, Cookie()] = None):

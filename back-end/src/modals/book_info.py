@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, overload
+from typing import ClassVar, Optional
 
 from pydantic import BaseModel
 from nlb_catalogue_client.models.get_title_details_response_v2 import (
