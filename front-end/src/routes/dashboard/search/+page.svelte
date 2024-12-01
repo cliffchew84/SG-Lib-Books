@@ -3,6 +3,7 @@
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 
+	let isSearching = $state(false);
 	let book = {
 		brn: 1,
 		title: 'Elon Musk',
@@ -18,5 +19,5 @@
 
 <TitledPage title="Search" description="Add your favourite books from NLB's Catalogue.">
 	<BookSearchBar />
-	<PaginatedCards {books} perPage={25} />
+	<PaginatedCards {books} perPage={25} isLoading={isSearching} />
 </TitledPage>

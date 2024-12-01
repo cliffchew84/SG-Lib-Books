@@ -1,20 +1,32 @@
 <script lang="ts">
+	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 	import * as Pagination from '$lib/components/ui/pagination';
 	import BookCard from '$lib/components/layout/BookCard.svelte';
 	import type { Book } from '$lib/models';
 
-	let { books = [], perPage = 25 }: { books: Book[]; perPage: number } = $props();
+	let {
+		books = [],
+		perPage = 25,
+		isLoading = $bindable()
+	}: { books: Book[]; perPage: number; isLoading: boolean } = $props();
+
 	let page = $state(0); // Current page number
 	let count = $derived(books.length); // Total items
 	let filteredBooks = $derived(books.slice(page * perPage, Math.min((page + 1) * perPage, count))); // Slice of books based on page changes
 </script>
 
 <section class="flex flex-col gap-3">
-	<div class="grid md:grid-cols-5 sm:grid-cols-3 grid-cols-1 gap-3">
-		{#each filteredBooks as book}
-			<BookCard {...book} onBookMarked={() => {}} />
-		{/each}
-	</div>
+	{#if isLoading}
+		<div class="flex justify-center items-center">
+			<LoaderCircle class="m-8 h-6 w-6 animate-spin" />
+		</div>
+	{:else}
+		<div class="grid md:grid-cols-5 sm:grid-cols-3 grid-cols-1 gap-3">
+			{#each filteredBooks as book}
+				<BookCard {...book} onBookMarked={() => {}} />
+			{/each}
+		</div>
+	{/if}
 	<Pagination.Root {count} {perPage} bind:page let:pages let:currentPage>
 		<Pagination.Content>
 			<Pagination.Item>
