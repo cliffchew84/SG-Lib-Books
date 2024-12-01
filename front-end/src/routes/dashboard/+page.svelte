@@ -9,4 +9,6 @@
 		// when new user signed-in via email
 		goto('/auth/new-sign-in');
 	}
+	// Else, redirect to library page
+	goto('/dashboard/library');
 </script>
