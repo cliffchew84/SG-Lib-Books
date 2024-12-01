@@ -16,7 +16,7 @@
 
 {#if libraries.length !== 0}
 	<div class="flex flex-col gap-3">
-		<h1 class="text-4xl font-bold text-slate-700">{title}</h1>
+		<h2 class="text-2xl font-bold text-slate-700">{title}</h2>
 		<p class="text-sm text-slate-500">{description}</p>
 
 		<Carousel.Root>

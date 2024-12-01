@@ -24,6 +24,7 @@ export interface Library {
 	openingHoursDesc: string;
 	favourite: boolean;
 	imageLink?: string;
+	location?: string;
 }
 
 export interface LibraryProp extends Library {
