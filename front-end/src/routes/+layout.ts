@@ -29,7 +29,7 @@ export const load: LayoutLoad = async ({ depends, fetch }) => {
 	} = await supabase.auth.getUser()
 
 	// TODO: change endpoint based on configuration
-	const client = new BackendAPIClient("http://locahost:8000", session)
+	const client = new BackendAPIClient("http://localhost:8000", session)
 
 	return { session, supabase, user, client }
 }
