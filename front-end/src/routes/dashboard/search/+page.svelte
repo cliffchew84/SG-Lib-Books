@@ -37,17 +37,13 @@
 		try {
 			const response = await searchBook(data.client, searchInput, next_offset);
 			isSearching = false;
-			let searchBooks: Book[] = [];
-			for (let title of response.titles) {
-				searchBooks.push({
-					brn: title.BID,
-					title: title.TitleName,
-					author: title.Author,
-					imageLink: title.cover_url,
-					bookmarked: false
-				});
-			}
-			books = searchBooks;
+			books = response.titles.map((title) => ({
+				brn: title.BID,
+				title: title.TitleName,
+				author: title.Author,
+				imageLink: title.cover_url,
+				bookmarked: false
+			}));
 			total_records = response.total_records;
 			has_more_records = response.has_more_records;
 			next_offset = response.next_offset;
