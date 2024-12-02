@@ -4,16 +4,30 @@ FastAPI dependencies
 
 from typing import Annotated
 
-from fastapi import Cookie, Depends
-from pymongo import MongoClient
-from supabase import create_client, Client
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from gotrue import User
+from gotrue.errors import AuthApiError
 from nlb_catalogue_client import AuthenticatedClient
+from supabase import create_client, Client
 
 from src.config import settings
 
 
+super_client: Client | None = None
+
+
+async def init_super_client() -> None:
+    """for validation access_token init at life span event"""
+    global super_client  # pylint: disable=global-statement
+    super_client = create_client(
+        settings.SUPABASE_URL,
+        settings.SUPABASE_KEY,
+    )
+
+
 def get_sdb():
-    """Return supabase db client connection"""
+    """Return supabase db client connection with service key"""
     client: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
     try:
         yield client
@@ -23,18 +37,35 @@ def get_sdb():
 
 SDBDep = Annotated[Client, Depends(get_sdb)]
 
-
-def username_email_resol(user_info: Annotated[str | None, Cookie()] = None):
-    """In the current new flow, username == email
-    To cover legacy situation where username != email
-    """
-    if not user_info:
-        return None
-    email, username = user_info.split(" | ")
-    return username if username else email
+# auto get access_token from header
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl="please login by supabase-js to get token", auto_error=False
+)
+AccessTokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-UsernameDep = Annotated[str | None, Depends(username_email_resol)]
+async def get_current_user(access_token: AccessTokenDep) -> User:
+    """get current user from access_token and  validate same time"""
+    if not super_client:
+        raise HTTPException(status_code=500, detail="Super client not initialized")
+
+    if not access_token:
+        raise HTTPException(
+            status_code=401, detail="Invalid authentication credentials"
+        )
+
+    try:
+        user_rsp = super_client.auth.get_user(jwt=access_token)
+    except AuthApiError as e:
+        raise HTTPException(
+            status_code=401, detail="Invalid authentication credentials"
+        ) from e
+    if not user_rsp:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user_rsp.user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 def get_nlb_api_client():

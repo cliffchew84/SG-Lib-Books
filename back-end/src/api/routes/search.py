@@ -8,7 +8,7 @@ from nlb_catalogue_client.api.catalogue import get_search_titles
 from nlb_catalogue_client.models.search_titles_response_v2 import SearchTitlesResponseV2
 
 
-from src.api.deps import SDBDep, UsernameDep, NLBClientDep
+from src.api.deps import SDBDep, CurrentUser, NLBClientDep
 from src.crud.user_search import user_search_crud
 from src.modals.book_info import BookInfo
 from src.modals.book_search import SearchResponse
@@ -22,7 +22,7 @@ router = APIRouter()
 async def search_books(
     db: SDBDep,
     nlb: NLBClientDep,
-    username: UsernameDep,
+    user: CurrentUser,
     keyword: str = "",
     offset: Optional[int] = 0,
     limit: Optional[int] = 25,
@@ -30,8 +30,8 @@ async def search_books(
     """Calls NLB API GetTitles Search and show results
     in search_table.html
     """
-    if not username:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User is unauthorized")
+    if not user.email:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     if not keyword:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Keyword is empty in params")
@@ -57,7 +57,7 @@ async def search_books(
     await user_search_crud.create(
         db,
         obj_in=UserSearchCreate(
-            UserName=username,
+            UserName=user.email,
             search_time=int(
                 time.mktime(datetime.now().timetuple()),
             ),
