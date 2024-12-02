@@ -1,15 +1,18 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+
+	import { searchBook } from '$lib/api/search';
 	import BookSearchBar from '$lib/components/forms/book-search-bar.svelte';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import type { Book } from '$lib/models';
 	import type { PageData } from '../$types';
-	import { searchBook } from '$lib/api/search';
 
 	let { data }: { data: PageData } = $props();
 
-	let searchInput = $state(''); // Input search box
-	let searchValue: string = $state(''); // search text when onSubmit is trigger
+	let searchInput = $state($page.url.searchParams.get('q') ?? ''); // Input search box
 	let books: Book[] = $state([]);
 
 	let isSearching = $state(false);
@@ -19,8 +22,9 @@
 	let has_more_records: boolean | null = $state(null);
 	let next_offset = $state(0);
 
-	async function onSubmit(e: SubmitEvent) {
-		e.preventDefault(); // Prevent page reload
+	async function onSubmit(e?: SubmitEvent) {
+		if (e) e.preventDefault(); // Prevent page reload
+		if (searchInput === '') return;
 
 		// Reset initial state
 		isSearching = true;
@@ -28,10 +32,10 @@
 		books = [];
 		total_records = null;
 		has_more_records = null;
-		searchValue = searchInput;
+		goto(`?q=${searchInput}`); // Add query data to url
 
 		try {
-			const response = await searchBook(data.client, searchValue, next_offset);
+			const response = await searchBook(data.client, searchInput, next_offset);
 			isSearching = false;
 			let searchBooks: Book[] = [];
 			for (let title of response.titles) {
@@ -53,6 +57,13 @@
 			console.error(error);
 		}
 	}
+
+	onMount(() => {
+		if (searchInput) {
+			// Start searching after mount if `q` is present in query
+			onSubmit();
+		}
+	});
 </script>
 
 <TitledPage title="Search" description="Add your favourite books from NLB's Catalogue.">
@@ -61,7 +72,8 @@
 		{#if total_records === 0}
 			<div>
 				<p>
-					Your search - <span class="font-semibold">{searchValue}</span> - did not match any books.
+					Your search - <span class="font-semibold">{$page.url.searchParams.get('q')}</span> - did not
+					match any books.
 				</p>
 				<ul class="list-disc list-inside">
 					<span>What you can do:</span>
