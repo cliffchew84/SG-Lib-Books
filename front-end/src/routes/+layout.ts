@@ -1,5 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
+import BackendAPIClient from '$lib/api/client'
 import type { LayoutLoad } from './$types'
 
 // Client-side rendering only
@@ -27,5 +28,8 @@ export const load: LayoutLoad = async ({ depends, fetch }) => {
 		data: { user },
 	} = await supabase.auth.getUser()
 
-	return { session, supabase, user }
+	// TODO: change endpoint based on configuration
+	const client = new BackendAPIClient("http://locahost:8000", session)
+
+	return { session, supabase, user, client }
 }
