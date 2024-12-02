@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status
+from nlb_catalogue_client.models.bad_request_error import BadRequestError
 from nlb_catalogue_client.types import UNSET
 from nlb_catalogue_client.api.catalogue import get_search_titles
 from nlb_catalogue_client.models.search_titles_response_v2 import SearchTitlesResponseV2
@@ -46,6 +47,13 @@ async def search_books(
 
     # Raise error if NLB API throw error
     if not isinstance(response.parsed, SearchTitlesResponseV2):
+        # HACK: Since NLB api implement 404 as BadRequestError,
+        # work around is to catch it earlier
+        if isinstance(response.parsed, BadRequestError):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "No search results are found"
+            )
+
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(response.parsed))
 
     # Return 404 if no response is found

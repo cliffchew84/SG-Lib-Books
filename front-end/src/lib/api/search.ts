@@ -18,14 +18,14 @@ interface APIResponse {
 	titles: BookInfo[];
 }
 
-export async function searchBook(client: BackendAPIClient, keywords: string): Promise<APIResponse> {
-	if (!keywords) {
+export async function searchBook(client: BackendAPIClient, keyword: string, offset: number): Promise<APIResponse> {
+	if (!keyword) {
 		console.warn('Empty keywords is provided.');
 		throw new Error("Empty keywords is provided");
 	}
 
 	try {
-		const response = await client.get({ path: "/search", queryParams: { keywords } });
+		const response = await client.get({ path: "/search", queryParams: { keyword, offset } });
 
 		if (!response.ok) {
 			if (response.status === 404) {
@@ -37,7 +37,7 @@ export async function searchBook(client: BackendAPIClient, keywords: string): Pr
 				}
 			}
 
-			throw new Error(`HTTP error! status: ${response.status}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
 		}
 
 		const data: APIResponse = await response.json();
