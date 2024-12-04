@@ -12,15 +12,18 @@
 
 	let { data }: { data: PageData } = $props();
 
+	const perPage = 25;
 	let searchInput = $state($page.url.searchParams.get('q') ?? ''); // Input search box
 	let books: Book[] = $state([]);
 
 	let isSearching = $state(false);
 	let isError = $state(false);
 
-	let total_records: number | null = $state(null);
-	let has_more_records: boolean | null = $state(null);
-	let next_offset = $state(0);
+	let currentPage = $state(parseInt($page.url.searchParams.get('page') ?? '1'));
+	let prevPage = $state(parseInt($page.url.searchParams.get('page') ?? '1'));
+	let totalRecords: number | null = $state(null);
+	let hasMoreRecords: boolean | null = $state(null);
+	let offset = $derived((currentPage - 1) * perPage);
 
 	async function onSubmit(e?: SubmitEvent) {
 		if (e) e.preventDefault(); // Prevent page reload
@@ -30,12 +33,12 @@
 		isSearching = true;
 		isError = false;
 		books = [];
-		total_records = null;
-		has_more_records = null;
-		goto(`?q=${searchInput}`); // Add query data to url
+		totalRecords = null;
+		hasMoreRecords = null;
+		goto(`?q=${searchInput}&page=${currentPage}`); // Add query data to url
 
 		try {
-			const response = await searchBook(data.client, searchInput, next_offset);
+			const response = await searchBook(data.client, searchInput, offset);
 			isSearching = false;
 			books = response.titles.map((title) => ({
 				brn: title.BID,
@@ -44,9 +47,8 @@
 				imageLink: title.cover_url,
 				bookmarked: false
 			}));
-			total_records = response.total_records;
-			has_more_records = response.has_more_records;
-			next_offset = response.next_offset;
+			totalRecords = response.total_records;
+			hasMoreRecords = response.has_more_records;
 		} catch (error) {
 			isSearching = false;
 			isError = true;
@@ -55,17 +57,27 @@
 	}
 
 	onMount(() => {
+		// Start searching after mount if `q` is present in query
 		if (searchInput) {
-			// Start searching after mount if `q` is present in query
 			onSubmit();
 		}
 	});
+
+	$effect(() => {
+		// Re-trigger query on page changed
+		if (prevPage !== currentPage) {
+			prevPage = currentPage;
+			onSubmit();
+		}
+	});
+
+	$inspect(currentPage, prevPage, offset);
 </script>
 
 <TitledPage title="Search" description="Add your favourite books from NLB's Catalogue.">
 	<BookSearchBar {onSubmit} bind:searchInput />
 	{#if !isError}
-		{#if total_records === 0}
+		{#if totalRecords === 0}
 			<div>
 				<p>
 					Your search - <span class="font-semibold">{$page.url.searchParams.get('q')}</span> - did not
@@ -79,7 +91,13 @@
 				</ul>
 			</div>
 		{:else}
-			<PaginatedCards {books} perPage={25} isLoading={isSearching} />
+			<PaginatedCards
+				{books}
+				{perPage}
+				isLoading={isSearching}
+				count={totalRecords ?? 0}
+				bind:page={currentPage}
+			/>
 		{/if}
 	{:else}
 		<p>An unknown error has occurred.</p>
