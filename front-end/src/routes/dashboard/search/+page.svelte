@@ -100,7 +100,7 @@
 			/>
 		{/if}
 	{:else}
-		<p>An unknown error has occurred.</p>
+		<p>Something went wrong...</p>
 		<p>If this behaviour persist, please contact us to make this app better, together.</p>
 	{/if}
 </TitledPage>

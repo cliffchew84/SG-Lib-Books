@@ -5,8 +5,11 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, status
 from nlb_catalogue_client.models.bad_request_error import BadRequestError
 from nlb_catalogue_client.types import UNSET
-from nlb_catalogue_client.api.catalogue import get_search_titles
-from nlb_catalogue_client.models.search_titles_response_v2 import SearchTitlesResponseV2
+
+# from nlb_catalogue_client.api.catalogue import get_search_titles
+# from nlb_catalogue_client.models.search_titles_response_v2 import SearchTitlesResponseV2
+from nlb_catalogue_client.api.catalogue import get_get_titles
+from nlb_catalogue_client.models.get_titles_response_v2 import GetTitlesResponseV2
 
 
 from src.api.deps import SDBDep, CurrentUser, NLBClientDep
@@ -38,7 +41,13 @@ async def search_books(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Keyword is empty in params")
 
     # Get titles from NLB API
-    response = await get_search_titles.asyncio_detailed(
+    # response = await get_search_titles.asyncio_detailed(
+    #     client=nlb,
+    #     keywords=keyword,
+    #     offset=offset if offset else UNSET,
+    #     limit=limit if limit else UNSET,
+    # )
+    response = await get_get_titles.asyncio_detailed(
         client=nlb,
         keywords=keyword,
         offset=offset if offset else UNSET,
@@ -46,7 +55,8 @@ async def search_books(
     )
 
     # Raise error if NLB API throw error
-    if not isinstance(response.parsed, SearchTitlesResponseV2):
+    # if not isinstance(response.parsed, SearchTitlesResponseV2):
+    if not isinstance(response.parsed, GetTitlesResponseV2):
         # HACK: Since NLB api implement 404 as BadRequestError,
         # work around is to catch it earlier
         if isinstance(response.parsed, BadRequestError):
@@ -84,5 +94,5 @@ async def search_books(
     return SearchResponse(
         total_records=total_records,
         has_more_records=has_more_records,
-        titles=[BookInfo.from_search(title) for title in response.parsed.titles],
+        titles=[BookInfo.from_title(title) for title in response.parsed.titles],
     )

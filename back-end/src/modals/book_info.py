@@ -1,5 +1,6 @@
 from typing import ClassVar, Optional
 
+from nlb_catalogue_client.models.title import Title
 from pydantic import BaseModel
 from nlb_catalogue_client.models.get_title_details_response_v2 import (
     GetTitleDetailsResponseV2,
@@ -61,6 +62,21 @@ class BookInfo(ResponseBase, BookInfoBase):
                 if item.cover_url and item.cover_url.medium
                 else None
             ),
+        )
+        return book_info
+
+    @staticmethod
+    def from_title(item: Title) -> "BookInfo":
+        # Get first record instancec from book
+        book_info = BookInfo(
+            BID=item.brn if item.brn else 0,
+            TitleName=item.title if item.title else None,
+            Author=item.author if item.author else None,
+            PublishYear=item.publish_date if item.publish_date else None,
+            Subjects=None,
+            Publisher=str(item.publisher) if item.publisher else None,
+            isbns=str(item.isbns) if item.isbns else None,
+            cover_url=f"https://eservice.nlb.gov.sg/bookcoverwrapper/cover/{item.isbns[0] if item.isbns else ''}",
         )
         return book_info
 
