@@ -14,8 +14,10 @@
 		imageLink: 'https://m.media-amazon.com/images/I/71iWxmst49L._AC_UF1000,1000_QL80_.jpg',
 		bookmarked: false
 	};
-	const books = Array(1000).fill(book);
+	const count = 100;
+	const books = Array(25).fill(book);
 
+	let currentPage = $state(1);
 	let isFiltering = $state(false);
 	let searchValue = $state('');
 	let filteredBooks = $state(books);
@@ -50,5 +52,11 @@
 <TitledPage title="Books" description="Checkout all your favourite books.">
 	<!-- TODO: add book search and filter -->
 	<BookFilterBar bind:searchValue />
-	<PaginatedCards books={filteredBooks} perPage={25} bind:isLoading={isFiltering} />
+	<PaginatedCards
+		books={filteredBooks}
+		perPage={25}
+		bind:isLoading={isFiltering}
+		{count}
+		page={currentPage}
+	/>
 </TitledPage>

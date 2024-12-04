@@ -3,6 +3,8 @@
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import { page } from '$app/stores';
 
+	let currentPage = $state(1);
+	const count = 12;
 	const lid = $page.params.lid;
 	const library = {
 		id: lid,
@@ -32,11 +34,11 @@
 	<div class="flex flex-col gap-3">
 		<h2 class="text-2xl font-bold text-slate-700">On-Shelf</h2>
 		<p class="text-sm text-slate-500">Books available to be borrowed</p>
-		<PaginatedCards books={booksOnShelf} perPage={4} isLoading={false} />
+		<PaginatedCards books={booksOnShelf} perPage={4} isLoading={false} {count} page={currentPage} />
 	</div>
 	<div class="flex flex-col gap-3">
 		<h2 class="text-2xl font-bold text-slate-700">On-Loaned</h2>
 		<p class="text-sm text-slate-500">Books on-loaned to fellow readers</p>
-		<PaginatedCards books={booksOnLoan} perPage={5} isLoading={false} />
+		<PaginatedCards books={booksOnLoan} perPage={5} isLoading={false} {count} page={currentPage} />
 	</div>
 </main>
