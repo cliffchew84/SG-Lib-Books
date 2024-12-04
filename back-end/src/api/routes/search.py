@@ -80,11 +80,9 @@ async def search_books(
     has_more_records = (
         response.parsed.has_more_records if response.parsed.has_more_records else False
     )
-    next_offset = (offset if offset else 0) + (limit if limit else 0)
 
     return SearchResponse(
         total_records=total_records,
         has_more_records=has_more_records,
-        next_offset=next_offset,
         titles=[BookInfo.from_search(title) for title in response.parsed.titles],
     )

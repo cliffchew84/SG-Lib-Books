@@ -14,7 +14,6 @@ interface BookInfo {
 interface APIResponse {
 	total_records: number;
 	has_more_records: boolean;
-	next_offset: number;
 	titles: BookInfo[];
 }
 
@@ -32,7 +31,6 @@ export async function searchBook(client: BackendAPIClient, keyword: string, offs
 				return {
 					total_records: 0,
 					has_more_records: false,
-					next_offset: 0,
 					titles: []
 				}
 			}
