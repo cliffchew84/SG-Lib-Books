@@ -98,7 +98,7 @@ class BookInfoCreate(CreateBase, BookInfoBase):
             Subjects=subjects if subjects else None,
             Publisher=str(item.publisher) if item.publisher else None,
             isbns=str(item.isbns) if item.isbns else None,
-            cover_url=None,
+            cover_url=f"https://eservice.nlb.gov.sg/bookcoverwrapper/cover/{item.isbns[0] if item.isbns else ''}",
         )
 
         return book_info
@@ -111,6 +111,7 @@ class BookInfoUpdateBase(BaseModel):
     PublishYear: Optional[str] = None
     Subjects: Optional[str] = None
     isbns: Optional[str] = None
+    cover_url: Optional[str] = None
 
 
 class BookInfoUpdate(UpdateBase, BookInfoUpdateBase):
