@@ -1,15 +1,5 @@
 import type BackendAPIClient from "./client";
-
-interface BookInfo {
-	BID: number;
-	TitleName?: string;
-	Author?: string
-	PublishYear?: string;
-	Publisher?: string;
-	Subjects?: string;
-	isbns?: string;
-	cover_url?: string;
-}
+import type { BookInfo } from "./models";
 
 interface APIResponse {
 	total_records: number;
