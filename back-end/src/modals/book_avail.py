@@ -47,16 +47,6 @@ class BookAvailBase(BaseModel):
             else None
         )
 
-    @computed_field
-    @property
-    def StatusDescWithDueDate(self) -> str:
-        """Add Due Date to StatusDesc if available"""
-        return (self.StatusDesc if self.StatusDesc else "Unknown") + (
-            f" [{datetime.strptime(self.DueDate, '%Y-%m-%d').strftime('%d/%m')}]"
-            if self.DueDate
-            else ""
-        )
-
 
 class BookAvail(ResponseBase, BookAvailBase):
     table_name: ClassVar[str] = "books_avail"
