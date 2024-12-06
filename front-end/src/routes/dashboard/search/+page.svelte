@@ -22,7 +22,6 @@
 	let currentPage = $state(parseInt($page.url.searchParams.get('page') ?? '1'));
 	let prevPage = $state(parseInt($page.url.searchParams.get('page') ?? '1'));
 	let totalRecords: number | null = $state(null);
-	let hasMoreRecords: boolean | null = $state(null);
 	let offset = $derived((currentPage - 1) * perPage);
 
 	async function onSubmit(e?: SubmitEvent) {
@@ -34,7 +33,6 @@
 		isError = false;
 		books = [];
 		totalRecords = null;
-		hasMoreRecords = null;
 		goto(`?q=${searchInput}&page=${currentPage}`); // Add query data to url
 
 		try {
@@ -48,7 +46,6 @@
 				bookmarked: false
 			}));
 			totalRecords = response.total_records;
-			hasMoreRecords = response.has_more_records;
 		} catch (error) {
 			isSearching = false;
 			isError = true;
