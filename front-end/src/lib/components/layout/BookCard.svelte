@@ -71,7 +71,7 @@
 		{/if}
 		{#if branchesName}
 			<div class="flex gap-2 text-slate-500">
-				<MapPin class="w-6 h-4 my-auto" />
+				<MapPin class="w-4 h-4 my-auto shrink-0" />
 				<p class="text-ellipsis overflow-hidden whitespace-nowrap">{branchesName}</p>
 			</div>
 		{/if}
