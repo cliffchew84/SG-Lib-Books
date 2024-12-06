@@ -54,6 +54,7 @@ async def get_book(
     bid: int,
     user: CurrentUser,
     db: SDBDep,
+    nlb: NLBClientDep,
 ) -> BookResponse:
     if not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
@@ -61,12 +62,44 @@ async def get_book(
     try:
         book_info = await book_info_crud.get(db, i=str(bid))
         if not book_info:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, f"Book brn: {bid} is not found in database"
+            # Book infomation does not exist in database,
+            # querying from NLB API instead
+            response_info = await get_get_title_details.asyncio_detailed(
+                client=nlb, brn=bid
             )
+            if not isinstance(response_info.parsed, GetTitleDetailsResponseV2):
+                if response_info.status_code == 404:
+                    raise HTTPException(
+                        status.HTTP_404_NOT_FOUND, str(response_info.parsed)
+                    )
+                raise HTTPException(
+                    status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_info.parsed)
+                )
+
+            book_info = BookInfoCreate.from_nlb(response_info.parsed)
+
         book_avail = await book_avail_crud.get_multi_by_owner(
             db, username=user.email, BIDs=[bid]
         )
+        if not book_avail:
+            # Book availablitiy does not exist in database,
+            # querying from NLB API instead
+            response_avail = await get_get_availability_info.asyncio_detailed(
+                client=nlb, brn=bid
+            )
+            if (
+                not isinstance(
+                    response_avail.parsed, GetAvailabilityInfoResponseV2
+                )  # ErrorResponse
+            ):
+                # Return empty table
+                raise HTTPException(
+                    status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_avail.parsed)
+                )
+            book_avail = [
+                BookAvailCreate.from_nlb(item)
+                for item in response_avail.parsed.items or []
+            ]
 
         return BookResponse(**book_info.model_dump(), avails=book_avail)
 
