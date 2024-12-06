@@ -67,8 +67,6 @@
 			onSubmit();
 		}
 	});
-
-	$inspect(currentPage, prevPage, offset);
 </script>
 
 <TitledPage title="Search" description="Add your favourite books from NLB's Catalogue.">
