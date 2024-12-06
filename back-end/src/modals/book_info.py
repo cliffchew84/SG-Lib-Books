@@ -39,6 +39,9 @@ class BookInfoBase(BaseModel):
     """Cover photo url"""
     cover_url: str | None
 
+    """Summary"""
+    summary: str | None
+
 
 class BookInfo(ResponseBase, BookInfoBase):
     table_name: ClassVar[str] = "books_info"
@@ -47,6 +50,7 @@ class BookInfo(ResponseBase, BookInfoBase):
     @staticmethod
     def from_search(item: TitleSummary) -> "BookInfo":
         # Get first record instancec from book
+        raise NotImplementedError()
         record = item.records[0] if item.records else None
 
         book_info = BookInfo(
@@ -77,6 +81,7 @@ class BookInfo(ResponseBase, BookInfoBase):
             Publisher=str(item.publisher) if item.publisher else None,
             isbns=str(item.isbns) if item.isbns else None,
             cover_url=f"https://eservice.nlb.gov.sg/bookcoverwrapper/cover/{item.isbns[0] if item.isbns else ''}",
+            summary="\n\n".join(item.summary) if item.summary else None,
         )
         return book_info
 
@@ -99,6 +104,7 @@ class BookInfoCreate(CreateBase, BookInfoBase):
             Publisher=str(item.publisher) if item.publisher else None,
             isbns=str(item.isbns) if item.isbns else None,
             cover_url=f"https://eservice.nlb.gov.sg/bookcoverwrapper/cover/{item.isbns[0] if item.isbns else ''}",
+            summary="\n\n".join(item.summary) if item.summary else None,
         )
 
         return book_info

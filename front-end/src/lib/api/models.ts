@@ -7,6 +7,7 @@ export interface BookInfo {
 	Subjects?: string;
 	isbns?: string;
 	cover_url?: string;
+	summary?: string;
 }
 
 export interface BookAvail {
