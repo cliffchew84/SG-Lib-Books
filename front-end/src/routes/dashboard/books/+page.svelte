@@ -16,8 +16,7 @@
 	let isLoading = $state(false);
 	let searchValue = $state('');
 	let filteredBooks: Book[] = $state([]);
-	// let count = $derived(books.length);
-	let count = $state(0);
+	let count = $derived(books.length);
 
 	// Effect to load books from API
 	$effect(() => {
