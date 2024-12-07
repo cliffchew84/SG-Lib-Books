@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
+	import { bookStore } from '$lib/stores';
 	import { Button } from '$lib/components/ui/button';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import BookFilterBar from '$lib/components/layout/BookFilterBar.svelte';
 	import type { Book } from '$lib/models';
-	import type { PageData } from '../$types';
+	import type { PageData } from './$types';
 	import type { BookAvail, BookResponse } from '$lib/api/models';
 	const perPage = 25;
 
@@ -43,7 +44,7 @@
 					callNumber: book.avails && book.avails.length > 0 ? book.avails[0].CallNumber : undefined,
 					imageLink: book.cover_url,
 					summary: book.summary,
-					bookmarked: true,
+					bookmarked: $bookStore.hasOwnProperty(book.BID),
 					branches: Object.keys(branchAvail)
 				} as Book;
 			});

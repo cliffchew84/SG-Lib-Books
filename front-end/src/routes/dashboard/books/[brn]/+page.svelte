@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { bookStore } from '$lib/stores';
 	import BookDetailsSection from '$lib/components/layout/BookDetailsSection.svelte';
 	import LibraryCarousel from '$lib/components/layout/LibraryCarousel.svelte';
 	import type { PageData } from './$types';
@@ -58,7 +59,7 @@
 					bookAPI.avails && bookAPI.avails.length > 0 ? bookAPI.avails[0].CallNumber : undefined,
 				imageLink: bookAPI.cover_url,
 				summary: bookAPI.summary,
-				bookmarked: false,
+				bookmarked: $bookStore.hasOwnProperty($page.params.brn),
 				branches: Object.keys(branchAvail)
 			};
 			librariesAvail = Object.values(libraries).filter((lib) => {

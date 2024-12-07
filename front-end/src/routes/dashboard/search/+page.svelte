@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
+	import { bookStore } from '$lib/stores';
 	import { searchBook } from '$lib/api/search';
 	import BookSearchBar from '$lib/components/forms/book-search-bar.svelte';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
@@ -43,7 +44,7 @@
 				title: title.TitleName,
 				author: title.Author,
 				imageLink: title.cover_url,
-				bookmarked: false
+				bookmarked: $bookStore.hasOwnProperty(title.BID)
 			}));
 			totalRecords = response.total_records;
 		} catch (error) {
