@@ -1,18 +1,46 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { likeBook, unlikeBook } from '$lib/api/book';
 	import { bookStore } from '$lib/stores';
 	import BookDetailsSection from '$lib/components/layout/BookDetailsSection.svelte';
 	import LibraryCarousel from '$lib/components/layout/LibraryCarousel.svelte';
 	import type { PageData } from './$types';
-	import type { Book, Library } from '$lib/models';
+	import type { BookProp, Library } from '$lib/models';
 	import type { BookAvail } from '$lib/api/models';
 
 	let { data }: { data: PageData } = $props();
+	const brn = Number($page.params.brn);
 
 	let isLoading = $state(true);
-	let book: Book = $state({
-		brn: Number($page.params.brn),
-		bookmarked: false
+	let book: BookProp = $state({
+		brn: brn,
+		bookmarked: $bookStore.hasOwnProperty($page.params.brn),
+		bookMarkLoading: false,
+		onBookMarked: async () => {
+			book.bookMarkLoading = true;
+			try {
+				if ($bookStore.hasOwnProperty(brn)) {
+					console.log('Unbookmark book', brn);
+					await unlikeBook(data.client, brn);
+					bookStore.update((s) => {
+						delete s[brn];
+						return s;
+					});
+				} else {
+					console.log('bookmark book', brn);
+					await likeBook(data.client, brn);
+					bookStore.update((s) => {
+						s[brn] = { ...book, bookmarked: true };
+						return s;
+					});
+				}
+				book.bookMarkLoading = false;
+				book.bookmarked = !book.bookmarked;
+			} catch (error) {
+				console.error('Bookmark/Unbookmark error:', error);
+				book.bookMarkLoading = false;
+			}
+		}
 	});
 	let librariesAvail: Library[] = $state([]);
 	let librariesOnLoan: Library[] = $state([]);
@@ -51,7 +79,6 @@
 
 			// Update front-end states
 			book = {
-				brn: Number($page.params.brn),
 				title: bookAPI.TitleName,
 				author: bookAPI.Author,
 				publishYear: bookAPI.PublishYear,
@@ -59,8 +86,8 @@
 					bookAPI.avails && bookAPI.avails.length > 0 ? bookAPI.avails[0].CallNumber : undefined,
 				imageLink: bookAPI.cover_url,
 				summary: bookAPI.summary,
-				bookmarked: $bookStore.hasOwnProperty($page.params.brn),
-				branches: Object.keys(branchAvail)
+				branches: Object.keys(branchAvail),
+				...book
 			};
 			librariesAvail = Object.values(libraries).filter((lib) => {
 				return lib.noAvail >= 1;
@@ -73,7 +100,7 @@
 </script>
 
 <main class="container flex flex-col gap-8 p-8 min-h-[85vh]">
-	<BookDetailsSection {...book} {isLoading} onBookMarked={() => {}} />
+	<BookDetailsSection {book} {isLoading} />
 	<LibraryCarousel
 		title="On-Shelf"
 		description="Libraries with books available to be borrowed."

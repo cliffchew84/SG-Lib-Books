@@ -1,66 +1,72 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
+	import { likeBook, unlikeBook } from '$lib/api/book';
 	import { bookStore } from '$lib/stores';
 	import { Button } from '$lib/components/ui/button';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import BookFilterBar from '$lib/components/layout/BookFilterBar.svelte';
-	import type { Book } from '$lib/models';
+	import type { BookProp } from '$lib/models';
 	import type { PageData } from './$types';
-	import type { BookAvail, BookResponse } from '$lib/api/models';
 	const perPage = 25;
 
 	let { data }: { data: PageData } = $props();
 
-	let books: Book[] = $state([]);
+	let books: { [key: number]: BookProp } = $derived(
+		Object.fromEntries(
+			Object.entries($bookStore).map(([k, v]) => {
+				const brn = Number(k);
+				return [
+					brn,
+					{
+						...v,
+						bookMarkLoading: false,
+						onBookMarked: async () => {
+							books[brn].bookMarkLoading = true;
+							try {
+								if ($bookStore.hasOwnProperty(brn)) {
+									console.log('Unbookmark book', brn);
+									await unlikeBook(data.client, brn);
+									bookStore.update((s) => {
+										delete s[brn];
+										return s;
+									});
+								} else {
+									console.log('bookmark book', k);
+									await likeBook(data.client, brn);
+									bookStore.update((s) => {
+										s[brn] = { ...v, bookmarked: true };
+										return s;
+									});
+								}
+								books[brn].bookMarkLoading = false;
+								books[brn].bookmarked = !books[brn].bookmarked;
+							} catch (error) {
+								console.error('Bookmark/Unbookmark error:', error);
+								books[brn].bookMarkLoading = false;
+							}
+						}
+					} as BookProp
+				];
+			})
+		)
+	);
 	let currentPage = $state(1);
 	let isLoading = $state(false);
 	let searchValue = $state('');
-	let filteredBooks: Book[] = $state([]);
-	let count = $derived(books.length);
-
-	// Effect to load books from API
-	$effect(() => {
-		(async () => {
-			// Await backend API response
-			isLoading = true;
-			let bookAPI = await data.bookResponse;
-			isLoading = false;
-
-			books = bookAPI.map((book: BookResponse) => {
-				let branchAvail: { [key: string]: BookAvail[] } = {};
-				book.avails.map((avail) => {
-					if (branchAvail.hasOwnProperty(avail.BranchName)) {
-						branchAvail[avail.BranchName].push(avail);
-					} else {
-						branchAvail[avail.BranchName] = [avail];
-					}
-				});
-				return {
-					brn: book.BID,
-					title: book.TitleName,
-					author: book.Author,
-					publishYear: book.PublishYear,
-					callNumber: book.avails && book.avails.length > 0 ? book.avails[0].CallNumber : undefined,
-					imageLink: book.cover_url,
-					summary: book.summary,
-					bookmarked: $bookStore.hasOwnProperty(book.BID),
-					branches: Object.keys(branchAvail)
-				} as Book;
-			});
-		})();
-	});
+	let filteredBooks: BookProp[] = $state([]);
+	let count = $derived(Object.values(books).length);
 
 	// Effect to filter books
 	$effect(() => {
 		if (!searchValue) {
-			filteredBooks = books;
+			filteredBooks = Object.values(books);
 		} else {
 			// Normalize search value: trim and convert to lowercase
 			isLoading = true;
 			const normalizedSearch = searchValue.trim().toLowerCase();
 
-			const result = books.filter((bk) => {
+			const result = Object.values(books).filter((bk) => {
 				// Check against multiple fields: title, author, call number
 				const searchFields = [bk.title, bk.author, bk.callNumber];
 

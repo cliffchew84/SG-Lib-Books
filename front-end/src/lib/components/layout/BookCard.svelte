@@ -6,7 +6,8 @@
 		AlignJustify,
 		MapPin,
 		BookMarked,
-		Bookmark
+		Bookmark,
+		LoaderCircle
 	} from 'lucide-svelte';
 	import type { BookProp } from '$lib/models';
 
@@ -19,7 +20,8 @@
 		branches = [],
 		imageLink = '',
 		bookmarked = false,
-		onBookMarked = () => {}
+		onBookMarked = () => {},
+		bookMarkLoading = false
 	}: BookProp = $props();
 
 	let externalLink = $derived(`https://catalogue.nlb.gov.sg/search/card?recordId=${brn}`);
@@ -33,11 +35,13 @@
 		{/if}
 	</a>
 
-	<button onclick={onBookMarked} class="absolute right-3 top-3 z-50 shadow">
-		{#if bookmarked}
-			<BookMarked class="w-5 h-5 bg-muted" />
+	<button onclick={onBookMarked} class="absolute right-3 top-3 z-50 bg-muted shadow">
+		{#if bookMarkLoading}
+			<LoaderCircle class="w-5 h-5 animate-spin" />
+		{:else if bookmarked}
+			<BookMarked class="w-5 h-5" />
 		{:else}
-			<Bookmark class="w-5 h-5 bg-muted" />
+			<Bookmark class="w-5 h-5" />
 		{/if}
 	</button>
 	<div class="my-4 mx-3 flex flex-col gap-2 text-xs">

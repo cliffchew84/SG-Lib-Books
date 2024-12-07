@@ -4,18 +4,19 @@
 	import { goto } from '$app/navigation';
 
 	import { bookStore } from '$lib/stores';
+	import { likeBook, unlikeBook } from '$lib/api/book';
 	import { searchBook } from '$lib/api/search';
 	import BookSearchBar from '$lib/components/forms/book-search-bar.svelte';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
-	import type { Book } from '$lib/models';
+	import type { Book, BookProp } from '$lib/models';
 	import type { PageData } from '../$types';
 
 	let { data }: { data: PageData } = $props();
 
 	const perPage = 25;
 	let searchInput = $state($page.url.searchParams.get('q') ?? ''); // Input search box
-	let books: Book[] = $state([]);
+	let books: { [key: number]: BookProp } = $state({});
 
 	let isSearching = $state(false);
 	let isError = $state(false);
@@ -32,20 +33,57 @@
 		// Reset initial state
 		isSearching = true;
 		isError = false;
-		books = [];
+		books = {};
 		totalRecords = null;
 		goto(`?q=${searchInput}&page=${currentPage}`); // Add query data to url
 
 		try {
 			const response = await searchBook(data.client, searchInput, offset);
 			isSearching = false;
-			books = response.titles.map((title) => ({
-				brn: title.BID,
-				title: title.TitleName,
-				author: title.Author,
-				imageLink: title.cover_url,
-				bookmarked: $bookStore.hasOwnProperty(title.BID)
-			}));
+			books = Object.fromEntries(
+				response.titles.map((book) => [
+					book.BID,
+					{
+						brn: book.BID,
+						title: book.TitleName,
+						author: book.Author,
+						imageLink: book.cover_url,
+						bookmarked: $bookStore.hasOwnProperty(book.BID),
+						bookMarkLoading: false,
+						onBookMarked: async () => {
+							books[book.BID].bookMarkLoading = true;
+							try {
+								if ($bookStore.hasOwnProperty(book.BID)) {
+									console.log('Unbookmark book', book.BID);
+									await unlikeBook(data.client, book.BID);
+									bookStore.update((s) => {
+										delete s[book.BID];
+										return s;
+									});
+								} else {
+									console.log('bookmark book', book.BID);
+									await likeBook(data.client, book.BID);
+									bookStore.update((s) => {
+										s[book.BID] = {
+											brn: book.BID,
+											title: book.TitleName,
+											author: book.Author,
+											imageLink: book.cover_url,
+											bookmarked: true
+										};
+										return s;
+									});
+								}
+								books[book.BID].bookMarkLoading = false;
+								books[book.BID].bookmarked = !books[book.BID].bookmarked;
+							} catch (error) {
+								console.error('Bookmark/Unbookmark error:', error);
+								books[book.BID].bookMarkLoading = false;
+							}
+						}
+					}
+				])
+			);
 			totalRecords = response.total_records;
 		} catch (error) {
 			isSearching = false;
@@ -88,7 +126,7 @@
 			</div>
 		{:else}
 			<PaginatedCards
-				{books}
+				books={Object.values(books)}
 				{perPage}
 				isLoading={isSearching}
 				count={totalRecords ?? 0}

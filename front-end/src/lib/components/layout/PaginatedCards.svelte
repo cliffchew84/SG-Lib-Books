@@ -2,7 +2,7 @@
 	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 	import * as Pagination from '$lib/components/ui/pagination';
 	import BookCard from '$lib/components/layout/BookCard.svelte';
-	import type { Book } from '$lib/models';
+	import type { BookProp } from '$lib/models';
 
 	let {
 		books = [],
@@ -10,7 +10,13 @@
 		count = 0,
 		isLoading = $bindable(),
 		page = $bindable()
-	}: { books: Book[]; perPage: number; count: number; isLoading: boolean; page: number } = $props();
+	}: {
+		books: BookProp[];
+		perPage: number;
+		count: number;
+		isLoading: boolean;
+		page: number;
+	} = $props();
 
 	// let filteredBooks = $derived(books.slice((page - 1) * perPage, Math.min(page * perPage, count))); // Slice of books based on page changes
 </script>
@@ -23,7 +29,7 @@
 	{:else}
 		<div class="grid md:grid-cols-5 sm:grid-cols-3 grid-cols-1 gap-3">
 			{#each books as book}
-				<BookCard {...book} onBookMarked={() => {}} />
+				<BookCard {...book} />
 			{/each}
 		</div>
 	{/if}

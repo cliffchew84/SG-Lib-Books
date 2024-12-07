@@ -14,7 +14,6 @@ export const load: LayoutLoad = async ({ parent }) => {
 	}
 	// Get all user's favourite books
 	const apiReponse = await getBooks(client)
-	console.log("I run")
 	bookStore.set(
 		Object.fromEntries(apiReponse.map((book: BookResponse) => {
 			let branchAvail: { [key: string]: BookAvail[] } = {};
