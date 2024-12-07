@@ -63,7 +63,7 @@ export async function getBook(client: BackendAPIClient, brn: number): Promise<Bo
 	}
 };
 
-export async function likeBook(client: BackendAPIClient, brn: number): Promise<null> {
+export async function likeBook(client: BackendAPIClient, brn: number): Promise<BookResponse> {
 	try {
 		const response = await client.post({ path: `/books/${brn}` });
 
@@ -71,7 +71,9 @@ export async function likeBook(client: BackendAPIClient, brn: number): Promise<n
 			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
 		}
 
-		return null;
+		const data: BookResponse = await response.json();
+
+		return data;
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error querying api:', error.message);

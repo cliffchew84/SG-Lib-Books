@@ -62,14 +62,15 @@
 									});
 								} else {
 									console.log('bookmark book', book.BID);
-									await likeBook(data.client, book.BID);
+									const bookResponse = await likeBook(data.client, book.BID);
 									bookStore.update((s) => {
 										s[book.BID] = {
 											brn: book.BID,
 											title: book.TitleName,
 											author: book.Author,
 											imageLink: book.cover_url,
-											bookmarked: true
+											bookmarked: true,
+											items: bookResponse.avails
 										};
 										return s;
 									});

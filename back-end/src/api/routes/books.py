@@ -119,7 +119,7 @@ async def like_book(
     db: SDBDep,
     nlb: NLBClientDep,
     user: CurrentUser,
-) -> None:
+) -> BookResponse:
     if not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
@@ -149,9 +149,10 @@ async def like_book(
     # Do all the adding at the end, after everything is confirmed
     # Insert and Update if conflict on book availability
     try:
+        book_info_result = BookInfoCreate.from_nlb(response_info.parsed)
         await book_info_crud.create_book_by_user(
             db,
-            obj_in=BookInfoCreate.from_nlb(response_info.parsed),
+            obj_in=book_info_result,
             username=user.email,
         )
         all_avail_bks = [
@@ -166,6 +167,8 @@ async def like_book(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             "Error occured with database transaction.",
         ) from e
+
+    return BookResponse(**book_info_result.model_dump(), avails=all_avail_bks)
 
 
 async def update_book_avail(db, nlb, bid_no: int) -> list[BookAvail]:
