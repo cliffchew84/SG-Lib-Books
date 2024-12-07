@@ -9,6 +9,8 @@
 		Bookmark,
 		LoaderCircle
 	} from 'lucide-svelte';
+
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import type { BookProp } from '$lib/models';
 
 	let { book, isLoading }: { book: BookProp; isLoading: boolean } = $props();
@@ -26,9 +28,7 @@
 	</div>
 	<div class="flex flex-col basis-4/5 items-start gap-3">
 		{#if isLoading}
-			<div class="flex justify-center items-center w-full h-full">
-				<LoaderCircle class="m-8 h-6 w-6 animate-spin" />
-			</div>
+			<Skeleton class="h-10 w-full rounded-full" />
 		{:else}
 			<div class="flex justify-between align-top w-full">
 				<h1 class="text-slate-700 font-bold text-3xl">
@@ -49,6 +49,26 @@
 					</button>
 				</div>
 			</div>
+		{/if}
+
+		{#if isLoading}
+			<div class="flex gap-2 text-slate-500">
+				<Skeleton class="w-8 h-8 rounded-full" />
+				<Skeleton class="h-8 w-72 rounded-full" />
+			</div>
+			<div class="flex gap-2 text-slate-500">
+				<Skeleton class="w-8 h-8 rounded-full" />
+				<Skeleton class="h-8 w-72 rounded-full" />
+			</div>
+			<div class="flex gap-2 text-slate-500">
+				<Skeleton class="w-8 h-8 rounded-full" />
+				<Skeleton class="h-8 w-72 rounded-full" />
+			</div>
+			<div class="flex gap-2 text-slate-500">
+				<Skeleton class="w-8 h-8 rounded-full" />
+				<Skeleton class="h-8 w-72 rounded-full" />
+			</div>
+		{:else}
 			{#if book.author}
 				<div class="flex gap-2 text-slate-500">
 					<User class="w-4 h-4 my-auto" />
