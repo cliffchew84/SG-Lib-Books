@@ -87,6 +87,7 @@
 				imageLink: bookAPI.cover_url,
 				summary: bookAPI.summary,
 				branches: Object.keys(branchAvail),
+				items: bookAPI.avails,
 				...book
 			};
 			librariesAvail = Object.values(libraries).filter((lib) => {

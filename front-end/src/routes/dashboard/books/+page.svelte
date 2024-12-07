@@ -88,8 +88,8 @@
 </script>
 
 <TitledPage title="Books" description="Checkout all your favourite books.">
-	<BookFilterBar bind:searchValue />
 	{#if count > 0}
+		<BookFilterBar bind:searchValue />
 		<PaginatedCards
 			books={filteredBooks}
 			{perPage}
@@ -99,7 +99,7 @@
 		/>
 	{:else}
 		<div class="w-full flex flex-col items-center gap-3">
-			<p>Mark your favourite library books at</p>
+			<p>Search your favourite library books</p>
 			<Button href="/dashboard/search">
 				<Search class="mr-2 h-4 w-4" />
 				<span>Search</span>

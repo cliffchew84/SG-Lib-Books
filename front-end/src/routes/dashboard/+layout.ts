@@ -10,10 +10,11 @@ export const load: LayoutLoad = async ({ parent }) => {
 	 */
 	const { session, client } = await parent();
 	if (!session) {
-		redirect(307, '/auth/sign-in')
+		redirect(307, '/auth/sign-in');
 	}
+
 	// Get all user's favourite books
-	const apiReponse = await getBooks(client)
+	const apiReponse = await getBooks(client);
 	bookStore.set(
 		Object.fromEntries(apiReponse.map((book: BookResponse) => {
 			let branchAvail: { [key: string]: BookAvail[] } = {};
@@ -33,8 +34,9 @@ export const load: LayoutLoad = async ({ parent }) => {
 				imageLink: book.cover_url,
 				summary: book.summary,
 				bookmarked: true,
-				branches: Object.keys(branchAvail)
+				branches: Object.keys(branchAvail),
+				items: book.avails
 			}];
 		}))
-	)
+	);
 }

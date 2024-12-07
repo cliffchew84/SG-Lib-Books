@@ -1,4 +1,5 @@
 import { type MouseEventHandler } from 'svelte/elements';
+import type { BookAvail } from './api/models';
 
 export interface Book {
 	brn: number;
@@ -10,6 +11,7 @@ export interface Book {
 	imageLink?: string;
 	branches?: string[];
 	bookmarked: boolean;
+	items?: BookAvail[];
 }
 
 export interface BookProp extends Book {
