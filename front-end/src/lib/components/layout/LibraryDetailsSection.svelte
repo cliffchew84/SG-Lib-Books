@@ -3,10 +3,9 @@
 	import { BookCheck, Clock4, Star, StarOff, MapPin } from 'lucide-svelte';
 
 	let {
-		id = '',
 		name = 'Undefined Library',
-		noOnLoan = 0,
-		noAvail = 0,
+		onLoanBooks = [],
+		availBooks = [],
 		openingHoursDesc = 'Unknown Opening Hours',
 		location = 'This is a long long long address\nThis is a long long long address\n',
 		favourite = false,
@@ -14,15 +13,21 @@
 		imageLink
 	}: LibraryProp = $props();
 
+	let noAvail = $derived(availBooks.length);
+	let noOnLoan = $derived(onLoanBooks.length);
 	let availabilityStatus = $derived(
 		[noAvail ? `${noAvail} Available` : '', noOnLoan ? `${noOnLoan} On-Loan` : ''].join(' · ')
 	);
 </script>
 
 <section class="">
-	<div class="bg-muted min-h-[140px] block">
+	<div class="bg-muted max-h-[360px] overflow-hidden rounded-lg">
 		{#if imageLink}
-			<img src={imageLink} alt={name} class="rounded-t-lg" />
+			<img
+				src={imageLink}
+				alt={name}
+				class=" relative h-full min-w-full left-1/2 -translate-x-1/2 md:-translate-y-1/4"
+			/>
 		{/if}
 	</div>
 

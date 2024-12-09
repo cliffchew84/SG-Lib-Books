@@ -15,27 +15,26 @@ export const libraryStore = derived(bookStore, ($bookStore) => {
 			}
 		});
 		for (const [k, bookAvails] of Object.entries(branchAvail)) {
-			let noOnLoan = 0;
-			let noAvail = 0;
+			let onLoanBooks = [];
+			let availBooks = [];
 			for (let bookAvail of bookAvails) {
 				if (bookAvail.StatusDesc == 'On Loan') {
-					noOnLoan += 1;
+					onLoanBooks.push(book)
 				} else {
-					noAvail += 1;
+					availBooks.push(book)
 				}
 			}
 
 			if (libraries.hasOwnProperty(k)) {
-				libraries[k].noOnLoan += noOnLoan;
-				libraries[k].noAvail += noAvail;
+				libraries[k].onLoanBooks.concat(onLoanBooks);
+				libraries[k].availBooks.concat(availBooks);
 			} else {
 				libraries[k] = {
-					id: k,
 					name: k,
 					favourite: false,
 					openingHoursDesc: 'Open · Closes 10pm',
-					noAvail,
-					noOnLoan,
+					onLoanBooks,
+					availBooks,
 				}
 			}
 		}

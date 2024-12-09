@@ -8,12 +8,12 @@
 
 	let librariesAvail: Library[] = $derived(
 		Object.values($libraryStore).filter((lib) => {
-			return lib.noAvail >= 1;
+			return lib.availBooks.length >= 1;
 		})
 	);
 	let librariesOnLoan: Library[] = $derived(
 		Object.values($libraryStore).filter((lib) => {
-			return lib.noAvail == 0;
+			return lib.availBooks.length == 0;
 		})
 	);
 </script>

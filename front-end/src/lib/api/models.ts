@@ -24,3 +24,13 @@ export interface BookAvail {
 export interface BookResponse extends BookInfo {
 	avails: BookAvail[];
 }
+
+export interface Library {
+	name: string;
+	opening_status: string;
+	start_hour?: string;
+	end_hour?: string;
+	opening_description?: string
+	address?: string
+	cover_url?: string
+}

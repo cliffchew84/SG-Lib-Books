@@ -3,15 +3,17 @@
 	import { BookCheck, Clock4, Star, StarOff } from 'lucide-svelte';
 
 	let {
-		id = '',
 		name = 'Undefined Library',
-		noOnLoan = 0,
-		noAvail = 0,
+		onLoanBooks = [],
+		availBooks = [],
 		openingHoursDesc = 'Unknown Opening Hours',
 		favourite = false,
 		onFavourite = () => {},
 		imageLink
 	}: LibraryProp = $props();
+
+	let noAvail = $derived(availBooks.length);
+	let noOnLoan = $derived(onLoanBooks.length);
 
 	let availabilityStatus = $derived(
 		[noAvail ? `${noAvail} Available` : '', noOnLoan ? `${noOnLoan} On-Loan` : ''].join(' · ')
@@ -19,7 +21,7 @@
 </script>
 
 <div class="relative rounded-lg shadow border-slate-400">
-	<a class="bg-muted min-h-[140px] block" href={`/dashboard/library/${id}`}>
+	<a class="bg-muted min-h-[140px] block" href={`/dashboard/library/${name}`}>
 		{#if imageLink}
 			<img src={imageLink} alt={name} class="rounded-t-lg" />
 		{/if}

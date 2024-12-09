@@ -9,7 +9,7 @@
 	import BookSearchBar from '$lib/components/forms/book-search-bar.svelte';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
-	import type { Book, BookProp } from '$lib/models';
+	import type { BookProp } from '$lib/models';
 	import type { PageData } from '../$types';
 
 	let { data }: { data: PageData } = $props();
@@ -70,7 +70,7 @@
 											author: book.Author,
 											imageLink: book.cover_url,
 											bookmarked: true,
-											items: bookResponse.avails
+											items: bookResponse.avails ?? []
 										};
 										return s;
 									});

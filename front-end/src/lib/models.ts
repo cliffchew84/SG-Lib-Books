@@ -20,10 +20,9 @@ export interface BookProp extends Book {
 }
 
 export interface Library {
-	id: string;
 	name: string;
-	noOnLoan: number;
-	noAvail: number;
+	onLoanBooks: Book[];
+	availBooks: Book[];
 	openingHoursDesc: string;
 	favourite: boolean;
 	imageLink?: string;

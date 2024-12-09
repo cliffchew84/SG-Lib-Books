@@ -66,17 +66,17 @@
 				for (const [k, bookAvails] of Object.entries(branchAvail)) {
 					let name = k;
 					let favourite = true;
-					let noOnLoan = 0;
-					let noAvail = 0;
+					let onLoanBooks = [];
+					let availBooks = [];
 					let openingHoursDesc = 'Open · Closes 10pm';
 					for (let bookAvail of bookAvails) {
 						if (bookAvail.StatusDesc == 'On Loan') {
-							noOnLoan += 1;
+							onLoanBooks.push(book);
 						} else {
-							noAvail += 1;
+							availBooks.push(book);
 						}
 					}
-					libraries[k] = { id: name, name, noAvail, noOnLoan, favourite, openingHoursDesc };
+					libraries[k] = { name, onLoanBooks, availBooks, favourite, openingHoursDesc };
 				}
 
 				// Update front-end states
@@ -93,10 +93,10 @@
 					...book
 				};
 				librariesAvail = Object.values(libraries).filter((lib) => {
-					return lib.noAvail >= 1;
+					return lib.availBooks.length >= 1;
 				});
 				librariesOnLoan = Object.values(libraries).filter((lib) => {
-					return lib.noAvail == 0;
+					return lib.availBooks.length == 0;
 				});
 			} catch (error) {
 				isError = true;
