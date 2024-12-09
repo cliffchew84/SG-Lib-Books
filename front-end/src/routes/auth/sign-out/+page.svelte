@@ -14,6 +14,7 @@
 		})
 		.catch((error) => {
 			console.error(error);
+			goto('/');
 		});
 </script>
 
