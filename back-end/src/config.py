@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "localhost",
         "https://sg-nlb-available-books.onrender.com",
+        "https://sg-lib-books.web.app",
     ]
 
     # NLB API Key
@@ -35,13 +36,6 @@ class Settings(BaseSettings):
     SUPA_DB_NAME: str = "postgres"
     SUPA_DB_USER: str = "postgres"
     SUPA_DB_PASSWORD: str = "postgres"
-
-    SUPABASE_JWT_SECRET: str = ""
-
-    # Google OAuth Secrets
-    GOOGLE_CLIENT_ID: str = ""
-    GOOGLE_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/callback"
 
     # Fill up setting properties using .env
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
