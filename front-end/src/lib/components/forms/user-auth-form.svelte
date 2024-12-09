@@ -26,9 +26,7 @@
 			email: email,
 			options: {
 				// set this to false if you do not want the user to be automatically signed up
-				shouldCreateUser: true,
-				// TODO: Change this based on locahost or not
-				emailRedirectTo: 'http://localhost:5173/dashboard'
+				shouldCreateUser: true
 			}
 		});
 		if (error) {
