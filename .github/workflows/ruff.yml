@@ -12,5 +12,5 @@ jobs:
       # Check for code linting with ruff check
       - uses: astral-sh/ruff-action@v1
         with:
-          src: "./src"
+          src: "./back-end/src"
 
