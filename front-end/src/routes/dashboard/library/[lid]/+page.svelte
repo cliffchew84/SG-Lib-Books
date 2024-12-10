@@ -101,7 +101,7 @@
 				perPage={4}
 				isLoading={false}
 				count={availBooks.length}
-				hidePagination={false}
+				hidePagination={true}
 				page={1}
 			/>
 		</div>
@@ -115,7 +115,7 @@
 				perPage={5}
 				isLoading={false}
 				count={onLoanBooks.length}
-				hidePagination={false}
+				hidePagination={true}
 				page={1}
 			/>
 		</div>
