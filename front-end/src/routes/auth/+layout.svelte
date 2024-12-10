@@ -4,8 +4,9 @@
 	let { children }: { children: Snippet } = $props();
 </script>
 
+<a class="lg:hidden container m-6 text-lg font-medium block" href="/">SG Lib Books</a>
 <div
-	class="container relative h-[100vh] flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0"
+	class="container relative lg:h-[100vh] h-[80vh] flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0"
 >
 	<div class="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
 		<div
