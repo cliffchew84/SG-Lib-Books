@@ -33,7 +33,6 @@
 			return lib.favourite;
 		})
 	);
-
 	let librariesAvail: LibraryProp[] = $derived(
 		librariresProps.filter((lib) => {
 			return lib.availBooks.length >= 1;
