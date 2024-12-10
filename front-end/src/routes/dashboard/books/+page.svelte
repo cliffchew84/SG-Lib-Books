@@ -94,6 +94,7 @@
 			books={filteredBooks}
 			{perPage}
 			{count}
+			hidePagination={true}
 			bind:isLoading
 			bind:page={currentPage}
 		/>
