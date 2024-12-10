@@ -2,6 +2,7 @@ import { derived, writable } from "svelte/store";
 import type { BookAvail } from "$lib/api/models";
 import type { Book, Library } from "$lib/models";
 
+export const isLoading = writable<boolean>(true);
 export const bookStore = writable<{ [key: number]: Book }>({})
 export const libraryStore = derived(bookStore, ($bookStore) => {
 	const libraries: { [key: string]: Library } = {}
