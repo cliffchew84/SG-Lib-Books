@@ -69,10 +69,10 @@
 
 					<DropdownMenu.Label>My Account</DropdownMenu.Label>
 					<DropdownMenu.Separator />
-					<DropdownMenu.Item href="/dashboard/settings">
-						<Settings class="mr-2 h-4 w-4" />
-						<span>Settings</span>
-					</DropdownMenu.Item>
+					<!-- <DropdownMenu.Item href="/dashboard/settings"> -->
+					<!-- 	<Settings class="mr-2 h-4 w-4" /> -->
+					<!-- 	<span>Settings</span> -->
+					<!-- </DropdownMenu.Item> -->
 					<DropdownMenu.Item href="/auth/sign-out">
 						<LogOut class="mr-2 h-4 w-4" />
 						<span>Log out</span>
