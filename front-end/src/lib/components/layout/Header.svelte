@@ -33,10 +33,10 @@
 				<Book class="mr-2 h-4 w-4" />
 				<span>Books</span>
 			</Button>
-			<Button variant="ghost" href="/dashboard/settings">
-				<Settings class="mr-2 h-4 w-4" />
-				<span>Settings</span>
-			</Button>
+			<!-- <Button variant="ghost" href="/dashboard/settings"> -->
+			<!-- 	<Settings class="mr-2 h-4 w-4" /> -->
+			<!-- 	<span>Settings</span> -->
+			<!-- </Button> -->
 		</nav>
 
 		<DropdownMenu.Root>

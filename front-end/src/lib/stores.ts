@@ -32,14 +32,16 @@ export const libraryStore = derived([bookStore, libraryAPIStore], ([$bookStore, 
 				libraries[k].onLoanBooks.concat(onLoanBooks);
 				libraries[k].availBooks.concat(availBooks);
 			} else {
-				libraries[k] = {
-					name: k,
-					favourite: $libraryAPIStore[k].favourite,
-					location: $libraryAPIStore[k].location,
-					openingHoursDesc: $libraryAPIStore[k].openingHoursDesc,
-					imageLink: $libraryAPIStore[k].imageLink,
-					onLoanBooks,
-					availBooks,
+				if ($libraryAPIStore.hasOwnProperty(k)) {
+					libraries[k] = {
+						name: k,
+						favourite: $libraryAPIStore[k].favourite,
+						location: $libraryAPIStore[k].location,
+						openingHoursDesc: $libraryAPIStore[k].openingHoursDesc,
+						imageLink: $libraryAPIStore[k].imageLink,
+						onLoanBooks,
+						availBooks,
+					}
 				}
 			}
 		}
