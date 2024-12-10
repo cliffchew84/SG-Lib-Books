@@ -29,8 +29,8 @@ export const libraryStore = derived([bookStore, libraryAPIStore], ([$bookStore, 
 			}
 
 			if (libraries.hasOwnProperty(k)) {
-				libraries[k].onLoanBooks.concat(onLoanBooks);
-				libraries[k].availBooks.concat(availBooks);
+				libraries[k].onLoanBooks = libraries[k].onLoanBooks.concat(onLoanBooks);
+				libraries[k].availBooks = libraries[k].availBooks.concat(availBooks);
 			} else {
 				if ($libraryAPIStore.hasOwnProperty(k)) {
 					libraries[k] = {
