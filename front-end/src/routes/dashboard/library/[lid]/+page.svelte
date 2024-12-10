@@ -3,7 +3,8 @@
 	import LibraryDetailsSection from '$lib/components/layout/LibraryDetailsSection.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import { unlikeBook } from '$lib/api/book';
-	import { bookStore, libraryStore } from '$lib/stores';
+	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
+	import { bookStore, libraryStore, libraryAPIStore } from '$lib/stores';
 	import type { BookProp, Library } from '$lib/models';
 	import type { PageData } from './$types';
 
@@ -55,13 +56,24 @@
 			};
 		}) ?? []
 	);
+	let onFavourite = $derived(async () => {
+		if (library.favourite) {
+			await unfavouriteLibrary(data.client, library.name);
+		} else {
+			await favouriteLibrary(data.client, library.name);
+		}
+		libraryAPIStore.update((s) => {
+			s[library.name].favourite = !s[library.name].favourite;
+			return s;
+		});
+	});
 
 	// TODO: Show loan till date in card
 </script>
 
 <main class="container flex flex-col gap-8 px-8 min-h-[85vh]">
 	{#if !isError}
-		<LibraryDetailsSection {...library} {onLoanBooks} {availBooks} onFavourite={() => {}} />
+		<LibraryDetailsSection {...library} {onLoanBooks} {availBooks} {onFavourite} />
 	{:else}
 		<div class="my-5 flex flex-col gap-3">
 			<h1 class="text-4xl font-bold text-slate-700">{lid} Library Not Found</h1>
