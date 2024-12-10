@@ -27,20 +27,22 @@
 					<img src={book.imageLink} alt={book.title} class="w-full" />
 				{/if}
 			</div>
-			{#if book.bookMarkLoading}
-				<Button class="rounded-lg">
-					<LoaderCircle class="w-5 h-5 animate-spin inline" />
-				</Button>
-			{:else if book.bookmarked}
-				<Button class="rounded-lg" variant="secondary" onclick={book.onBookMarked}>
-					<BookMarked class="w-5 h-5 mr-3" />
-					Remove Bookmark
-				</Button>
-			{:else}
-				<Button class="rounded-lg" onclick={book.onBookMarked}>
-					<Bookmark class="w-5 h-5 mr-3" />
-					Save Book
-				</Button>
+			{#if !isLoading}
+				{#if book.bookMarkLoading}
+					<Button class="rounded-lg">
+						<LoaderCircle class="w-5 h-5 animate-spin inline" />
+					</Button>
+				{:else if book.bookmarked}
+					<Button class="rounded-lg" variant="secondary" onclick={book.onBookMarked}>
+						<BookMarked class="w-5 h-5 mr-3" />
+						Remove Bookmark
+					</Button>
+				{:else}
+					<Button class="rounded-lg" onclick={book.onBookMarked}>
+						<Bookmark class="w-5 h-5 mr-3" />
+						Save Book
+					</Button>
+				{/if}
 			{/if}
 		</div>
 	</div>
