@@ -20,6 +20,7 @@
 		library?.availBooks.map((book) => {
 			return {
 				...book,
+				branches: undefined,
 				bookMarkLoading: false,
 				onBookMarked: async () => {
 					try {
@@ -40,6 +41,7 @@
 		library?.onLoanBooks.map((book) => {
 			return {
 				...book,
+				branches: undefined,
 				bookMarkLoading: false,
 				onBookMarked: async () => {
 					try {
