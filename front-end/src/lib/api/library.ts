@@ -2,7 +2,7 @@ import type BackendAPIClient from "./client";
 import type { Library, LibraryResponse } from "./models";
 
 
-export async function getLibraries(client: BackendAPIClient): Promise<Library> {
+export async function getLibraries(client: BackendAPIClient): Promise<LibraryResponse[]> {
 	try {
 		const response = await client.get({ path: `/library` });
 
@@ -10,7 +10,7 @@ export async function getLibraries(client: BackendAPIClient): Promise<Library> {
 			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
 		}
 
-		const data: LibraryResponse = await response.json();
+		const data: LibraryResponse[] = await response.json();
 
 		return data;
 	} catch (error) {
