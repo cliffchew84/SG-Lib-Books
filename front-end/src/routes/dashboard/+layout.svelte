@@ -57,7 +57,7 @@
 							openingHoursDesc: openingStatusDesc,
 							favourite: v.isFavourite,
 							imageLink: v.cover_url,
-							location: v.address
+							location: v.address?.replace('<br>', '\n')
 						};
 						return a;
 					},
