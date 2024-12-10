@@ -10,6 +10,7 @@
 		LoaderCircle
 	} from 'lucide-svelte';
 
+	import { Button } from '$lib/components/ui/button';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import type { BookProp } from '$lib/models';
 
@@ -20,9 +21,26 @@
 
 <section class="flex md:flex-row flex-col gap-9">
 	<div class="basis-1/5">
-		<div class="bg-muted min-h-[340px] max-h-min rounded-lg">
-			{#if book.imageLink}
-				<img src={book.imageLink} alt={book.title} />
+		<div class="flex flex-col gap-3">
+			<div class="bg-muted min-h-[340px] max-h-min rounded-lg">
+				{#if book.imageLink}
+					<img src={book.imageLink} alt={book.title} class="w-full" />
+				{/if}
+			</div>
+			{#if book.bookMarkLoading}
+				<Button class="rounded-lg">
+					<LoaderCircle class="w-5 h-5 animate-spin inline" />
+				</Button>
+			{:else if book.bookmarked}
+				<Button class="rounded-lg" variant="secondary" onclick={book.onBookMarked}>
+					<BookMarked class="w-5 h-5 mr-3" />
+					Remove Bookmark
+				</Button>
+			{:else}
+				<Button class="rounded-lg" onclick={book.onBookMarked}>
+					<Bookmark class="w-5 h-5 mr-3" />
+					Save Book
+				</Button>
 			{/if}
 		</div>
 	</div>
