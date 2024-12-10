@@ -34,3 +34,7 @@ export interface Library {
 	address?: string
 	cover_url?: string
 }
+
+export interface LibraryResponse extends Library {
+	isFavourite: boolean;
+}
