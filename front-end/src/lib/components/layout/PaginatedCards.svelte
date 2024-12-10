@@ -29,7 +29,7 @@
 			<LoaderCircle class="m-8 h-6 w-6 animate-spin" />
 		</div>
 	{:else}
-		<div class="grid md:grid-cols-5 sm:grid-cols-3 grid-cols-1 gap-3">
+		<div class="grid md:grid-cols-5 sm:grid-cols-3 grid-cols-2 gap-3">
 			{#each books as book}
 				<BookCard {...book} />
 			{/each}
