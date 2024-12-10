@@ -3,12 +3,39 @@ from fastapi import APIRouter, status, HTTPException
 from src.api.deps import SDBDep, CurrentUser
 from src.crud.library import library_crud
 from src.modals.library import Library
+from src.modals.library_response import LibraryResponse
 
 router = APIRouter()
 
 
+@router.get("")
+async def get_libraries(
+    user: CurrentUser,
+    db: SDBDep,
+) -> list[LibraryResponse]:
+    """Get all libraries in the database and whether is library favourite"""
+    if not user.email:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
+
+    try:
+        libraries = await library_crud.get_all(db)
+        libraries_fav = await library_crud.get_multi_by_owner(db, username=user.email)
+        favourite = {lib.name for lib in libraries_fav} if libraries_fav else {}
+        return [
+            LibraryResponse(**lib.model_dump(), isFavourite=lib.name in favourite)
+            for lib in libraries
+        ]
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "Error occured with database transaction.",
+        ) from e
+
+
 @router.get("/{name}")
-async def get_book(
+async def get_library(
     name: str,
     user: CurrentUser,
     db: SDBDep,
