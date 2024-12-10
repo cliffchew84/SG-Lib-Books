@@ -47,7 +47,7 @@
 
 <TitledPage
 	title="Library"
-	description="Checkout your favaourite books in every library operated by NLB."
+	description="Checkout your favourite books in every library operated by NLB."
 >
 	{#if librariesAvail.length === 0 && librariesOnLoan.length === 0}
 		<div>
