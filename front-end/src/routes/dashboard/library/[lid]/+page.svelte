@@ -13,37 +13,27 @@
 
 	const lid = $page.params.lid;
 
-	let isLoading: boolean = $state(true);
-	let isError: boolean = $state(false);
-	let library: Library = $state({
-		name: lid,
-		onLoanBooks: [],
-		availBooks: [],
-		openingHoursDesc: '',
-		location: '',
-		favourite: false
-	});
+	let library: Library | undefined = $derived($libraryStore[lid]);
+	let isError: boolean = $derived(library === undefined);
 	let availBooks: BookProp[] = $derived(
-		library !== undefined
-			? library.availBooks.map((book) => {
-					return {
-						...book,
-						bookMarkLoading: false,
-						onBookMarked: async () => {
-							try {
-								console.log('Unbookmark book', book.brn);
-								await unlikeBook(data.client, book.brn);
-								bookStore.update((s) => {
-									delete s[book.brn];
-									return s;
-								});
-							} catch (error) {
-								console.error('Bookmark/Unbookmark error:', error);
-							}
-						}
-					};
-				})
-			: []
+		library?.availBooks.map((book) => {
+			return {
+				...book,
+				bookMarkLoading: false,
+				onBookMarked: async () => {
+					try {
+						console.log('Unbookmark book', book.brn);
+						await unlikeBook(data.client, book.brn);
+						bookStore.update((s) => {
+							delete s[book.brn];
+							return s;
+						});
+					} catch (error) {
+						console.error('Bookmark/Unbookmark error:', error);
+					}
+				}
+			};
+		}) ?? []
 	);
 	let onLoanBooks: BookProp[] = $derived(
 		library?.onLoanBooks.map((book) => {
@@ -66,28 +56,6 @@
 		}) ?? []
 	);
 
-	$effect(() => {
-		(async () => {
-			try {
-				// Await backend API response
-				let libraryAPI = await data.libraryResponse;
-				isLoading = false;
-				// Update front-end states
-				library = {
-					name: libraryAPI.name,
-					favourite: false,
-					imageLink: libraryAPI.cover_url,
-					location: libraryAPI.address,
-					onLoanBooks: $libraryStore[libraryAPI.name]?.onLoanBooks ?? [],
-					availBooks: $libraryStore[libraryAPI.name]?.availBooks ?? [],
-					openingHoursDesc: ''
-				};
-			} catch (error) {
-				isError = true;
-				console.error(error);
-			}
-		})();
-	});
 	// TODO: Show loan till date in card
 </script>
 
