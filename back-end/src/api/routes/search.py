@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import datetime
 from typing import Optional
@@ -49,7 +50,8 @@ async def search_books(
     # )
     response = await get_get_titles.asyncio_detailed(
         client=nlb,
-        keywords=keyword,
+        # Remove non-alphanumeric and spaces char
+        keywords=re.sub(r"[^A-Za-z0-9 ]+", "", keyword),
         offset=offset if offset else UNSET,
         limit=limit if limit else UNSET,
     )
