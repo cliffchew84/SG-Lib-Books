@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import LibraryCard from '$lib/components/layout/LibraryCard.svelte';
-	import type { Library } from '$lib/models.ts';
+	import type { LibraryProp } from '$lib/models.ts';
 
 	let {
 		title = '',
@@ -10,7 +10,7 @@
 	}: {
 		title: String;
 		description: String;
-		libraries: Library[];
+		libraries: LibraryProp[];
 	} = $props();
 </script>
 
@@ -23,7 +23,7 @@
 			<Carousel.Content>
 				{#each libraries as library}
 					<Carousel.Item class="md:basis-1/2 lg:basis-1/4 my-3">
-						<LibraryCard {...library} onFavourite={() => {}} />
+						<LibraryCard {...library} />
 					</Carousel.Item>
 				{/each}
 			</Carousel.Content>

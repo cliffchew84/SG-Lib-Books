@@ -8,12 +8,14 @@
 		books = [],
 		perPage = 25,
 		count = 0,
+		hidePagination = false,
 		isLoading = $bindable(),
 		page = $bindable()
 	}: {
 		books: BookProp[];
 		perPage: number;
 		count: number;
+		hidePagination: boolean;
 		isLoading: boolean;
 		page: number;
 	} = $props();
@@ -34,7 +36,7 @@
 		</div>
 	{/if}
 
-	{#if books.length !== 0}
+	{#if books.length !== 0 && !hidePagination}
 		<Pagination.Root {count} {perPage} bind:page let:pages let:currentPage>
 			<Pagination.Content>
 				<Pagination.Item>

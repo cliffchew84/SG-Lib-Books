@@ -1,18 +1,46 @@
 <script lang="ts">
 	import { Book, LibraryBig, Search } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { libraryStore } from '$lib/stores';
-	import type { Library } from '$lib/models';
+	import { libraryStore, libraryAPIStore } from '$lib/stores';
+	import type { LibraryProp } from '$lib/models';
+	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import LibraryCarousel from '$lib/components/layout/LibraryCarousel.svelte';
+	import type { PageData } from './$types';
 
-	let librariesAvail: Library[] = $derived(
-		Object.values($libraryStore).filter((lib) => {
+	let { data }: { data: PageData } = $props();
+
+	let librariresProps: LibraryProp[] = $derived(
+		Object.values($libraryStore).map((lib) => {
+			return {
+				...lib,
+				onFavourite: async () => {
+					if (lib.favourite) {
+						await unfavouriteLibrary(data.client, lib.name);
+					} else {
+						await favouriteLibrary(data.client, lib.name);
+					}
+					libraryAPIStore.update((s) => {
+						s[lib.name].favourite = !s[lib.name].favourite;
+						return s;
+					});
+				}
+			};
+		})
+	);
+	let librariesFavourite: LibraryProp[] = $derived(
+		librariresProps.filter((lib) => {
+			return lib.favourite;
+		})
+	);
+
+	let librariesAvail: LibraryProp[] = $derived(
+		librariresProps.filter((lib) => {
 			return lib.availBooks.length >= 1;
 		})
 	);
-	let librariesOnLoan: Library[] = $derived(
-		Object.values($libraryStore).filter((lib) => {
+	let librariesOnLoan: LibraryProp[] = $derived(
+		librariresProps.filter((lib) => {
 			return lib.availBooks.length == 0;
 		})
 	);
@@ -67,6 +95,13 @@
 			</ul>
 		</div>
 	{:else}
+		{#if librariesFavourite.length > 0}
+			<LibraryCarousel
+				title="Your Favourite"
+				description="Libraries marked as favourite by you."
+				libraries={librariesFavourite}
+			/>
+		{/if}
 		<LibraryCarousel
 			title="On-Shelf"
 			description="Libraries with books available to be borrowed."

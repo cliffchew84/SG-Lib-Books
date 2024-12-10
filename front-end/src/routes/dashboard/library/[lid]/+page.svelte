@@ -3,7 +3,8 @@
 	import LibraryDetailsSection from '$lib/components/layout/LibraryDetailsSection.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import { unlikeBook } from '$lib/api/book';
-	import { bookStore, libraryStore } from '$lib/stores';
+	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
+	import { bookStore, libraryStore, libraryAPIStore } from '$lib/stores';
 	import type { BookProp, Library } from '$lib/models';
 	import type { PageData } from './$types';
 
@@ -13,37 +14,27 @@
 
 	const lid = $page.params.lid;
 
-	let isLoading: boolean = $state(true);
-	let isError: boolean = $state(false);
-	let library: Library = $state({
-		name: lid,
-		onLoanBooks: [],
-		availBooks: [],
-		openingHoursDesc: '',
-		location: '',
-		favourite: false
-	});
+	let library: Library | undefined = $derived($libraryStore[lid]);
+	let isError: boolean = $derived(library === undefined);
 	let availBooks: BookProp[] = $derived(
-		library !== undefined
-			? library.availBooks.map((book) => {
-					return {
-						...book,
-						bookMarkLoading: false,
-						onBookMarked: async () => {
-							try {
-								console.log('Unbookmark book', book.brn);
-								await unlikeBook(data.client, book.brn);
-								bookStore.update((s) => {
-									delete s[book.brn];
-									return s;
-								});
-							} catch (error) {
-								console.error('Bookmark/Unbookmark error:', error);
-							}
-						}
-					};
-				})
-			: []
+		library?.availBooks.map((book) => {
+			return {
+				...book,
+				bookMarkLoading: false,
+				onBookMarked: async () => {
+					try {
+						console.log('Unbookmark book', book.brn);
+						await unlikeBook(data.client, book.brn);
+						bookStore.update((s) => {
+							delete s[book.brn];
+							return s;
+						});
+					} catch (error) {
+						console.error('Bookmark/Unbookmark error:', error);
+					}
+				}
+			};
+		}) ?? []
 	);
 	let onLoanBooks: BookProp[] = $derived(
 		library?.onLoanBooks.map((book) => {
@@ -65,35 +56,24 @@
 			};
 		}) ?? []
 	);
-
-	$effect(() => {
-		(async () => {
-			try {
-				// Await backend API response
-				let libraryAPI = await data.libraryResponse;
-				isLoading = false;
-				// Update front-end states
-				library = {
-					name: libraryAPI.name,
-					favourite: false,
-					imageLink: libraryAPI.cover_url,
-					location: libraryAPI.address,
-					onLoanBooks: $libraryStore[libraryAPI.name]?.onLoanBooks ?? [],
-					availBooks: $libraryStore[libraryAPI.name]?.availBooks ?? [],
-					openingHoursDesc: ''
-				};
-			} catch (error) {
-				isError = true;
-				console.error(error);
-			}
-		})();
+	let onFavourite = $derived(async () => {
+		if (library.favourite) {
+			await unfavouriteLibrary(data.client, library.name);
+		} else {
+			await favouriteLibrary(data.client, library.name);
+		}
+		libraryAPIStore.update((s) => {
+			s[library.name].favourite = !s[library.name].favourite;
+			return s;
+		});
 	});
+
 	// TODO: Show loan till date in card
 </script>
 
 <main class="container flex flex-col gap-8 px-8 min-h-[85vh]">
 	{#if !isError}
-		<LibraryDetailsSection {...library} {onLoanBooks} {availBooks} onFavourite={() => {}} />
+		<LibraryDetailsSection {...library} {onLoanBooks} {availBooks} {onFavourite} />
 	{:else}
 		<div class="my-5 flex flex-col gap-3">
 			<h1 class="text-4xl font-bold text-slate-700">{lid} Library Not Found</h1>
@@ -119,6 +99,7 @@
 				perPage={4}
 				isLoading={false}
 				count={availBooks.length}
+				hidePagination={false}
 				page={1}
 			/>
 		</div>
@@ -132,6 +113,7 @@
 				perPage={5}
 				isLoading={false}
 				count={onLoanBooks.length}
+				hidePagination={false}
 				page={1}
 			/>
 		</div>

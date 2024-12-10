@@ -2,11 +2,14 @@ import { derived, writable } from "svelte/store";
 import type { BookAvail } from "$lib/api/models";
 import type { Book, Library } from "$lib/models";
 
+export const isLoading = writable<boolean>(true);
+export const libraryAPIStore = writable<{ [key: string]: Library }>({})
 export const bookStore = writable<{ [key: number]: Book }>({})
-export const libraryStore = derived(bookStore, ($bookStore) => {
-	const libraries: { [key: string]: Library } = {}
+export const libraryStore = derived([bookStore, libraryAPIStore], ([$bookStore, $libraryAPIStore]) => {
+	const libraries: { [key: string]: Library } = {};
 	const branchAvail: { [key: string]: BookAvail[] } = {};
 	Object.values($bookStore).map((book) => {
+		// Split book items into dictionary of branch
 		book.items?.map((avail) => {
 			if (branchAvail.hasOwnProperty(avail.BranchName)) {
 				branchAvail[avail.BranchName].push(avail);
@@ -31,8 +34,10 @@ export const libraryStore = derived(bookStore, ($bookStore) => {
 			} else {
 				libraries[k] = {
 					name: k,
-					favourite: false,
-					openingHoursDesc: 'Open · Closes 10pm',
+					favourite: $libraryAPIStore[k].favourite,
+					location: $libraryAPIStore[k].location,
+					openingHoursDesc: $libraryAPIStore[k].openingHoursDesc,
+					imageLink: $libraryAPIStore[k].imageLink,
 					onLoanBooks,
 					availBooks,
 				}
