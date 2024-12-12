@@ -7,7 +7,7 @@ export async function getBooks(client: BackendAPIClient): Promise<BookResponse[]
 		const response = await client.get({ path: "/books" });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: BookResponse[] = await response.json();
@@ -28,7 +28,7 @@ export async function updateBooks(client: BackendAPIClient): Promise<null> {
 		const response = await client.put({ path: `/books` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		return null;
@@ -47,7 +47,7 @@ export async function getBook(client: BackendAPIClient, brn: number): Promise<Bo
 		const response = await client.get({ path: `/books/${brn}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: BookResponse = await response.json();
@@ -68,7 +68,7 @@ export async function likeBook(client: BackendAPIClient, brn: number): Promise<B
 		const response = await client.post({ path: `/books/${brn}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: BookResponse = await response.json();
@@ -89,7 +89,7 @@ export async function updateBook(client: BackendAPIClient, brn: number): Promise
 		const response = await client.put({ path: `/books/${brn}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: BookAvail[] = await response.json();
@@ -110,7 +110,7 @@ export async function unlikeBook(client: BackendAPIClient, brn: number): Promise
 		const response = await client.delete({ path: `/books/${brn}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		return null;

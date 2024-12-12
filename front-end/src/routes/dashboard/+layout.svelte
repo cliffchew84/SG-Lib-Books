@@ -4,6 +4,7 @@
 
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import { Toaster } from '$lib/components/ui/sonner';
 	import { isLoading, libraryAPIStore, bookStore } from '$lib/stores';
 	import { getBooks } from '$lib/api/book';
 	import { getLibraries } from '$lib/api/library';
@@ -97,6 +98,8 @@
 		})();
 	});
 </script>
+
+<Toaster />
 
 <Header user={data.user} />
 {@render children()}

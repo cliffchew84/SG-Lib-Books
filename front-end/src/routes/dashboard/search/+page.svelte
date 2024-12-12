@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { toast } from 'svelte-sonner';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
@@ -60,6 +61,7 @@
 										delete s[book.BID];
 										return s;
 									});
+									toast.success(`Book ${book.TitleName} is removed`);
 								} else {
 									console.log('bookmark book', book.BID);
 									const bookResponse = await likeBook(data.client, book.BID);
@@ -74,10 +76,18 @@
 										};
 										return s;
 									});
+									toast.success(`Book ${book.TitleName} is added`);
 								}
 								books[book.BID].bookMarkLoading = false;
 								books[book.BID].bookmarked = !books[book.BID].bookmarked;
 							} catch (error) {
+								if (error instanceof Error) {
+									if (error.cause === 429) {
+										toast.warning("We are hitting NLB's API too hard. Please try again later.");
+									} else {
+										toast.warning('Bookmark request has failed. Please try again later.');
+									}
+								}
 								console.error('Bookmark/Unbookmark error:', error);
 								books[book.BID].bookMarkLoading = false;
 							}

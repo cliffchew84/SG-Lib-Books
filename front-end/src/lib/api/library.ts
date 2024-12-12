@@ -7,7 +7,7 @@ export async function getLibraries(client: BackendAPIClient): Promise<LibraryRes
 		const response = await client.get({ path: `/library` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: LibraryResponse[] = await response.json();
@@ -28,7 +28,7 @@ export async function getLibrary(client: BackendAPIClient, name: string): Promis
 		const response = await client.get({ path: `/library/${name}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: Library = await response.json();
@@ -49,7 +49,7 @@ export async function favouriteLibrary(client: BackendAPIClient, name: string): 
 		const response = await client.post({ path: `/library/${name}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		return null;
@@ -69,7 +69,7 @@ export async function unfavouriteLibrary(client: BackendAPIClient, name: string)
 		const response = await client.delete({ path: `/library/${name}` });
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		return null;

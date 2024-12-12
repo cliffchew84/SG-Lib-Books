@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
 	import { page } from '$app/stores';
 
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -27,6 +28,7 @@
 				if ($bookStore.hasOwnProperty(brn)) {
 					console.log('Unbookmark book', brn);
 					await unlikeBook(data.client, brn);
+					toast.success(`Book ${$bookStore[brn].title} is removed`);
 					bookStore.update((s) => {
 						delete s[brn];
 						return s;
@@ -38,10 +40,18 @@
 						s[brn] = { ...book, bookmarked: true };
 						return s;
 					});
+					toast.success(`Book ${$bookStore[brn].title} is added`);
 				}
 				book.bookMarkLoading = false;
 				book.bookmarked = !book.bookmarked;
 			} catch (error) {
+				if (error instanceof Error) {
+					if (error.cause === 429) {
+						toast.warning("We are hitting NLB's API too hard. Please try again later.");
+					} else {
+						toast.warning('Bookmark request has failed. Please try again later.');
+					}
+				}
 				console.error('Bookmark/Unbookmark error:', error);
 				book.bookMarkLoading = false;
 			}
@@ -130,17 +140,30 @@
 				return {
 					...lib,
 					onFavourite: async () => {
-						if (lib.favourite) {
-							console.log('unlike library');
-							await unfavouriteLibrary(data.client, lib.name);
-						} else {
-							console.log('like library');
-							await favouriteLibrary(data.client, lib.name);
+						try {
+							if (lib.favourite) {
+								console.log('unlike library');
+								await unfavouriteLibrary(data.client, lib.name);
+								toast.success(`${lib.name} is removed from your favourites`);
+							} else {
+								console.log('like library');
+								await favouriteLibrary(data.client, lib.name);
+								toast.success(`${lib.name} is added to your favourites`);
+							}
+							libraryAPIStore.update((s) => {
+								s[lib.name].favourite = !s[lib.name].favourite;
+								return s;
+							});
+						} catch (error) {
+							if (error instanceof Error) {
+								if (error.cause === 429) {
+									toast.warning("We are hitting NLB's API too hard. Please try again later.");
+								} else {
+									toast.warning('Library favourite request has failed. Please try again later.');
+								}
+							}
+							console.error('Favourite/unfavourite error:', error);
 						}
-						libraryAPIStore.update((s) => {
-							s[lib.name].favourite = !s[lib.name].favourite;
-							return s;
-						});
 					}
 				};
 			});

@@ -65,6 +65,10 @@ async def search_books(
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND, "No search results are found"
             )
+        if response.status_code == 429:
+            raise HTTPException(
+                status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
+            )
 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(response.parsed))
 

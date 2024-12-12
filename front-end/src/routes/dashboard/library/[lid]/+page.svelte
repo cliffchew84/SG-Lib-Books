@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
+
 	import { Button } from '$lib/components/ui/button';
 	import LibraryDetailsSection from '$lib/components/layout/LibraryDetailsSection.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
+
 	import { unlikeBook } from '$lib/api/book';
 	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
 	import { bookStore, libraryStore, libraryAPIStore } from '$lib/stores';
@@ -30,7 +33,15 @@
 							delete s[book.brn];
 							return s;
 						});
+						toast.success(`Book ${book.title} is removed`);
 					} catch (error) {
+						if (error instanceof Error) {
+							if (error.cause === 429) {
+								toast.warning("We are hitting NLB's API too hard. Please try again later.");
+							} else {
+								toast.warning('Bookmark request has failed. Please try again later.');
+							}
+						}
 						console.error('Bookmark/Unbookmark error:', error);
 					}
 				}
@@ -51,7 +62,15 @@
 							delete s[book.brn];
 							return s;
 						});
+						toast.success(`Book ${book.title} is removed`);
 					} catch (error) {
+						if (error instanceof Error) {
+							if (error.cause === 429) {
+								toast.warning("We are hitting NLB's API too hard. Please try again later.");
+							} else {
+								toast.warning('Bookmark request has failed. Please try again later.');
+							}
+						}
 						console.error('Bookmark/Unbookmark error:', error);
 					}
 				}
@@ -59,15 +78,28 @@
 		}) ?? []
 	);
 	let onFavourite = $derived(async () => {
-		if (library.favourite) {
-			await unfavouriteLibrary(data.client, library.name);
-		} else {
-			await favouriteLibrary(data.client, library.name);
+		try {
+			if (library.favourite) {
+				await unfavouriteLibrary(data.client, library.name);
+				toast.success(`${library.name} is removed from your favourites`);
+			} else {
+				await favouriteLibrary(data.client, library.name);
+				toast.success(`${library.name} is added to your favourites`);
+			}
+			libraryAPIStore.update((s) => {
+				s[library.name].favourite = !s[library.name].favourite;
+				return s;
+			});
+		} catch (error) {
+			if (error instanceof Error) {
+				if (error.cause === 429) {
+					toast.warning("We are hitting NLB's API too hard. Please try again later.");
+				} else {
+					toast.warning('Library favourite request has failed. Please try again later.');
+				}
+			}
+			console.error('Favourite/unfavourite error:', error);
 		}
-		libraryAPIStore.update((s) => {
-			s[library.name].favourite = !s[library.name].favourite;
-			return s;
-		});
 	});
 
 	// TODO: Show loan till date in card

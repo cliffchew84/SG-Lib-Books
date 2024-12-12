@@ -25,7 +25,7 @@ export async function searchBook(client: BackendAPIClient, keyword: string, offs
 				}
 			}
 
-			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`);
+			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });
 		}
 
 		const data: APIResponse = await response.json();

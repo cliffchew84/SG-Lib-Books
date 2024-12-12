@@ -72,6 +72,11 @@ async def get_book(
                     raise HTTPException(
                         status.HTTP_404_NOT_FOUND, str(response_info.parsed)
                     )
+                if response_info.status_code == 429:
+                    raise HTTPException(
+                        status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
+                    )
+
                 raise HTTPException(
                     status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_info.parsed)
                 )
@@ -92,7 +97,11 @@ async def get_book(
                     response_avail.parsed, GetAvailabilityInfoResponseV2
                 )  # ErrorResponse
             ):
-                # Return empty table
+                if response_avail.status_code == 429:
+                    raise HTTPException(
+                        status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
+                    )
+
                 raise HTTPException(
                     status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_avail.parsed)
                 )
@@ -128,6 +137,11 @@ async def like_book(
     if not isinstance(response_info.parsed, GetTitleDetailsResponseV2):
         if response_info.status_code == 404:
             raise HTTPException(status.HTTP_404_NOT_FOUND, str(response_info.parsed))
+        if response_info.status_code == 429:
+            raise HTTPException(
+                status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
+            )
+
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_info.parsed)
         )
@@ -141,7 +155,11 @@ async def like_book(
         )  # ErrorResponse
         or response_avail.parsed.total_records == 0
     ):
-        # Return empty table
+        if response_avail.status_code == 429:
+            raise HTTPException(
+                status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
+            )
+
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_avail.parsed)
         )

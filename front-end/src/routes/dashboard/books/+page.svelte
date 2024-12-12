@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
 	import { likeBook, unlikeBook } from '$lib/api/book';
 	import { bookStore } from '$lib/stores';
 	import { Button } from '$lib/components/ui/button';
@@ -27,6 +28,7 @@
 								if ($bookStore.hasOwnProperty(brn)) {
 									console.log('Unbookmark book', brn);
 									await unlikeBook(data.client, brn);
+									toast.success(`Book ${books[brn].title} is removed`);
 									bookStore.update((s) => {
 										delete s[brn];
 										return s;
@@ -38,10 +40,18 @@
 										s[brn] = { ...v, bookmarked: true };
 										return s;
 									});
+									toast.success(`Book ${books[brn].title} is added`);
 								}
 								books[brn].bookMarkLoading = false;
 								books[brn].bookmarked = !books[brn].bookmarked;
 							} catch (error) {
+								if (error instanceof Error) {
+									if (error.cause === 429) {
+										toast.warning("We are hitting NLB's API too hard. Please try again later.");
+									} else {
+										toast.warning('Bookmark request has failed. Please try again later.');
+									}
+								}
 								console.error('Bookmark/Unbookmark error:', error);
 								books[brn].bookMarkLoading = false;
 							}
