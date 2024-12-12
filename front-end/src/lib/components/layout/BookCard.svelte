@@ -5,7 +5,8 @@
 		User,
 		AlignJustify,
 		MapPin,
-		BookMarked,
+		// BookMarked,
+		Trash2,
 		Bookmark,
 		LoaderCircle
 	} from 'lucide-svelte';
@@ -39,7 +40,8 @@
 		{#if bookMarkLoading}
 			<LoaderCircle class="w-5 h-5 animate-spin" />
 		{:else if bookmarked}
-			<BookMarked class="w-5 h-5" />
+			<!-- <BookMarked class="w-5 h-5" /> -->
+			<Trash2 class="w-5 h-5" />
 		{:else}
 			<Bookmark class="w-5 h-5" />
 		{/if}
