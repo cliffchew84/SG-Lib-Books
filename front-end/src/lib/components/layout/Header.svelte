@@ -56,7 +56,7 @@
 							<LibraryBig class="mr-2 h-4 w-4" />
 							<span>Library</span>
 						</DropdownMenu.Item>
-						<DropdownMenu.Item href="/dasboard/search">
+						<DropdownMenu.Item href="/dashboard/search">
 							<Search class="mr-2 h-4 w-4" />
 							<span>Search</span>
 						</DropdownMenu.Item>

@@ -22,13 +22,16 @@
 		<Carousel.Root>
 			<Carousel.Content>
 				{#each libraries as library}
-					<Carousel.Item class="md:basis-1/2 lg:basis-1/4 my-3">
+					<Carousel.Item class="basis-1/2 lg:basis-1/4 my-3">
 						<LibraryCard {...library} />
 					</Carousel.Item>
 				{/each}
 			</Carousel.Content>
-			<Carousel.Previous />
-			<Carousel.Next />
+			<div class="hidden md:block">
+				<!-- Hide navigation button in mobile interface -->
+				<Carousel.Previous />
+				<Carousel.Next />
+			</div>
 		</Carousel.Root>
 	</div>
 {/if}
