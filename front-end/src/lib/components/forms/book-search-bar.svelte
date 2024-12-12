@@ -15,7 +15,7 @@
 	<form onsubmit={onSubmit}>
 		<div class="relative">
 			<Search class="text-muted-foreground absolute left-2 top-[50%] h-4 w-4 translate-y-[-50%]" />
-			<Input placeholder="Book Title" class="px-8" bind:value={searchInput} />
+			<Input placeholder="Book Title / Author / ISBN" class="px-8" bind:value={searchInput} />
 			<input type="submit" hidden />
 			<button
 				class="absolute right-2 top-[50%] translate-y-[-50%]"

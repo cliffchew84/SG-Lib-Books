@@ -132,6 +132,7 @@
 				isLoading={isSearching}
 				count={totalRecords ?? 0}
 				bind:page={currentPage}
+				hidePagination={false}
 			/>
 		{/if}
 	{:else}
