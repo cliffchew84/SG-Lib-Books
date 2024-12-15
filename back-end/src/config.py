@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     SUPA_DB_USER: str = "postgres"
     SUPA_DB_PASSWORD: str = "postgres"
 
+    # Google Cloud Configs
+    GC_PROJECT_ID: str = ""
+    GC_LOCATION: str = "asia-southeast1"
+    GC_QUEUE: str = ""
+    GC_BACKEND_URI: str = ""
+
     # Fill up setting properties using .env
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
