@@ -1,4 +1,5 @@
-from fastapi import APIRouter, BackgroundTasks, status, HTTPException
+from asyncio import sleep
+from fastapi import APIRouter, status, HTTPException
 from nlb_catalogue_client.api.catalogue import (
     get_get_availability_info,
     get_get_title_details,
@@ -13,6 +14,7 @@ from nlb_catalogue_client.models.get_title_details_response_v2 import (
 from src.api.deps import SDBDep, CurrentUser, NLBClientDep
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
+from src.crud.book_outdated_bid import book_outdated_bid_crud
 from src.modals.book_avail import BookAvail, BookAvailCreate
 from src.modals.book_info import BookInfoCreate
 from src.modals.book_response import BookResponse
@@ -214,10 +216,16 @@ async def update_book_avail(db, nlb, bid_no: int) -> list[BookAvail]:
         not isinstance(response.parsed, GetAvailabilityInfoResponseV2)  # ErrorResponse
         or response.parsed.total_records == 0
     ):
-        # Return empty table
+        if response.status_code == 200:
+            # If Book avail have no records
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(response.parsed))
+
+        if response.status_code == 429:
+            raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, str(response.parsed))
+
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, str(response.parsed))
 
-    # Inser and Update if conflict on book availability
+    # Insert and Update if conflict on book availability
     try:
         all_avail_bks = [
             BookAvailCreate.from_nlb(item) for item in response.parsed.items or []
@@ -234,37 +242,34 @@ async def update_book_avail(db, nlb, bid_no: int) -> list[BookAvail]:
     return book_avails
 
 
-@router.put("")
+@router.put("", status_code=status.HTTP_204_NO_CONTENT)
 async def update_books(
-    background_tasks: BackgroundTasks,
     db: SDBDep,
     nlb: NLBClientDep,
     user: CurrentUser,
+    query_per_min: int = 15,
 ):
-    """Updates availability of all user's saved books"""
+    """Updates availability of all saved books"""
     if not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
-    async def update_all_books(bids: list[int]) -> None:
-        for bid in bids:
-            await update_book_avail(db, nlb, bid)
+    outdated_books = await book_outdated_bid_crud.get_all(db)
+    fail_bid = []
+    # TODO: Do limiting on database side instead
+    for book in outdated_books[:query_per_min]:
+        try:
+            await update_book_avail(db, nlb, book.BID)
+            print(f"Updated book BID: {book.BID}")
+            await sleep(1)  # To comply 1 request per second rate-limit
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                if e.status_code == 404:
+                    # delete book avail from DB if no records was found on book
+                    await book_avail_crud.delete_by_bid(db, bid=book.BID)
 
-    try:
-        book_infos = await book_info_crud.get_multi_by_owner(db, username=user.email)
-
-        # Set background task to query and update all user's books
-        background_tasks.add_task(
-            update_all_books, [book_info.BID for book_info in book_infos]
-        )
-
-    except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
-        print(e)
-        raise HTTPException(
-            status.HTTP_500_INTERNAL_SERVER_ERROR,
-            "Error occured with database transaction.",
-        ) from e
+            print(f"Update fail for BID:{book.BID}: Error {e}")
+            fail_bid.append(book.BID)
+            continue
 
 
 @router.put("/{bid}")
