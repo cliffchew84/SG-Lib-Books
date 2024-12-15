@@ -41,9 +41,9 @@
 										return s;
 									});
 									toast.success(`Book ${books[brn].title} is added`);
+									books[brn].bookMarkLoading = false;
+									books[brn].bookmarked = !books[brn].bookmarked;
 								}
-								books[brn].bookMarkLoading = false;
-								books[brn].bookmarked = !books[brn].bookmarked;
 							} catch (error) {
 								if (error instanceof Error) {
 									if (error.cause === 429) {
