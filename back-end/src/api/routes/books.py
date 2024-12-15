@@ -250,7 +250,7 @@ async def update_books(
     nlb: NLBClientDep,
     user: CurrentUser,
     query_per_min: int = 15,
-    recurse: bool = True,
+    recurse: bool = False,
 ):
     """Updates availability of all saved books"""
     if user is not None:
