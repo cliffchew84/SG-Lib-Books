@@ -100,5 +100,9 @@ async def search_books(
     return SearchResponse(
         total_records=total_records,
         has_more_records=has_more_records,
-        titles=[BookInfo.from_title(title) for title in response.parsed.titles],
+        titles=[
+            BookInfo.from_title(title)
+            for title in response.parsed.titles
+            if title.format_.code == "Book"
+        ],
     )
