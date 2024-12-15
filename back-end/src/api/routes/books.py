@@ -51,17 +51,16 @@ async def get_books(
 
 @router.get("/{bid}")
 async def get_book(
-    bid: int,
-    user: CurrentUser,
-    db: SDBDep,
-    nlb: NLBClientDep,
+    bid: int, user: CurrentUser, db: SDBDep, nlb: NLBClientDep, live: bool = False
 ) -> BookResponse:
     if not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
+    book_saved = True  # Book was saved before in database
     try:
         book_info = await book_info_crud.get(db, i=str(bid))
         if not book_info:
+            book_saved = False
             # Book infomation does not exist in database,
             # querying from NLB API instead
             response_info = await get_get_title_details.asyncio_detailed(
@@ -83,10 +82,14 @@ async def get_book(
 
             book_info = BookInfoCreate.from_nlb(response_info.parsed)
 
-        book_avail = await book_avail_crud.get_multi_by_owner(
-            db, username=user.email, BIDs=[bid]
-        )
-        if not book_avail:
+        if book_saved and not live:
+            # If book was saved, its availiblity exists in database
+            # If fetch_live param is set, live data will be queries regardless
+            book_avail = await book_avail_crud.get_multi_by_owner(
+                db, username=user.email, BIDs=[bid]
+            )
+        else:
+            print("Querying live:")
             # Book availablitiy does not exist in database,
             # querying from NLB API instead
             response_avail = await get_get_availability_info.asyncio_detailed(
@@ -101,14 +104,22 @@ async def get_book(
                     raise HTTPException(
                         status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
                     )
+                if response_avail.status_code == 404:
+                    # Book availibity does not exist, continues as book_avail is None
+                    pass
 
                 raise HTTPException(
                     status.HTTP_500_INTERNAL_SERVER_ERROR, str(response_avail.parsed)
                 )
+
             book_avail = [
                 BookAvailCreate.from_nlb(item)
                 for item in response_avail.parsed.items or []
             ]
+
+            # Save book avail to db if book was saved before
+            if book_saved:
+                await book_avail_crud.upsert(db, obj_ins=book_avail)
 
         return BookResponse(**book_info.model_dump(), avails=book_avail)
 
