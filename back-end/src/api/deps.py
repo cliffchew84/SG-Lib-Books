@@ -44,8 +44,8 @@ reusable_oauth2 = OAuth2PasswordBearer(
 AccessTokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-async def get_current_user(access_token: AccessTokenDep) -> User:
-    """get current user from access_token and  validate same time"""
+async def get_current_user(access_token: AccessTokenDep) -> User | None:
+    """get current user from access_token and validate same time. Accept service_role token"""
     if not super_client:
         raise HTTPException(status_code=500, detail="Super client not initialized")
 
@@ -54,6 +54,8 @@ async def get_current_user(access_token: AccessTokenDep) -> User:
             status_code=401, detail="Invalid authentication credentials"
         )
 
+    if access_token == settings.SUPABASE_KEY:
+        return None
     try:
         user_rsp = super_client.auth.get_user(jwt=access_token)
     except AuthApiError as e:
@@ -65,7 +67,7 @@ async def get_current_user(access_token: AccessTokenDep) -> User:
     return user_rsp.user
 
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentUser = Annotated[User | None, Depends(get_current_user)]
 
 
 def get_nlb_api_client():

@@ -42,9 +42,9 @@ export async function updateBooks(client: BackendAPIClient): Promise<null> {
 	}
 };
 
-export async function getBook(client: BackendAPIClient, brn: number): Promise<BookResponse> {
+export async function getBook(client: BackendAPIClient, brn: number, live: boolean = false): Promise<BookResponse> {
 	try {
-		const response = await client.get({ path: `/books/${brn}` });
+		const response = await client.get({ path: `/books/${brn}`, queryParams: { live } });
 
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, { cause: response.status });

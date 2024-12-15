@@ -35,7 +35,7 @@ async def search_books(
     """Calls NLB API GetTitles Search and show results
     in search_table.html
     """
-    if not user.email:
+    if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     if not keyword:
