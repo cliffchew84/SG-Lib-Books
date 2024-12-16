@@ -102,7 +102,7 @@ The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage
     npm install
     ```
 
-### 2.0 Development Workflow
+### 2. Development Workflow
 
 1. Start-up Supabase server with supabase-cli.
 
