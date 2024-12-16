@@ -144,8 +144,8 @@ The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage
 ### Code Linting and Formating
 
 This project uses [ruff](https://github.com/astral-sh/ruff) as Python
-code linter and formatter while [eslint](https://eslint.org) and [prettier](https://prettier.io)
-are used for Typescript.
+code linter and formatter while [husky](https://typicode.github.io/husky/) is used
+for Typescript.
 
 To integrate this seamlessly to your development workflow, we recommend
 using [pre-commit](https://pre-commit.com/) to run the formatter and linter before

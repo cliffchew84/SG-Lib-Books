@@ -13,4 +13,3 @@ jobs:
       - uses: astral-sh/ruff-action@v1
         with:
           src: "./back-end/src"
-
