@@ -21,51 +21,135 @@ This side project is also a way for me to continue to learn and apply more techn
 3. Recommending books
 
 ## Getting Started
-The following section details the step it takes to start-up a local Supabase and FastAPI server for development purpose.
 
-### Prerequisite: Supabase CLI
-The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage the database schema and seed data. Please follow the instructions below:
+The following section details the setup steps and development workflow for this web-app.
 
-1. Install Supabase CLI using the official guide in your local machine [here](https://supabase.com/docs/guides/cli/getting-started#installing-the-supabase-cli).
+### Prerequisites
 
+Development:
 
-2. Authenticate Supabase CLI with the following command:
-```bash
-supabase login
-```
+    - Node.js and npm (for frontend)
+    - Python (for backend)
+    - Supabase CLI
+    - Docker (for Supabase)
 
-3. Run supabase start to take note of the local Supabase URL and API Key. 
-```bash
-supabase start
-```
+Deployment:
 
-4. Copy and Update the `.env` file with the Supabase API Key before beginning of any development.
+    - Firebase CLI
+    - Google Cloud CLI
 
-### FastAPI Server
-1. Install `uv` in your local machine. Please follow the [official guide](https://docs.astral.sh/uv/getting-started/installation/) for more information.
+### 1.0 Setup Steps
 
-2. Update `.env` file with APIKeys from `.env.example` template.
+#### 1.1 Supabase Setup
+
+The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage
+ the database schema and seed data. Please follow the instructions below:
+
+1. Install Supabase CLI using the official guide [here](https://supabase.com/docs/guides/cli/getting-started#installing-the-supabase-cli).
+
+1. Authenticate Supabase CLI with the following command:
 
     ```bash
-    cp .env.example .env
+    supabase login
     ```
-3. Start-up Supabase server with supabase-cli and docker.
+
+1. Start the local Supabase instance:.
 
     ```bash
     supabase start
     ```
 
-4. Start-up FastAPI server with Uvicorn and hot-reloading for development purpose. This command will install create virtual environment in `.venv` and install all dependencies before starting the server.
+1. As the local Supabase instance spinned up, take note of the `anon key`
+ and `service_role key` from the console as they need to be filled into
+ `.env` files of front-end and back-end subsequently.
+
+#### 1.2 Back-end FastAPI Server Setup
+
+1. Navigate to back-end directory:
 
     ```bash
+    cd back-end
+    ```
+
+1. Install `uv` in your local machine. Please follow the
+ [official guide](https://docs.astral.sh/uv/getting-started/installation/)
+ for more information.
+
+1. Copy the example environment file:.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+1. Update the .env file with the Supabase API keys and other necessary configurations.
+ Do note that you need to request for a API Key to access NLB's Catalogue API [here](https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs).
+
+#### 1.3 Front-end Svelte Setup
+
+1. Navigate to front-end directory:
+
+    ```bash
+    cd front-end
+    ```
+
+1. Copy the example environment file. Remember to update your Supabase anon key accordingly.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+1. Install dependencies with npm.
+
+    ```bash
+    npm install
+    ```
+
+### 2.0 Development Workflow
+
+1. Start-up Supabase server with supabase-cli.
+
+    ```bash
+    supabase start
+    ```
+
+1. Run Backend (FastAPI)
+
+    ```bash
+    cd back-end
     uv run -- uvicorn src.main:app --reload
     ```
 
+1. Run Frontend (Svelte)
+
+    ```bash
+    cd front-end
+    npm run dev -- --open
+    ```
+
+### 3.0 Building and Deploying for Production
+
+1. Backend Deployment to Google Artifact Registry
+
+    - Automated CI/CD pipeline triggers on push to main branch
+    - Builds Docker image
+    - Pushes to Google Artifact Registry
+    - Deploys to specified Google Cloud Run for managed container service.
+
+2. Frontend Deployment to Firebase Hosting
+
+    - Automated CI/CD pipeline triggers on push to main branch
+    - Builds Svelte application
+    - Deploys to Firebase Hosting
+
 ### Code Linting and Formating
 
-This project uses [ruff](https://github.com/astral-sh/ruff) as Python code linter and formatter.
+This project uses [ruff](https://github.com/astral-sh/ruff) as Python
+code linter and formatter while [eslint](https://eslint.org) and [prettier](https://prettier.io)
+are used for Typescript.
 
-To integrate this seamlessly to your development workflow, we recommend using [pre-commit](https://pre-commit.com/) to run the formatter and linter before commiting to the repo.
+To integrate this seamlessly to your development workflow, we recommend
+using [pre-commit](https://pre-commit.com/) to run the formatter and linter before
+commiting to the repo.
 
 1. run `pre-commit install` to set up the git hook scripts
 
