@@ -44,5 +44,18 @@
 	"dependencies": {
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.46.1"
-	}
+	},
+"husky": {
+  "hooks": {
+    "pre-commit": "lint-staged",
+  }
+},
+"lint-staged": {
+  "*.{js,ts,svelte}": [
+    "pretty-quick --staged",
+    "eslint --fix",
+    "git add"
+  ]
+}
+
 }
