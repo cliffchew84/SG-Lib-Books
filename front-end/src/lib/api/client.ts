@@ -12,16 +12,15 @@ class BackendAPIClient {
 	private baseURL: string;
 	private session: Session | null;
 
-	constructor(
-		baseURL: string,
-		session: Session | null
-	) {
+	constructor(baseURL: string, session: Session | null) {
 		this.baseURL = baseURL;
 		this.session = session;
 	}
 
-
-	private buildURL(path: string = '', queryParams: Record<string, string | number | boolean> = {}): string {
+	private buildURL(
+		path: string = '',
+		queryParams: Record<string, string | number | boolean> = {}
+	): string {
 		const url = new URL(`${this.baseURL}/${path.replace(/^\//, '')}`);
 
 		Object.entries(queryParams).forEach(([key, value]) => {
@@ -44,7 +43,7 @@ class BackendAPIClient {
 		};
 
 		if (this.session) {
-			requestHeaders['Authorization'] = `Bearer ${this.session.access_token}`
+			requestHeaders['Authorization'] = `Bearer ${this.session.access_token}`;
 		}
 
 		const fullURL = this.buildURL(path, queryParams);
@@ -55,7 +54,7 @@ class BackendAPIClient {
 			body: method !== 'GET' ? JSON.stringify(body) : undefined
 		});
 
-		return response
+		return response;
 	}
 
 	// Convenience methods for common HTTP verbs
@@ -81,4 +80,3 @@ class BackendAPIClient {
 }
 
 export default BackendAPIClient;
-

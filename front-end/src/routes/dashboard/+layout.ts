@@ -1,5 +1,5 @@
-import { redirect } from '@sveltejs/kit'
-import type { LayoutLoad } from './$types'
+import { redirect } from '@sveltejs/kit';
+import type { LayoutLoad } from './$types';
 
 export const load: LayoutLoad = async ({ parent }) => {
 	/**
@@ -9,4 +9,4 @@ export const load: LayoutLoad = async ({ parent }) => {
 	if (!session) {
 		redirect(307, '/auth/sign-in');
 	}
-}
+};
