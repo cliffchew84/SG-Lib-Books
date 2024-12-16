@@ -10,7 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"prepare": "husky"
+		"prepare": "npm run lint && npm run format"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -44,18 +44,5 @@
 	"dependencies": {
 		"@supabase/ssr": "^0.5.2",
 		"@supabase/supabase-js": "^2.46.1"
-	},
-"husky": {
-  "hooks": {
-    "pre-commit": "lint-staged",
-  }
-},
-"lint-staged": {
-  "*.{js,ts,svelte}": [
-    "pretty-quick --staged",
-    "eslint --fix",
-    "git add"
-  ]
-}
-
+	}
 }
