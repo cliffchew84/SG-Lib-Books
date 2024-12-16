@@ -16,7 +16,7 @@ export interface Book {
 
 export interface BookProp extends Book {
 	onBookMarked: MouseEventHandler<HTMLButtonElement>;
-	bookMarkLoading: boolean
+	bookMarkLoading: boolean;
 }
 
 export interface Library {

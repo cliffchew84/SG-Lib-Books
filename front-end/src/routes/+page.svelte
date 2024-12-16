@@ -3,4 +3,3 @@
 
 	goto('/dashboard');
 </script>
-

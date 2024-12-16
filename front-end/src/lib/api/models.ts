@@ -1,7 +1,7 @@
 export interface BookInfo {
 	BID: number;
 	TitleName?: string;
-	Author?: string
+	Author?: string;
 	PublishYear?: string;
 	Publisher?: string;
 	Subjects?: string;
@@ -15,7 +15,7 @@ export interface BookAvail {
 	CallNumber: string;
 	BranchName: string;
 	StatusDesc?: string;
-	InsertTime?: number
+	InsertTime?: number;
 	BID: number;
 	DueDate?: string;
 	UpdateTime?: string;
@@ -30,9 +30,9 @@ export interface Library {
 	opening_status: string;
 	start_hour?: string;
 	end_hour?: string;
-	opening_description?: string
-	address?: string
-	cover_url?: string
+	opening_description?: string;
+	address?: string;
+	cover_url?: string;
 }
 
 export interface LibraryResponse extends Library {
