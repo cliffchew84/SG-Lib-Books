@@ -27,18 +27,16 @@ The following section details the setup steps and development workflow for this 
 ### Prerequisites
 
 Development:
-
-    - Node.js and npm (for frontend)
-    - Python (for backend)
-    - Supabase CLI
-    - Docker (for Supabase)
+- Node.js and npm (for frontend)
+- Python (for backend)
+- Supabase CLI
+- Docker (for Supabase)
 
 Deployment:
+- Firebase CLI
+- Google Cloud CLI
 
-    - Firebase CLI
-    - Google Cloud CLI
-
-### 1.0 Setup Steps
+### 1. Setup Steps
 
 #### 1.1 Supabase Setup
 
@@ -82,7 +80,7 @@ The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage
     ```
 
 1. Update the .env file with the Supabase API keys and other necessary configurations.
- Do note that you need to request for a API Key to access NLB's Catalogue API [here](https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs).
+ A seperate request for a API Key is required to access NLB's Catalogue API [here](https://www.nlb.gov.sg/main/partner-us/contribute-and-create-with-us/NLBLabs).
 
 #### 1.3 Front-end Svelte Setup
 
@@ -126,7 +124,7 @@ The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage
     npm run dev -- --open
     ```
 
-### 3.0 Building and Deploying for Production
+### 3. Building and Deploying for Production
 
 1. Backend Deployment to Google Artifact Registry
 
