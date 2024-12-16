@@ -103,6 +103,6 @@ async def search_books(
         titles=[
             BookInfo.from_title(title)
             for title in response.parsed.titles
-            if title.format_.code == "Book"
+            if title.format_.name == "Book"
         ],
     )
