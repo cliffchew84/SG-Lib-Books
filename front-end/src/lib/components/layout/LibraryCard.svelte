@@ -22,10 +22,13 @@
 	);
 </script>
 
-<div class="relative rounded-lg shadow border-slate-400">
-	<a class="bg-muted min-h-[140px] block" href={`/dashboard/library/${name}`}>
+<div class="relative rounded-lg shadow border-slate-400 w-full">
+	<a
+		class="bg-muted min-h-[140px] max-h-[200px] w-full block overflow-hidden"
+		href={`/dashboard/library/${name}`}
+	>
 		{#if imageLink}
-			<img src={imageLink} alt={name} class="rounded-t-lg" />
+			<img src={imageLink} alt={name} class="rounded-t-lg aspect-[3/2] h-fit w-fit object-cover" />
 		{/if}
 	</a>
 	<button onclick={onFavourite} class="absolute right-3 top-3 z-50 shadow">
