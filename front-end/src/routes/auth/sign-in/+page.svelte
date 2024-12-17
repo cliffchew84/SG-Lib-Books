@@ -12,6 +12,6 @@
 
 <div class="flex flex-col space-y-2 text-center">
 	<h1 class="text-2xl font-semibold tracking-tight">Sign In</h1>
-	<p class="text-muted-foreground text-sm">Sign-in to your account with Google OAuth</p>
+	<p class="text-muted-foreground text-sm">Sign-in to your account</p>
 </div>
 <UserAuthForm class={undefined} supabase={data.supabase} />
