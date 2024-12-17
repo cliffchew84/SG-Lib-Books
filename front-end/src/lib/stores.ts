@@ -24,7 +24,7 @@ export const libraryStore = derived(
 				let availBooks = [];
 				for (let bookAvail of bookAvails) {
 					if (bookAvail.StatusDesc == 'On Loan') {
-						onLoanBooks.push(book);
+						onLoanBooks.push({ ...book, dueDate: `Due ${bookAvail.DueDate}` });
 					} else {
 						availBooks.push(book);
 					}

@@ -8,7 +8,8 @@
 		// BookMarked,
 		Trash2,
 		Bookmark,
-		LoaderCircle
+		LoaderCircle,
+		Hourglass
 	} from 'lucide-svelte';
 	import type { BookProp } from '$lib/models';
 
@@ -19,6 +20,7 @@
 		publishYear = '',
 		callNumber = '',
 		branches = [],
+		dueDate = '',
 		imageLink = '',
 		bookmarked = false,
 		onBookMarked = () => {},
@@ -79,6 +81,12 @@
 			<div class="flex gap-2 text-slate-500">
 				<MapPin class="w-4 h-4 my-auto shrink-0" />
 				<p class="text-ellipsis overflow-hidden whitespace-nowrap">{branchesName}</p>
+			</div>
+		{/if}
+		{#if dueDate}
+			<div class="flex gap-2 text-slate-500">
+				<Hourglass class="w-4 h-4 my-auto shrink-0" />
+				<p class="text-ellipsis overflow-hidden whitespace-nowrap">{dueDate}</p>
 			</div>
 		{/if}
 	</div>

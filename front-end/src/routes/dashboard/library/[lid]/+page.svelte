@@ -52,6 +52,7 @@
 		library?.onLoanBooks.map((book) => {
 			return {
 				...book,
+				callNumber: undefined,
 				branches: undefined,
 				bookMarkLoading: false,
 				onBookMarked: async () => {

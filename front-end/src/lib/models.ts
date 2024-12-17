@@ -9,6 +9,7 @@ export interface Book {
 	callNumber?: string;
 	summary?: string;
 	imageLink?: string;
+	dueDate?: string;
 	branches?: string[];
 	bookmarked: boolean;
 	items?: BookAvail[];
