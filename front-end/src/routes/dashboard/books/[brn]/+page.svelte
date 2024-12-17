@@ -171,6 +171,14 @@
 	});
 </script>
 
+<svelte:head>
+	{#if isError}
+		<title>Something Went Wrong | SG Lib Books</title>
+	{:else}
+		<title>{book.title} | SG Lib Books</title>
+	{/if}
+</svelte:head>
+
 <main class="container flex flex-col gap-8 p-8 min-h-[85vh]">
 	{#if !isError}
 		<BookDetailsSection {book} {isLoading} />

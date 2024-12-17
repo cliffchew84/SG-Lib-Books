@@ -97,6 +97,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Books | SG Lib Books</title>
+</svelte:head>
+
 <TitledPage title="Books" description="Checkout all your favourite books.">
 	{#if count > 0}
 		<BookFilterBar bind:searchValue />

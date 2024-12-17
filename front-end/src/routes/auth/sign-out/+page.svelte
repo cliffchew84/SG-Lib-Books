@@ -18,6 +18,10 @@
 		});
 </script>
 
+<svelte:head>
+	<title>Sign Out | SG Lib Books</title>
+</svelte:head>
+
 <div class="flex flex-col space-y-2 text-center">
 	<h1 class="text-2xl font-semibold tracking-tight">Signing Out</h1>
 	<p class="text-muted-foreground text-sm">

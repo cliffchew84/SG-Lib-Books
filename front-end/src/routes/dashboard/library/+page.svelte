@@ -61,6 +61,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Library | SG Lib Books</title>
+</svelte:head>
+
 <TitledPage
 	title="Library"
 	description="Checkout your favourite books in every library operated by NLB."

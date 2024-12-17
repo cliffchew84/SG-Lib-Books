@@ -106,6 +106,14 @@
 	// TODO: Show loan till date in card
 </script>
 
+<svelte:head>
+	{#if isError}
+		<title>Something Went Wrong | SG Lib Books</title>
+	{:else}
+		<title>{library.name} | SG Lib Books</title>
+	{/if}
+</svelte:head>
+
 <main class="container flex flex-col gap-8 px-8 min-h-[85vh]">
 	{#if !isError}
 		<LibraryDetailsSection {...library} {onLoanBooks} {availBooks} {onFavourite} />

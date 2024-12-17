@@ -11,6 +11,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Welcome | SG Lib Books</title>
+</svelte:head>
+
 <main class="container flex flex-col gap-8 p-8 min-h-[85vh]">
 	<div class="flex flex-col gap-3">
 		<h1 class="text-4xl font-bold text-slate-700">Welcome to SG Lib Books</h1>

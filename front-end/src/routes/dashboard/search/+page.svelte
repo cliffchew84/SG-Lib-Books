@@ -120,6 +120,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Search | SG Lib Books</title>
+</svelte:head>
+
 <TitledPage title="Search" description="Add your favourite books from NLB's Catalogue.">
 	<BookSearchBar {onSubmit} bind:searchInput />
 	{#if !isError}

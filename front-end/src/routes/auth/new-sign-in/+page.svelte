@@ -11,6 +11,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>New User | SG Lib Books</title>
+</svelte:head>
+
 <div class="flex flex-col space-y-2 text-center">
 	<h1 class="text-2xl font-semibold tracking-tight">Welcome to SG Lib Books</h1>
 	<p class="text-muted-foreground text-sm">Welcome to SG Lib Reads {data.user?.email ?? ''}</p>
