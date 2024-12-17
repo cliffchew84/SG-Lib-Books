@@ -51,12 +51,12 @@
 	);
 	let librariesAvail: LibraryProp[] = $derived(
 		librariresProps.filter((lib) => {
-			return lib.availBooks.length >= 1;
+			return lib.availBooks.length >= 1 && !lib.favourite;
 		})
 	);
 	let librariesOnLoan: LibraryProp[] = $derived(
 		librariresProps.filter((lib) => {
-			return lib.availBooks.length == 0;
+			return lib.availBooks.length == 0 && !lib.favourite;
 		})
 	);
 </script>
