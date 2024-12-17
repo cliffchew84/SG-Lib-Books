@@ -49,6 +49,7 @@
 						title: book.TitleName,
 						author: book.Author,
 						imageLink: book.cover_url,
+						publishYear: book.PublishYear,
 						bookmarked: $bookStore.hasOwnProperty(book.BID),
 						bookMarkLoading: false,
 						onBookMarked: async () => {
