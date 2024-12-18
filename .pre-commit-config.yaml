@@ -8,13 +8,13 @@ repos:
       # Run the formatter.
       - id: ruff-format
 
-  - repo: local
-    hooks:
-      - id: prettier
-        name: prettier
-        entry: npm --prefix front-end run format
-        types_or: [javascript, jsx, ts, svelte]
-        language: system
+  # - repo: local
+  #   hooks:
+  #     - id: prettier
+  #       name: prettier
+  #       entry: npm --prefix front-end run format
+  #       types_or: [javascript, jsx, ts, svelte]
+  #       language: system
       # - id: eslint
       #   name: prettier
       #   entry: npm --prefix front-end run lint

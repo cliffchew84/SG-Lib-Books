@@ -8,7 +8,7 @@ export const bookStore = writable<{ [key: number]: Book }>({});
 export const libraryStore = derived(
 	[bookStore, libraryAPIStore],
 	([$bookStore, $libraryAPIStore]) => {
-		const libraries: { [key: string]: Library } = {};
+		const libraries: { [key: string]: Library } = $libraryAPIStore;
 		Object.values($bookStore).map((book) => {
 			const branchAvail: { [key: string]: BookAvail[] } = {};
 			// Split book items into dictionary of branch
@@ -20,38 +20,24 @@ export const libraryStore = derived(
 				}
 			});
 			for (const [k, bookAvails] of Object.entries(branchAvail)) {
-				let onLoanBooks = [];
-				let availBooks = [];
 				for (let bookAvail of bookAvails) {
-					if (bookAvail.StatusDesc == 'On Loan') {
-						onLoanBooks.push({ ...book, dueDate: `Due ${bookAvail.DueDate}` });
-					} else {
-						availBooks.push(book);
+					if (!libraries.hasOwnProperty(k)) {
+						console.warn(`Library ${k} does not exist in database`);
+						continue;
 					}
-				}
-
-				if (libraries.hasOwnProperty(k)) {
-					libraries[k].onLoanBooks = libraries[k].onLoanBooks.concat(onLoanBooks);
-					libraries[k].availBooks = libraries[k].availBooks.concat(availBooks);
-				} else {
-					if ($libraryAPIStore.hasOwnProperty(k)) {
-						libraries[k] = {
-							name: k,
-							favourite: $libraryAPIStore[k].favourite,
-							location: $libraryAPIStore[k].location,
-							openingHoursDesc: $libraryAPIStore[k].openingHoursDesc,
-							imageLink: $libraryAPIStore[k].imageLink,
-							onLoanBooks,
-							availBooks
-						};
+					if (bookAvail.StatusDesc == 'On Loan') {
+						libraries[k].onLoanBooks.push({ ...book, dueDate: `Due ${bookAvail.DueDate}` });
+					} else {
+						libraries[k].availBooks.push(book);
 					}
 				}
 			}
 		});
+		// Sort libraries result by alphabetical order
 		const sortedResult: { [key: string]: Library } = {};
 		Object.keys(libraries)
 			.sort()
-			.forEach(function (k) {
+			.forEach((k) => {
 				sortedResult[k] = libraries[k];
 			});
 		return sortedResult;
