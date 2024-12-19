@@ -17,8 +17,11 @@
 
 	const lid = $page.params.lid;
 
-	let library: Library | undefined = $derived($libraryStore[lid]);
-	let isError: boolean = $derived(library === undefined);
+	let library: Library | undefined = $state($libraryStore[lid]);
+	// Update library dynamically as libraryStore changes
+	$effect(() => {
+		library = $libraryStore[lid];
+	});
 	let availBooks: BookProp[] = $derived(
 		library?.availBooks.map((book) => {
 			return {
@@ -79,6 +82,10 @@
 		}) ?? []
 	);
 	let onFavourite = $derived(async () => {
+		if (library === undefined) {
+			// Do nothing if library is undefined
+			return;
+		}
 		try {
 			if (library.favourite) {
 				await unfavouriteLibrary(data.client, library.name);
@@ -88,7 +95,7 @@
 				toast.success(`${library.name} is added to your favourites`);
 			}
 			libraryAPIStore.update((s) => {
-				s[library.name].favourite = !s[library.name].favourite;
+				s[library!.name].favourite = !s[library!.name].favourite;
 				return s;
 			});
 		} catch (error) {
@@ -107,15 +114,15 @@
 </script>
 
 <svelte:head>
-	{#if isError}
-		<title>Something Went Wrong | SG Lib Books</title>
+	{#if library !== undefined}
+		<title>{library!.name} | SG Lib Books</title>
 	{:else}
-		<title>{library.name} | SG Lib Books</title>
+		<title>Unknown Library | SG Lib Books</title>
 	{/if}
 </svelte:head>
 
 <main class="container flex flex-col gap-8 px-8 min-h-[85vh]">
-	{#if !isError}
+	{#if library !== undefined}
 		<LibraryDetailsSection {...library} {onLoanBooks} {availBooks} {onFavourite} />
 	{:else}
 		<div class="my-5 flex flex-col gap-3">
