@@ -71,9 +71,14 @@
 	);
 	let librariesOnLoan: LibraryProp[] = $derived(
 		librariresProps.filter((lib) => {
-			return lib.availBooks.length == 0 && !lib.favourite;
+			return lib.onLoanBooks.length > 0 && lib.availBooks.length == 0 && !lib.favourite;
 		})
 	);
+
+	// Compute bookmarked based on bookStore update
+	$effect(() => {
+		book.bookmarked = $bookStore.hasOwnProperty($page.params.brn);
+	});
 
 	$effect(() => {
 		(async () => {
@@ -101,9 +106,14 @@
 
 	$effect(() => {
 		// Compute library availability state
-		const libraries: { [key: string]: Library } = {};
+		const libraries: { [key: string]: Library } = $libraryAPIStore;
 		const branchAvail: { [key: string]: BookAvail[] } = {};
-		(book.items ?? []).map((avail) => {
+		// Reset onLoanBook and availBook state
+		Object.keys(libraries).map((k) => {
+			libraries[k].onLoanBooks = [];
+			libraries[k].availBooks = [];
+		});
+		book.items?.map((avail) => {
 			if (branchAvail.hasOwnProperty(avail.BranchName)) {
 				branchAvail[avail.BranchName].push(avail);
 			} else {
@@ -111,63 +121,49 @@
 			}
 		});
 		for (const [k, bookAvails] of Object.entries(branchAvail)) {
-			const onLoanBooks = [];
-			const availBooks = [];
 			for (let bookAvail of bookAvails) {
+				if (!libraries.hasOwnProperty(k)) {
+					console.warn(`Library ${k} does not exist in database`);
+					continue;
+				}
 				if (bookAvail.StatusDesc == 'On Loan') {
-					onLoanBooks.push(book);
+					libraries[k].onLoanBooks.push({ ...book, dueDate: `Due ${bookAvail.DueDate}` });
 				} else {
-					availBooks.push(book);
+					libraries[k].availBooks.push(book);
 				}
 			}
-			if (libraries.hasOwnProperty(k)) {
-				libraries[k].onLoanBooks = libraries[k].onLoanBooks.concat(onLoanBooks);
-				libraries[k].availBooks = libraries[k].availBooks.concat(availBooks);
-			} else {
-				if ($libraryAPIStore.hasOwnProperty(k)) {
-					libraries[k] = {
-						name: k,
-						favourite: $libraryAPIStore[k].favourite,
-						location: $libraryAPIStore[k].location,
-						openingHoursDesc: $libraryAPIStore[k].openingHoursDesc,
-						imageLink: $libraryAPIStore[k].imageLink,
-						onLoanBooks,
-						availBooks
-					};
-				}
-			}
-			librariresProps = Object.values(libraries).map((lib) => {
-				return {
-					...lib,
-					onFavourite: async () => {
-						try {
-							if (lib.favourite) {
-								console.log('unlike library');
-								await unfavouriteLibrary(data.client, lib.name);
-								toast.success(`${lib.name} is removed from your favourites`);
-							} else {
-								console.log('like library');
-								await favouriteLibrary(data.client, lib.name);
-								toast.success(`${lib.name} is added to your favourites`);
-							}
-							libraryAPIStore.update((s) => {
-								s[lib.name].favourite = !s[lib.name].favourite;
-								return s;
-							});
-						} catch (error) {
-							if (error instanceof Error) {
-								if (error.cause === 429) {
-									toast.warning("We are hitting NLB's API too hard. Please try again later.");
-								} else {
-									toast.warning('Library favourite request has failed. Please try again later.');
-								}
-							}
-							console.error('Favourite/unfavourite error:', error);
-						}
-					}
-				};
-			});
 		}
+		librariresProps = Object.values(libraries).map((lib) => {
+			return {
+				...lib,
+				onFavourite: async () => {
+					try {
+						if (lib.favourite) {
+							console.log('unlike library');
+							await unfavouriteLibrary(data.client, lib.name);
+							toast.success(`${lib.name} is removed from your favourites`);
+						} else {
+							console.log('like library');
+							await favouriteLibrary(data.client, lib.name);
+							toast.success(`${lib.name} is added to your favourites`);
+						}
+						libraryAPIStore.update((s) => {
+							s[lib.name].favourite = !s[lib.name].favourite;
+							return s;
+						});
+					} catch (error) {
+						if (error instanceof Error) {
+							if (error.cause === 429) {
+								toast.warning("We are hitting NLB's API too hard. Please try again later.");
+							} else {
+								toast.warning('Library favourite request has failed. Please try again later.');
+							}
+						}
+						console.error('Favourite/unfavourite error:', error);
+					}
+				}
+			};
+		});
 	});
 </script>
 
