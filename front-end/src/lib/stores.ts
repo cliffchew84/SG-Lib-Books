@@ -9,6 +9,11 @@ export const libraryStore = derived(
 	[bookStore, libraryAPIStore],
 	([$bookStore, $libraryAPIStore]) => {
 		const libraries: { [key: string]: Library } = $libraryAPIStore;
+		// Reset onLoanBook and availBook state
+		Object.keys(libraries).map((k) => {
+			libraries[k].onLoanBooks = [];
+			libraries[k].availBooks = [];
+		})
 		Object.values($bookStore).map((book) => {
 			const branchAvail: { [key: string]: BookAvail[] } = {};
 			// Split book items into dictionary of branch

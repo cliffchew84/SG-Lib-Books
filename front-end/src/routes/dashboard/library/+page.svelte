@@ -56,7 +56,7 @@
 	);
 	let librariesOnLoan: LibraryProp[] = $derived(
 		librariresProps.filter((lib) => {
-			return lib.availBooks.length == 0 && !lib.favourite;
+			return lib.onLoanBooks.length > 0 && lib.availBooks.length == 0 && !lib.favourite;
 		})
 	);
 </script>
