@@ -16,9 +16,11 @@
 	let noAvail = $derived(availBooks.length);
 	let noOnLoan = $derived(onLoanBooks.length);
 	let availabilityStatus = $derived(
-		[noAvail ? `${noAvail} Available` : undefined, noOnLoan ? `${noOnLoan} On-Loan` : undefined]
-			.filter((v) => v)
-			.join(' · ')
+		noAvail > 0 || noOnLoan > 0
+			? [noAvail ? `${noAvail} Available` : undefined, noOnLoan ? `${noOnLoan} On-Loan` : undefined]
+					.filter((v) => v)
+					.join(' · ')
+			: 'No related books'
 	);
 </script>
 
