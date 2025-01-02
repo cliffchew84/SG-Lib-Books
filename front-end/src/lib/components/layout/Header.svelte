@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { User } from '@supabase/supabase-js';
 
-	import { Menu, Book, Settings, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
+	import { Menu, Book, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { getInitials } from '$lib/utils';
 
-	let { user }: { user: User | null } = $props();
-	let isLoggedIn: boolean = $derived(user !== null);
+	let { user }: { user?: User | null } = $props();
+	let isLoggedIn: boolean = $derived(user != null);
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
 </script>
 
