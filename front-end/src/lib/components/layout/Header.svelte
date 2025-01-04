@@ -13,7 +13,7 @@
 </script>
 
 <header class="flex flex-row justify-between p-2 border shadow items-center">
-	<a href="/">SG Lib Books</a>
+	<a href="/">SG Lib Books <span class="text-[0.5em]">BETA</span></a>
 
 	{#if isLoggedIn}
 		<!-- User is logged in -->
