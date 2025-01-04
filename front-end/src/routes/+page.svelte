@@ -12,7 +12,6 @@
 
 	let { data }: { data: PageData } = $props();
 	$effect(() => {
-		console.log(data);
 		if (data.session != null) {
 			goto('/dashboard');
 		}
