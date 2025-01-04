@@ -127,7 +127,7 @@
 		<div class="max-w-3xl mx-auto text-center">
 			<h2 class="mb-6 text-4xl font-semibold text-slate-700">Join our waitlist!</h2>
 			<p class="text-slate-600 mb-8 text-lg">
-				Loves what we are doing? Receives an email from us as soon as our web application is ready
+				Love what we are doing? Receives an email from us as soon as our web application is ready
 				for everyone.
 			</p>
 			<Button class="mb-10" href="https://forms.gle/C4MyKxAyUhhgds4U9">
