@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { LogIn, Library, Radar, Sprout, Smartphone, Bell } from 'lucide-svelte';
+	import { LogIn, Library, Radar, Sprout, Smartphone, Bell, Linkedin, Github } from 'lucide-svelte';
 
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import readingPic from '$lib/images/reading.gif';
 	import highlightPic from '$lib/images/library-overview.png';
+	import contributorCliff from '$lib/images/contributor-cliff-chew.jpg';
+	import contributorBryan from '$lib/images/contributor-bryan-wong.jpg';
+	import contributorTingfeng from '$lib/images/contributor-tingfeng-wu.jpg';
 
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
@@ -34,9 +37,11 @@
 				Redefining your book borrowing experience
 			</h1>
 			<p class="text-slate-500 mb-8">
+				<!-- Find out which libraries have the books you want. Get notified when they are available for -->
+				<!-- loan. -->
 				Borrowing your favourite books easier at your neighbourhood public libraries
 			</p>
-			<Button href="/auth/sign-in" class="ml-auto mb-10">
+			<Button href="/#waitlist" class="ml-auto mb-10">
 				<LogIn class="mr-2 h-4 w-4" />
 				<span>Be Our Beta Tester!</span>
 			</Button>
@@ -55,7 +60,7 @@
 					<h3 class="text-2xl font-semibold">Library View</h3>
 				</div>
 				<p class="text-slate-700">
-					Overview of books availibility on each library. You wont missed out your favourite book
+					Check out the books availibility on each library. You wont missed out your favourite books
 					on-shelve again!
 				</p>
 			</div>
@@ -65,7 +70,7 @@
 					<h3 class="text-2xl font-semibold">Plan your Trip Ahead</h3>
 				</div>
 				<p class="text-slate-700">
-					Know which library has your favourite book so you can plan your journey ahead.
+					Know which library has your favourite books so you can plan your journey ahead.
 				</p>
 			</div>
 			<div class="w-72 flex flex-col gap-3 mb-9">
@@ -89,7 +94,6 @@
 			</div>
 		</div>
 	</section>
-
 	<section class="container mb-9 flex flex-col md:flex-row gap-6">
 		<div class="flex items-center">
 			<div>
@@ -97,19 +101,13 @@
 					Calling all Singapore library users!
 				</h2>
 				<p class="text-slate-700 text-lg mb-3">
-					We are a group of Singapore tech and book enthusiasts who wanted to improve our physical
-					library book borrowing experience.
+					Tired of always missing out on your favorite books at the library? We’ve got you covered!
 				</p>
-				<ul class="list-disc pl-4 text-slate-700 text-lg">
-					<li>Mark your favourite books</li>
-					<li>Check for book availibility from all public libraries</li>
-					<li>
-						Join our <a
-							href="https://github.com/cliffchew84/SG-Lib-Books"
-							class="underline font-semibold">open source</a
-						> movement to make book borrowing easier
-					</li>
-					<li>Other exciting features in coming soon!</li>
+				<ul class="text-slate-700 text-lg">
+					<li><span class="mr-3">📚</span> Bookmark your favourite titles</li>
+					<li><span class="mr-3">📍</span> Discover which libraries have the books you love</li>
+					<li><span class="mr-3">🔔</span> Get notified when they're available</li>
+					<li><span class="mr-3">🚀</span> More exciting features are on the way!</li>
 				</ul>
 			</div>
 		</div>
@@ -123,7 +121,69 @@
 			</a>
 		</div>
 	</section>
-	<section class="bg-gradient-to-b from-white to-slate-100">
+	<section class="bg-gradient-to-b from-white to-slate-100" id="about-us">
+		<div class="max-w-6xl mx-auto text-center">
+			<h2 class="mb-6 text-4xl font-semibold text-slate-700">About Us</h2>
+			<p class="text-slate-700 mb-10 text-lg max-w-4xl mx-auto">
+				We are a group of Singapore tech and book enthusiasts who wanted to improve our physical
+				library book borrowing experience.
+			</p>
+			<div class="flex gap-24 pb-20">
+				<div class="flex flex-col gap-1">
+					<img src={contributorCliff} alt="Cliff Chew" class="rounded-full pb-3 border-slate-200" />
+					<h3 class="text-slate-900 text-lg">Cliff Chew</h3>
+					<div class="flex justify-center">
+						<Button variant="ghost" href="https://www.linkedin.com/in/cliff-chew-kt/"
+							><Linkedin class="w-5 h-5" /></Button
+						>
+						<Button variant="ghost" href="https://github.com/cliffchew84"
+							><Github class="w-5 h-5" /></Button
+						>
+					</div>
+				</div>
+				<div class="flex flex-col gap-1">
+					<img src={contributorBryan} alt="Bryan Wong" class="rounded-full pb-3 border-slate-200" />
+					<h3 class="text-slate-900 text-lg">Bryan Wong</h3>
+					<div class="flex justify-center">
+						<Button variant="ghost" href="https://www.linkedin.com/in/zw-wong/"
+							><Linkedin class="w-5 h-5" /></Button
+						>
+						<Button variant="ghost" href="https://github.com/kiritowu"
+							><Github class="w-5 h-5" /></Button
+						>
+					</div>
+				</div>
+				<div class="flex flex-col gap-1">
+					<img
+						src={contributorTingfeng}
+						alt="Tingfeng Wu"
+						class="rounded-full pb-3 border-slate-200"
+					/>
+					<h3 class="text-slate-900 text-lg">Tingfeng Wu</h3>
+					<div class="flex justify-center">
+						<Button variant="ghost" href="https://www.linkedin.com/in/wutingfeng/"
+							><Linkedin class="w-5 h-5" /></Button
+						>
+						<Button variant="ghost" href="https://github.com/elliotwutingfeng"
+							><Github class="w-5 h-5" /></Button
+						>
+					</div>
+				</div>
+				<div class="flex flex-col gap-1">
+					<div class="rounded-full p-3 border-slate-200 border">
+						<Github class="w-36 h-36 m-6" />
+					</div>
+					<h3 class="text-slate-900 text-lg">
+						Join our <a
+							href="https://github.com/cliffchew84/SG-Lib-Books"
+							class="underline font-semibold">open-source</a
+						> community!
+					</h3>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section class="bg-gradient-to-b from-slate-100 to-slate-50" id="waitlist">
 		<div class="max-w-3xl mx-auto text-center">
 			<h2 class="mb-6 text-4xl font-semibold text-slate-700">Join our waitlist!</h2>
 			<p class="text-slate-600 mb-8 text-lg">
