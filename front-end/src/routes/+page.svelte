@@ -122,14 +122,14 @@
 		</div>
 	</section>
 	<section class="bg-gradient-to-b from-white to-slate-100" id="about-us">
-		<div class="max-w-6xl mx-auto text-center">
+		<div class="max-w-6xl mx-auto text-center px-3">
 			<h2 class="mb-6 text-4xl font-semibold text-slate-700">About Us</h2>
 			<p class="text-slate-700 mb-10 text-lg max-w-4xl mx-auto">
 				We are a group of Singapore tech and book enthusiasts who wanted to improve our physical
 				library book borrowing experience.
 			</p>
-			<div class="flex gap-24 pb-20">
-				<div class="flex flex-col gap-1">
+			<div class="flex flex-col md:flex-row gap-3 md:gap-10 pb-20">
+				<div class="flex flex-col gap-1 p-5">
 					<img src={contributorCliff} alt="Cliff Chew" class="rounded-full pb-3 border-slate-200" />
 					<h3 class="text-slate-900 text-lg">Cliff Chew</h3>
 					<div class="flex justify-center">
@@ -141,7 +141,7 @@
 						>
 					</div>
 				</div>
-				<div class="flex flex-col gap-1">
+				<div class="flex flex-col gap-1 p-5">
 					<img src={contributorBryan} alt="Bryan Wong" class="rounded-full pb-3 border-slate-200" />
 					<h3 class="text-slate-900 text-lg">Bryan Wong</h3>
 					<div class="flex justify-center">
@@ -153,7 +153,7 @@
 						>
 					</div>
 				</div>
-				<div class="flex flex-col gap-1">
+				<div class="flex flex-col gap-1 p-5">
 					<img
 						src={contributorTingfeng}
 						alt="Tingfeng Wu"
@@ -169,9 +169,9 @@
 						>
 					</div>
 				</div>
-				<div class="flex flex-col gap-1">
+				<div class="flex flex-col gap-1 p-5">
 					<div class="rounded-full p-3 border-slate-200 border">
-						<Github class="w-36 h-36 m-6" />
+						<Github class="w-36 h-36 md:m-6 mx-auto" />
 					</div>
 					<h3 class="text-slate-900 text-lg">
 						Join our <a
