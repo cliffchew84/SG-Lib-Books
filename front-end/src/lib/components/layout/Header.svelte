@@ -12,8 +12,11 @@
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
 </script>
 
-<header class="flex flex-row justify-between p-2 border shadow items-center h-14">
-	<a href="/">SG Lib Books <span class="text-[0.5em]">BETA</span></a>
+<header class="flex flex-row justify-between p-2 border shadow items-center min-h-14">
+	<a href="/"
+		>SG Lib Books
+		<span class="text-[0.5em]">BETA</span>
+	</a>
 
 	{#if isLoggedIn}
 		<!-- User is logged in -->
