@@ -49,7 +49,7 @@
 			</p>
 			<Button href="https://forms.gle/C4MyKxAyUhhgds4U9" class="ml-auto mb-10">
 				<LogIn class="mr-2 h-4 w-4" />
-				<span>Be Our Beta Tester!</span>
+				<span>Join Our Waitlist!</span>
 			</Button>
 			<Carousel.Root
 				class="mb-10 shadow-lg shadow-slate-500 rounded-xl"
@@ -212,7 +212,7 @@
 			</p>
 			<Button class="mb-10" href="https://forms.gle/C4MyKxAyUhhgds4U9">
 				<LogIn class="mr-2 h-4 w-4" />
-				<span>Be Our Beta Tester!</span>
+				<span>Join Our Waitlist!</span>
 			</Button>
 			<p class="text-slate-600 pt-8 pb-1 text-sm">
 				SG Lib Books is an independent project that has no affiliation with the National Library
