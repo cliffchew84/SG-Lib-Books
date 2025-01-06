@@ -7,7 +7,10 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import readingPic from '$lib/images/reading.gif';
-	import highlightPic from '$lib/images/library-overview.png';
+	import bookPic from '$lib/images/book-overview.png';
+	import booksPic from '$lib/images/books-overview.jpg';
+	import librariesPic from '$lib/images/libraries-overview.png';
+	import libraryPic from '$lib/images/library-overview.png';
 	import contributorCliff from '$lib/images/contributor-cliff-chew.jpg';
 	import contributorBryan from '$lib/images/contributor-bryan-wong.jpg';
 	import contributorTingfeng from '$lib/images/contributor-tingfeng-wu.jpg';
@@ -15,6 +18,7 @@
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
+	const heroImages = [librariesPic, bookPic, booksPic, libraryPic];
 	let { data }: { data: PageData } = $props();
 	$effect(() => {
 		if (data.session != null) {
@@ -43,7 +47,7 @@
 				<!-- loan. -->
 				Borrowing your favourite books easier at your neighbourhood public libraries
 			</p>
-			<Button href="/#waitlist" class="ml-auto mb-10">
+			<Button href="https://forms.gle/C4MyKxAyUhhgds4U9" class="ml-auto mb-10">
 				<LogIn class="mr-2 h-4 w-4" />
 				<span>Be Our Beta Tester!</span>
 			</Button>
@@ -53,15 +57,11 @@
 				plugins={[Autoplay({ delay: 3000 })]}
 			>
 				<Carousel.Content class="rounded-xl">
-					<Carousel.Item class="rounded-xl">
-						<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
-					</Carousel.Item>
-					<Carousel.Item class="rounded-xl">
-						<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
-					</Carousel.Item>
-					<Carousel.Item class="rounded-xl">
-						<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
-					</Carousel.Item>
+					{#each heroImages as highlightPic}
+						<Carousel.Item class="rounded-xl">
+							<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
+						</Carousel.Item>
+					{/each}
 				</Carousel.Content>
 				<Carousel.Previous />
 				<Carousel.Next />
