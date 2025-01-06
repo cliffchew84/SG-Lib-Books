@@ -1,19 +1,22 @@
 <script lang="ts">
 	import type { User } from '@supabase/supabase-js';
 
-	import { Menu, Book, Settings, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
+	import { Menu, Book, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { getInitials } from '$lib/utils';
 
-	let { user }: { user: User | null } = $props();
-	let isLoggedIn: boolean = $derived(user !== null);
+	let { user }: { user?: User | null } = $props();
+	let isLoggedIn: boolean = $derived(user != null);
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
 </script>
 
-<header class="flex flex-row justify-between p-2 border shadow items-center">
-	<a href="/">SG Lib Books</a>
+<header class="flex flex-row justify-between p-2 border shadow items-center min-h-14">
+	<a href="/"
+		>SG Lib Books
+		<span class="text-[0.5em]">BETA</span>
+	</a>
 
 	{#if isLoggedIn}
 		<!-- User is logged in -->
@@ -82,9 +85,9 @@
 		</DropdownMenu.Root>
 	{:else}
 		<!-- User is not logged in -->
-		<Button variant="outline" href="/auth/sign-in" class="ml-auto">
-			<LogIn class="mr-2 h-4 w-4" />
-			<span>Sign In</span>
-		</Button>
+		<!-- <Button href="/auth/sign-in" class="ml-auto"> -->
+		<!-- 	<LogIn class="mr-2 h-4 w-4" /> -->
+		<!-- 	<span>Sign In</span> -->
+		<!-- </Button> -->
 	{/if}
 </header>

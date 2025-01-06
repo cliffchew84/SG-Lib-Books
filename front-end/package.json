@@ -20,6 +20,7 @@
 		"autoprefixer": "^10.4.20",
 		"bits-ui": "^0.21.16",
 		"clsx": "^2.1.1",
+		"embla-carousel-autoplay": "^8.5.1",
 		"embla-carousel-svelte": "^8.5.1",
 		"eslint": "^9.7.0",
 		"eslint-config-prettier": "^9.1.0",
