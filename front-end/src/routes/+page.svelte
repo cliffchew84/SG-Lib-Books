@@ -35,7 +35,7 @@
 		class="min-h-[85vh] bg-gradient-to-b from-slate-100 to-white container-sm md:container-lg md:mx-auto px-5 text-xl font-primary"
 	>
 		<div class="mx-auto text-center py-16 max-w-3xl">
-			<h1 class="mb-6 text-6xl font-semibold text-slate-700">
+			<h1 class="mb-6 text-5xl md:text-6xl font-semibold text-slate-700">
 				Redefining your book borrowing experience
 			</h1>
 			<p class="text-slate-500 mb-8">
@@ -148,7 +148,7 @@
 				We are a group of Singapore tech and book enthusiasts who wanted to improve our physical library
 				book borrowing experience.
 			</p>
-			<div class="flex flex-col md:flex-row gap-3 md:gap-10 pb-20">
+			<div class="grid md:grid-cols-4 grid-cols-2 gap-3 md:gap-10 pb-20">
 				<div class="flex flex-col gap-1 p-5">
 					<img src={contributorCliff} alt="Cliff Chew" class="rounded-full pb-3 border-slate-200" />
 					<h3 class="text-slate-900 text-lg">Cliff Chew</h3>
@@ -191,7 +191,7 @@
 				</div>
 				<div class="flex flex-col gap-1 p-5">
 					<div class="rounded-full p-3 border-slate-200 border">
-						<Github class="w-36 h-36 md:m-6 mx-auto" />
+						<Github class="w-24 h-24 md:w-36 md:h-36 md:m-6 mx-auto" />
 					</div>
 					<h3 class="text-slate-900 text-lg">
 						Join our <a
