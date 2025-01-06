@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { LogIn, Library, Radar, Sprout, Smartphone, Bell, Linkedin, Github } from 'lucide-svelte';
+	import Autoplay from 'embla-carousel-autoplay';
 
+	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -45,11 +47,25 @@
 				<LogIn class="mr-2 h-4 w-4" />
 				<span>Be Our Beta Tester!</span>
 			</Button>
-			<img
-				class="rounded-xl shadow-lg shadow-slate-500 mb-10"
-				src={highlightPic}
-				alt="sg-lib-books"
-			/>
+			<Carousel.Root
+				class="mb-10 shadow-lg shadow-slate-500 rounded-xl"
+				opts={{ loop: true }}
+				plugins={[Autoplay({ delay: 3000 })]}
+			>
+				<Carousel.Content class="rounded-xl">
+					<Carousel.Item class="rounded-xl">
+						<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
+					</Carousel.Item>
+					<Carousel.Item class="rounded-xl">
+						<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
+					</Carousel.Item>
+					<Carousel.Item class="rounded-xl">
+						<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
+					</Carousel.Item>
+				</Carousel.Content>
+				<Carousel.Previous />
+				<Carousel.Next />
+			</Carousel.Root>
 		</div>
 	</section>
 	<section class="container my-6">

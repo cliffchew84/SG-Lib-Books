@@ -13,7 +13,7 @@
 </script>
 
 <div
-	class="overflow-hidden"
+	class="overflow-hidden rounded-xl"
 	use:emblaCarouselSvelte={{
 		options: {
 			container: '[data-embla-container]',
