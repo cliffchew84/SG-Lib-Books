@@ -60,8 +60,9 @@
 					<h3 class="text-2xl font-semibold">Library View</h3>
 				</div>
 				<p class="text-slate-700">
-					Check out the books availibility on each library. You wont missed out your favourite books
-					on-shelve again!
+					<!-- Check out the books availibility on each library. You wont missed out your favourite books -->
+					<!-- on-shelve again! -->
+					Instant view of books availability across libraries in a single page—no more endless clicks!
 				</p>
 			</div>
 			<div class="w-72 flex flex-col gap-3 mb-9">
@@ -70,7 +71,8 @@
 					<h3 class="text-2xl font-semibold">Plan your Trip Ahead</h3>
 				</div>
 				<p class="text-slate-700">
-					Know which library has your favourite books so you can plan your journey ahead.
+					<!-- Know which library has your favourite books so you can plan your journey ahead. -->
+					Heading to the library? Quickly check which books are available for borrowing nearby!
 				</p>
 			</div>
 			<div class="w-72 flex flex-col gap-3 mb-9">
@@ -79,7 +81,8 @@
 					<h3 class="text-2xl font-semibold">Mobile Friendly</h3>
 				</div>
 				<p class="text-slate-700">
-					Easily check the availability of your favorite books anytime, anywhere, on any device.
+					<!-- Easily check the availability of your favorite books anytime, anywhere, on any device. -->
+					Your perfect library companion—accessible anytime, anywhere on your mobile phone!
 				</p>
 			</div>
 			<div class="w-72 flex flex-col gap-3 mb-9">
@@ -125,8 +128,9 @@
 		<div class="max-w-6xl mx-auto text-center px-3">
 			<h2 class="mb-6 text-4xl font-semibold text-slate-700">About Us</h2>
 			<p class="text-slate-700 mb-10 text-lg max-w-4xl mx-auto">
-				We are a group of Singapore tech and book enthusiasts who wanted to improve our physical
-				library book borrowing experience.
+				<!-- We are a group of Singapore tech and book enthusiasts who want to improve our library tech experience! -->
+				We are a group of Singapore tech and book enthusiasts who wanted to improve our physical library
+				book borrowing experience.
 			</p>
 			<div class="flex flex-col md:flex-row gap-3 md:gap-10 pb-20">
 				<div class="flex flex-col gap-1 p-5">
