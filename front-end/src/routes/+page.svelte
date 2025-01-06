@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LogIn, Library, Radar, Sprout, Smartphone, Bell, Linkedin, Github } from 'lucide-svelte';
+	import { LogIn, Library, Radar, Sprout, Smartphone, Linkedin, Github } from 'lucide-svelte';
 	import Autoplay from 'embla-carousel-autoplay';
 
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
@@ -211,8 +211,8 @@
 				for everyone.
 			</p>
 			<Button class="mb-10" href="https://forms.gle/C4MyKxAyUhhgds4U9">
-				<Bell class="mr-2 h-4 w-4" />
-				<span>Notify when Ready!</span>
+				<LogIn class="mr-2 h-4 w-4" />
+				<span>Be Our Beta Tester!</span>
 			</Button>
 			<p class="text-slate-600 pt-8 pb-1 text-sm">
 				SG Lib Books is an independent project that has no affiliation with the National Library
