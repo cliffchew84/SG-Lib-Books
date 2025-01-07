@@ -34,7 +34,6 @@ export const load: LayoutLoad = async ({ depends, fetch }) => {
 		data: { user }
 	} = await supabase.auth.getUser();
 
-	// TODO: change endpoint based on configuration
 	const client = new BackendAPIClient(PUBLIC_BACKEND_URL, session);
 
 	return { session, supabase, user, client };

@@ -1,4 +1,4 @@
-<footer class="border-t text-center">
+<footer class="border-t text-center mb-20 md:mb-0">
 	<p class="my-3">© Copyright {new Date().getFullYear()} SG Lib Books</p>
 	<div class="mb-6 flex gap-3 justify-center">
 		<a href="/privacy-statement" class="underline">Privacy Statement</a> ·
