@@ -1,4 +1,5 @@
-from fastapi import FastAPI, RedirectResponse
+from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -24,7 +25,7 @@ if settings.BACKEND_CORS_ORIGINS:
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-@app.get("")
+@app.get("/")
 def redirect():
     # Redirect to new website
     response = RedirectResponse(url="https://sg-lib-books.web.app/dashboard")
