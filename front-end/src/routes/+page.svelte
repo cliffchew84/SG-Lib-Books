@@ -131,13 +131,7 @@
 			</div>
 		</div>
 		<div class="rounded-xl max-w-sm mx-auto">
-			<a
-				class="w-full text-slate-500 text-sm mx-auto"
-				href="https://www.flaticon.com/free-animated-icons/reading"
-				title="reading animated icons"
-			>
-				<img class="rounded-xl" src={readingPic} alt="reading animated icons" />
-			</a>
+			<img class="rounded-xl" src={readingPic} alt="reading animated icons" />
 		</div>
 	</section>
 	<section class="bg-gradient-to-b from-white to-slate-100" id="about-us">
@@ -219,10 +213,13 @@
 				Board.
 			</p>
 			<p class="text-slate-600 pb-2 text-sm">
-				Data displayed by SG Lib Books is licensed under <a
+				Data displayed by SG Lib Books is licensed under the <a
 					href="https://data.gov.sg/open-data-licence"
 					class="underline">Singapore Open Data Licence</a
 				>.
+			</p>
+			<p class="text-slate-600 pb-2 text-sm">
+				<a href="https://www.flaticon.com/free-animated-icons/reading" title="reading animated icons">Reading animated icons created by Freepik - Flaticon</a>
 			</p>
 		</div>
 	</section>
