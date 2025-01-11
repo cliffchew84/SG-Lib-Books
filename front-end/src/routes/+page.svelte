@@ -144,7 +144,7 @@
 			</p>
 			<div class="grid md:grid-cols-4 grid-cols-2 gap-3 md:gap-10 pb-20">
 				<div class="flex flex-col gap-1 p-5">
-					<img src={contributorCliff} alt="Cliff Chew" class="rounded-full pb-3 border-slate-200" />
+					<img src={contributorCliff} alt="Cliff Chew" class="rounded-full p-3 border-slate-200" />
 					<h3 class="text-slate-900 text-lg">Cliff Chew</h3>
 					<div class="flex justify-center">
 						<Button variant="ghost" href="https://www.linkedin.com/in/cliff-chew-kt/"
@@ -156,7 +156,7 @@
 					</div>
 				</div>
 				<div class="flex flex-col gap-1 p-5">
-					<img src={contributorBryan} alt="Bryan Wong" class="rounded-full pb-3 border-slate-200" />
+					<img src={contributorBryan} alt="Bryan Wong" class="rounded-full p-3 border-slate-200" />
 					<h3 class="text-slate-900 text-lg">Bryan Wong</h3>
 					<div class="flex justify-center">
 						<Button variant="ghost" href="https://www.linkedin.com/in/zw-wong/"
@@ -171,7 +171,7 @@
 					<img
 						src={contributorTingfeng}
 						alt="Tingfeng Wu"
-						class="rounded-full pb-3 border-slate-200"
+						class="rounded-full p-3 border-slate-200"
 					/>
 					<h3 class="text-slate-900 text-lg">Tingfeng Wu</h3>
 					<div class="flex justify-center">
