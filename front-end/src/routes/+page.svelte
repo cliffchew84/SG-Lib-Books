@@ -7,13 +7,13 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import readingPic from '$lib/images/reading.gif';
-	import bookPic from '$lib/images/book-overview.png';
-	import booksPic from '$lib/images/books-overview.jpg';
-	import librariesPic from '$lib/images/libraries-overview.png';
-	import libraryPic from '$lib/images/library-overview.png';
-	import contributorCliff from '$lib/images/contributor-cliff-chew.jpg';
-	import contributorBryan from '$lib/images/contributor-bryan-wong.jpg';
-	import contributorTingfeng from '$lib/images/contributor-tingfeng-wu.jpg';
+	import bookPic from '$lib/images/book-overview.png?enhanced';
+	import booksPic from '$lib/images/books-overview.jpg?enhanced';
+	import librariesPic from '$lib/images/libraries-overview.png?enhanced';
+	import libraryPic from '$lib/images/library-overview.png?enhanced';
+	import contributorCliff from '$lib/images/contributor-cliff-chew.jpg?enhanced';
+	import contributorBryan from '$lib/images/contributor-bryan-wong.jpg?enhanced';
+	import contributorTingfeng from '$lib/images/contributor-tingfeng-wu.jpg?enhanced';
 
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
@@ -59,7 +59,7 @@
 				<Carousel.Content class="rounded-xl">
 					{#each heroImages as highlightPic}
 						<Carousel.Item class="rounded-xl">
-							<img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
+							<enhanced:img class="rounded-xl" src={highlightPic} alt="sg-lib-books" />
 						</Carousel.Item>
 					{/each}
 				</Carousel.Content>
@@ -144,7 +144,11 @@
 			</p>
 			<div class="grid md:grid-cols-4 grid-cols-2 gap-3 md:gap-10 pb-20">
 				<div class="flex flex-col gap-1 p-5">
-					<img src={contributorCliff} alt="Cliff Chew" class="rounded-full p-3 border-slate-200" />
+					<enhanced:img
+						src={contributorCliff}
+						alt="Cliff Chew"
+						class="rounded-full p-3 border-slate-200"
+					/>
 					<h3 class="text-slate-900 text-lg">Cliff Chew</h3>
 					<div class="flex justify-center">
 						<Button variant="ghost" href="https://www.linkedin.com/in/cliff-chew-kt/"
@@ -156,7 +160,11 @@
 					</div>
 				</div>
 				<div class="flex flex-col gap-1 p-5">
-					<img src={contributorBryan} alt="Bryan Wong" class="rounded-full p-3 border-slate-200" />
+					<enhanced:img
+						src={contributorBryan}
+						alt="Bryan Wong"
+						class="rounded-full p-3 border-slate-200"
+					/>
 					<h3 class="text-slate-900 text-lg">Bryan Wong</h3>
 					<div class="flex justify-center">
 						<Button variant="ghost" href="https://www.linkedin.com/in/zw-wong/"
@@ -168,7 +176,7 @@
 					</div>
 				</div>
 				<div class="flex flex-col gap-1 p-5">
-					<img
+					<enhanced:img
 						src={contributorTingfeng}
 						alt="Tingfeng Wu"
 						class="rounded-full p-3 border-slate-200"
@@ -219,7 +227,10 @@
 				>.
 			</p>
 			<p class="text-slate-600 pb-2 text-sm">
-				<a href="https://www.flaticon.com/free-animated-icons/reading" title="reading animated icons">Reading animated icons created by Freepik - Flaticon</a>
+				<a
+					href="https://www.flaticon.com/free-animated-icons/reading"
+					title="reading animated icons">Reading animated icons created by Freepik - Flaticon</a
+				>
 			</p>
 		</div>
 	</section>
