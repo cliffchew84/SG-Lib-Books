@@ -9,13 +9,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-com
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
 firebase.initializeApp({
-	apiKey: "AIzaSyDOTjTDM6PojM84ZMUeDoGrByPD7PjPjow",
-	authDomain: "sg-lib-books.firebaseapp.com",
-	projectId: "sg-lib-books",
-	storageBucket: "sg-lib-books.firebasestorage.app",
 	messagingSenderId: "955327746756",
-	appId: "1:955327746756:web:222c40ec81a9e83488af91",
-	measurementId: "G-VEBNMX6GCV"
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background
