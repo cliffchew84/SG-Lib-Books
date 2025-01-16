@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { getToken, onMessage } from 'firebase/messaging';
+	import { toast } from 'svelte-sonner';
+
 	import { PUBLIC_FIREBASE_VAPIDKEY } from '$env/static/public';
 	import { messaging } from '$lib/firebase';
 	import { goto } from '$app/navigation';
-	import { getToken, onMessage } from 'firebase/messaging';
-	import { toast } from 'svelte-sonner';
 
 	// Get registration token. Initially this makes a network call, once retrieved
 	// subsequent calls to getToken will return from cache
