@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { User } from '@supabase/supabase-js';
 
+	import Notification from '$lib/components/layout/Notification.svelte';
 	import { Book, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
@@ -38,27 +39,30 @@
 			</Button>
 		</nav>
 
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				<Avatar.Root class="block">
-					<Avatar.Fallback>{username}</Avatar.Fallback>
-				</Avatar.Root>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Group>
-					<DropdownMenu.Label>My Account</DropdownMenu.Label>
-					<DropdownMenu.Separator />
-					<!-- <DropdownMenu.Item href="/dashboard/settings"> -->
-					<!-- 	<Settings class="mr-2 h-4 w-4" /> -->
-					<!-- 	<span>Settings</span> -->
-					<!-- </DropdownMenu.Item> -->
-					<DropdownMenu.Item href="/auth/sign-out">
-						<LogOut class="mr-2 h-4 w-4" />
-						<span>Log out</span>
-					</DropdownMenu.Item>
-				</DropdownMenu.Group>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+		<div class="flex gap-6">
+			<Notification />
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					<Avatar.Root class="block">
+						<Avatar.Fallback>{username}</Avatar.Fallback>
+					</Avatar.Root>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<DropdownMenu.Group>
+						<DropdownMenu.Label>My Account</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<!-- <DropdownMenu.Item href="/dashboard/settings"> -->
+						<!-- 	<Settings class="mr-2 h-4 w-4" /> -->
+						<!-- 	<span>Settings</span> -->
+						<!-- </DropdownMenu.Item> -->
+						<DropdownMenu.Item href="/auth/sign-out">
+							<LogOut class="mr-2 h-4 w-4" />
+							<span>Log out</span>
+						</DropdownMenu.Item>
+					</DropdownMenu.Group>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		</div>
 	{:else}
 		<!-- User is not logged in -->
 		<!-- <Button href="/auth/sign-in" class="ml-auto"> -->
