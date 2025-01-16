@@ -21,6 +21,10 @@
 
 	async function onSubmitEmail(e: SubmitEvent) {
 		e.preventDefault();
+		if (email === '') {
+			errorMessage = 'Email cannot be empty';
+			return;
+		}
 		isLoading = true;
 		const { error } = await supabase.auth.signInWithOtp({
 			email: email,
