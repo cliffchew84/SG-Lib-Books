@@ -43,6 +43,7 @@
 	},
 	"dependencies": {
 		"@supabase/ssr": "^0.5.2",
-		"@supabase/supabase-js": "^2.46.1"
+		"@supabase/supabase-js": "^2.46.1",
+		"firebase": "^11.1.0"
 	}
 }
