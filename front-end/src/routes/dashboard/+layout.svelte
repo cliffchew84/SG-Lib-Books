@@ -103,6 +103,7 @@
 <Toaster />
 
 <!-- Initialise FCM to receives and show notification -->
+<!-- TODO: Merge this to notification component -->
 <Notification />
 <Header user={data.user} client={data.client} />
 
