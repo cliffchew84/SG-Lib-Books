@@ -39,7 +39,7 @@
 			</Button>
 		</nav>
 
-		<div class="flex gap-6">
+		<div class="flex gap-3">
 			<Notification />
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
