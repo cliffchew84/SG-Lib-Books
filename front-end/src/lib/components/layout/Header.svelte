@@ -12,13 +12,14 @@
 	import NotificationDropdown from '$lib/components/layout/NotificationDropdown.svelte';
 	import { getInitials } from '$lib/utils';
 	import type { Notification } from '$lib/models';
+	import { notificationStore } from '$lib/stores';
 
 	let { user, client }: { user?: User | null; client?: BackendAPIClient } = $props();
 	let isNotificationOpen: boolean = $state(false);
 	let isLoggedIn: boolean = $derived(user != null);
-	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
-	let notifications: Notification[] = $state([]);
 	let isNotificationLoading: boolean = $state(false);
+	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
+	let notifications: Notification[] = $derived(Object.values($notificationStore) as Notification[]);
 
 	$effect(() => {
 		(async () => {
@@ -26,18 +27,27 @@
 			if (isNotificationOpen && client && notifications.length === 0) {
 				isNotificationLoading = true;
 				try {
-					notifications = (await getNotifications(client)).map((notif) => ({
-						...notif,
-						onClick: async () => {
-							try {
-								await readNotification(client, notif.id);
-							} catch (error) {
-								toast.warning('Failed to mark notification as read');
-								console.error('Failed to mark notification as read', error);
-							}
-							goto(notif.action);
-						}
-					}));
+					notificationStore.set(
+						(await getNotifications(client)).reduce((acc, notif) => {
+							acc[String(notif.id)] = {
+								...notif,
+								onClick: async () => {
+									try {
+										await readNotification(client, notif.id);
+										notificationStore.update((s) => {
+											s[String(notif.id)].isRead = true;
+											return s;
+										});
+									} catch (error) {
+										toast.warning('Failed to mark notification as read');
+										console.error('Failed to mark notification as read', error);
+									}
+									goto(notif.action);
+								}
+							};
+							return acc;
+						}, {} as any)
+					);
 					isNotificationLoading = false;
 				} catch (error) {
 					isNotificationLoading = false;

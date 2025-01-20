@@ -26,7 +26,7 @@ export async function getNotifications(client: BackendAPIClient): Promise<Notifi
 
 export async function readNotification(client: BackendAPIClient, id: number): Promise<Notification> {
 	try {
-		const response = await client.post({ path: `/notifications/${id}` });
+		const response = await client.post({ path: `/notifications/${id}/read` });
 
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}, detail: ${await response.text()}`, {

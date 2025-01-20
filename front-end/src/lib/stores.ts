@@ -1,6 +1,6 @@
 import { derived, writable } from 'svelte/store';
 import type { BookAvail } from '$lib/api/models';
-import type { Book, Library } from '$lib/models';
+import type { Book, Library, Notification } from '$lib/models';
 
 export const isLoading = writable<boolean>(true);
 export const libraryAPIStore = writable<{ [key: string]: Library }>({});
@@ -48,3 +48,4 @@ export const libraryStore = derived(
 		return sortedResult;
 	}
 );
+export const notificationStore = writable<{ [key: string]: Notification }>({});
