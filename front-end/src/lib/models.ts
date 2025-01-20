@@ -33,3 +33,12 @@ export interface Library {
 export interface LibraryProp extends Library {
 	onFavourite: MouseEventHandler<HTMLButtonElement>;
 }
+
+export interface Notification {
+	id: number;
+	title: string;
+	description?: string;
+	createdAt: Date;
+	isRead: boolean;
+	onClick: MouseEventHandler<HTMLDivElement>;
+}

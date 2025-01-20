@@ -101,6 +101,6 @@
 
 <Toaster />
 
-<Header user={data.user} />
+<Header user={data.user} client={data.client} />
 {@render children()}
 <Footer />

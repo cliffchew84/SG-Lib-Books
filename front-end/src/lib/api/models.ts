@@ -38,3 +38,12 @@ export interface Library {
 export interface LibraryResponse extends Library {
 	isFavourite: boolean;
 }
+
+export interface Notification {
+	id: number;
+	title: string;
+	description?: string;
+	createdAt: Date;
+	action: string;
+	isRead: boolean;
+}

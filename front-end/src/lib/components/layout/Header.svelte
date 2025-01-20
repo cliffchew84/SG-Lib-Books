@@ -1,16 +1,52 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
 	import type { User } from '@supabase/supabase-js';
-
-	import Notification from '$lib/components/layout/Notification.svelte';
 	import { Book, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
+
+	import { goto } from '$app/navigation';
+	import type BackendAPIClient from '$lib/api/client';
+	import { getNotifications, readNotification } from '$lib/api/notification';
 	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import NotificationDropdown from '$lib/components/layout/NotificationDropdown.svelte';
 	import { getInitials } from '$lib/utils';
+	import type { Notification } from '$lib/models';
 
-	let { user }: { user?: User | null } = $props();
+	let { user, client }: { user?: User | null; client?: BackendAPIClient } = $props();
+	let isNotificationOpen: boolean = $state(false);
 	let isLoggedIn: boolean = $derived(user != null);
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
+	let notifications: Notification[] = $state([]);
+	let isNotificationLoading: boolean = $state(false);
+
+	$effect(() => {
+		(async () => {
+			// Fetch notifications from API when menu is opened
+			if (isNotificationOpen && client && notifications.length === 0) {
+				isNotificationLoading = true;
+				try {
+					notifications = (await getNotifications(client)).map((notif) => ({
+						...notif,
+						onClick: async () => {
+							try {
+								await readNotification(client, notif.id);
+							} catch (error) {
+								toast.warning('Failed to mark notification as read');
+								console.error('Failed to mark notification as read', error);
+							}
+							goto(notif.action);
+						}
+					}));
+					isNotificationLoading = false;
+				} catch (error) {
+					isNotificationLoading = false;
+					toast.warning('Failed to fetch notifications');
+					console.error('Failed to fetch notifications', error);
+				}
+			}
+		})();
+	});
 </script>
 
 <header class="flex flex-row justify-between p-2 border shadow items-center min-h-14">
@@ -40,7 +76,11 @@
 		</nav>
 
 		<div class="flex gap-3">
-			<Notification />
+			<NotificationDropdown
+				bind:menuOpen={isNotificationOpen}
+				{notifications}
+				isLoading={isNotificationLoading}
+			/>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<Avatar.Root class="block">
