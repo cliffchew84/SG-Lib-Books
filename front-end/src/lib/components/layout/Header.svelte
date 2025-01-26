@@ -61,9 +61,9 @@
 		</DropdownMenu.Root>
 	{:else}
 		<!-- User is not logged in -->
-		<!-- <Button href="/auth/sign-in" class="ml-auto"> -->
-		<!-- 	<LogIn class="mr-2 h-4 w-4" /> -->
-		<!-- 	<span>Sign In</span> -->
-		<!-- </Button> -->
+		<Button href="/auth/sign-in" class="ml-auto">
+			<LogIn class="mr-2 h-4 w-4" />
+			<span>Sign In</span>
+		</Button>
 	{/if}
 </header>
