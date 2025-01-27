@@ -6,7 +6,7 @@ This is the repository for a side project, [SGLibReads](https://sg-nlb-available
 
 ### Why One - Providing a better way to search for NLB books
 
-As of 2023, both the Singapore National Library Board’s (NLB) app and website are great and functional. However, I found it difficult to save and search for book availability on their app and website. Wanting an easier way to hunt down the library books, I hacked out a rudimentary technical solution for my own personal use. As the stars started to align and I learned more technical skills, thanks to NLB and the NLB Udemy Biz account no less, I realised I could develop a solution for the general Singapore public too. I hope to create value for the Singapore public, using skills I learned from public funds.
+As of 2023, both the Singapore National Library Board's (NLB) app and website are great and functional. However, I found it difficult to save and search for book availability on their app and website. Wanting an easier way to hunt down the library books, I hacked out a rudimentary technical solution for my own personal use. As the stars started to align and I learned more technical skills, thanks to NLB and the NLB Udemy Biz account no less, I realised I could develop a solution for the general Singapore public too. I hope to create value for the Singapore public, using skills I learned from public funds.
 
 ### Why Two - Changing SG government tech culture
 
