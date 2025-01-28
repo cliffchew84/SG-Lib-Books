@@ -3,16 +3,14 @@
 	import type { User } from '@supabase/supabase-js';
 	import { Book, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
 
-	import { goto } from '$app/navigation';
 	import type BackendAPIClient from '$lib/api/client';
-	import { getNotifications, readNotification } from '$lib/api/notification';
-	import { Button } from '$lib/components/ui/button';
 	import * as Avatar from '$lib/components/ui/avatar';
+	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import NotificationDropdown from '$lib/components/layout/NotificationDropdown.svelte';
 	import { getInitials } from '$lib/utils';
 	import type { Notification } from '$lib/models';
-	import { notificationStore } from '$lib/stores';
+	import { fetchNotifications, notificationStore } from '$lib/stores/notification';
 
 	let { user, client }: { user?: User | null; client?: BackendAPIClient } = $props();
 	let isNotificationOpen: boolean = $state(false);
@@ -27,33 +25,11 @@
 			if (isNotificationOpen && client && notifications.length === 0) {
 				isNotificationLoading = true;
 				try {
-					notificationStore.set(
-						(await getNotifications(client)).reduce((acc, notif) => {
-							acc[String(notif.id)] = {
-								...notif,
-								onClick: async () => {
-									try {
-										await readNotification(client, notif.id);
-										notificationStore.update((s) => {
-											s[String(notif.id)].isRead = true;
-											return s;
-										});
-									} catch (error) {
-										toast.warning('Failed to mark notification as read');
-										console.error('Failed to mark notification as read', error);
-									}
-									goto(notif.action);
-								}
-							};
-							return acc;
-						}, {} as any)
-					);
-					isNotificationLoading = false;
+					await fetchNotifications(client);
 				} catch (error) {
-					isNotificationLoading = false;
-					toast.warning('Failed to fetch notifications');
-					console.error('Failed to fetch notifications', error);
+					toast.warning('Failed to fetch new notifications');
 				}
+				isNotificationLoading = false;
 			}
 		})();
 	});
