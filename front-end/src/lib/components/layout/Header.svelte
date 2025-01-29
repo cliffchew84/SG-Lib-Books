@@ -10,7 +10,11 @@
 	import NotificationDropdown from '$lib/components/layout/NotificationDropdown.svelte';
 	import { getInitials } from '$lib/utils';
 	import type { Notification } from '$lib/models';
-	import { fetchNotifications, notificationStore } from '$lib/stores/notification';
+	import {
+		fetchNotifications,
+		notificationStore,
+		refreshNotification
+	} from '$lib/stores/notification';
 
 	let { user, client }: { user?: User | null; client?: BackendAPIClient } = $props();
 	let isNotificationOpen: boolean = $state(false);
@@ -22,13 +26,14 @@
 	$effect(() => {
 		(async () => {
 			// Fetch notifications from API when menu is opened
-			if (isNotificationOpen && client && notifications.length === 0) {
+			if (isNotificationOpen && client && $refreshNotification) {
 				isNotificationLoading = true;
 				try {
 					await fetchNotifications(client);
 				} catch (error) {
 					toast.warning('Failed to fetch new notifications');
 				}
+				refreshNotification.set(false);
 				isNotificationLoading = false;
 			}
 		})();

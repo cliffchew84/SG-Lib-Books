@@ -3,9 +3,9 @@
 	import { toast } from 'svelte-sonner';
 	import type { LayoutData } from './$types';
 
+	import '$lib/notification'; // Firebase FCM to handle realtime notifications
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
-	import Notification from '$lib/components/notification.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { isLoading } from '$lib/stores';
 	import { fetchBooks } from '$lib/stores/book';
@@ -29,9 +29,6 @@
 
 <Toaster />
 
-<!-- Initialise FCM to receives and show notification -->
-<!-- TODO: Merge this to notification component -->
-<Notification />
 <Header user={data.user} client={data.client} />
 
 {@render children()}
