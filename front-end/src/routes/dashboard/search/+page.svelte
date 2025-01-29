@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 
 	import { bookStore } from '$lib/stores';
-	import { bookmarkBook } from '$lib/stores/book';
+	import { toggleBookmarkBook } from '$lib/stores/book';
 	import { searchBook } from '$lib/api/search';
 	import BookSearchBar from '$lib/components/forms/book-search-bar.svelte';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
@@ -54,7 +54,7 @@
 						onBookMarked: async () => {
 							books[book.BID].bookMarkLoading = true;
 							try {
-								await bookmarkBook(data.client, book.BID);
+								await toggleBookmarkBook(data.client, book.BID);
 								books[book.BID].bookmarked = !books[book.BID].bookmarked;
 							} catch (e) {}
 							books[book.BID].bookMarkLoading = false;

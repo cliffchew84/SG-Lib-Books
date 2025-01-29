@@ -7,7 +7,7 @@
 
 	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
 	import { libraryStore, libraryAPIStore } from '$lib/stores';
-	import { bookmarkBook } from '$lib/stores/book';
+	import { toggleBookmarkBook } from '$lib/stores/book';
 	import type { Book, BookProp, Library } from '$lib/models';
 	import type { PageData } from './$types';
 
@@ -23,7 +23,9 @@
 			bookMarkLoading: bookmarking[book.brn] ?? false,
 			onBookMarked: async () => {
 				bookmarking[book.brn] = true;
-				await bookmarkBook(data.client, book.brn);
+				try {
+					await toggleBookmarkBook(data.client, book.brn);
+				} catch (e) {}
 				bookmarking[book.brn] = false;
 			}
 		}) as BookProp;

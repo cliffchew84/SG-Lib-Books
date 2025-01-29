@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
 	import { bookStore } from '$lib/stores';
-	import { bookmarkBook } from '$lib/stores/book';
+	import { toggleBookmarkBook } from '$lib/stores/book';
 	import { Button } from '$lib/components/ui/button';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
@@ -22,7 +22,9 @@
 			bookMarkLoading: bookmarking[book.brn] ?? false,
 			onBookMarked: async () => {
 				bookmarking[book.brn] = true;
-				await bookmarkBook(data.client, book.brn);
+				try {
+					await toggleBookmarkBook(data.client, book.brn);
+				} catch (e) {}
 				bookmarking[book.brn] = false;
 			}
 		}))

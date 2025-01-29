@@ -48,7 +48,7 @@ export async function fetchBooks(client: BackendAPIClient) {
 	}
 }
 
-export async function bookmarkBook(client: BackendAPIClient, brn: number) {
+export async function toggleBookmarkBook(client: BackendAPIClient, brn: number) {
 	try {
 		if (get(bookStore)[brn]?.bookmarked ?? false) {
 			await unlikeBook(client, brn);

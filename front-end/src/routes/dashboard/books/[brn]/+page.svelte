@@ -10,7 +10,7 @@
 	import type { BookAvail } from '$lib/api/models';
 	import type { BookProp, Library, LibraryProp } from '$lib/models';
 	import { bookStore, libraryAPIStore } from '$lib/stores';
-	import { bookmarkBook } from '$lib/stores/book';
+	import { toggleBookmarkBook } from '$lib/stores/book';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -24,7 +24,9 @@
 		bookMarkLoading: false,
 		onBookMarked: async () => {
 			book.bookMarkLoading = true;
-			await bookmarkBook(data.client, book.brn);
+			try {
+				await toggleBookmarkBook(data.client, book.brn);
+			} catch (e) {}
 			book.bookMarkLoading = false;
 		}
 	});
