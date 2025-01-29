@@ -1,7 +1,8 @@
-import { derived, writable } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
+import { toast } from 'svelte-sonner';
 
 import BackendAPIClient from '$lib/api/client';
-import { getLibraries } from '$lib/api/library';
+import { getLibraries, favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
 import type { BookAvail, LibraryResponse } from '$lib/api/models';
 import type { Library } from '$lib/models';
 import { bookStore } from '$lib/stores/book';
@@ -107,3 +108,30 @@ export async function fetchLibraries(client: BackendAPIClient) {
 	}
 }
 
+export async function toggleFavouriteLibrary(client: BackendAPIClient, libraryName: string) {
+	try {
+		if (get(libraryStore)[libraryName]?.favourite ?? false) {
+			await unfavouriteLibrary(client, libraryName);
+			toast.success(`${libraryName} is removed from your favourites`);
+		}
+		else {
+			await favouriteLibrary(client, libraryName);
+			toast.success(`${libraryName} is added to your favourites`);
+		}
+
+		libraryAPIStore.update((s) => {
+			s[libraryName].favourite = !s[libraryName].favourite;
+			toast.success(`${libraryName} is removed from your favourites`);
+			return s;
+		});
+	} catch (error) {
+		if (error instanceof Error) {
+			if (error.cause === 429) {
+				toast.warning("We are hitting NLB's API too hard. Please try again later.");
+			} else {
+				toast.warning('Bookmark request has failed. Please try again later.');
+			}
+		}
+		console.error('Bookmark/Unbookmark error:', error);
+	}
+}
