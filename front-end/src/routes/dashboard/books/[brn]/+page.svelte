@@ -6,11 +6,11 @@
 	import BookDetailsSection from '$lib/components/layout/BookDetailsSection.svelte';
 	import LibraryCarousel from '$lib/components/layout/LibraryCarousel.svelte';
 
-	import { likeBook, unlikeBook } from '$lib/api/book';
 	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
 	import type { BookAvail } from '$lib/api/models';
 	import type { BookProp, Library, LibraryProp } from '$lib/models';
 	import { bookStore, libraryAPIStore } from '$lib/stores';
+	import { bookmarkBook } from '$lib/stores/book';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -20,41 +20,12 @@
 	let isError = $state(false);
 	let book: BookProp = $state({
 		brn: brn,
-		bookmarked: $bookStore.hasOwnProperty($page.params.brn),
+		bookmarked: $bookStore[brn]?.bookmarked ?? false,
 		bookMarkLoading: false,
 		onBookMarked: async () => {
 			book.bookMarkLoading = true;
-			try {
-				if ($bookStore.hasOwnProperty(brn)) {
-					console.log('Unbookmark book', brn);
-					await unlikeBook(data.client, brn);
-					toast.success(`Book ${$bookStore[brn].title} is removed`);
-					bookStore.update((s) => {
-						delete s[brn];
-						return s;
-					});
-				} else {
-					console.log('bookmark book', brn);
-					await likeBook(data.client, brn);
-					bookStore.update((s) => {
-						s[brn] = { ...book, bookmarked: true };
-						return s;
-					});
-					toast.success(`Book ${$bookStore[brn].title} is added`);
-				}
-				book.bookMarkLoading = false;
-				book.bookmarked = !book.bookmarked;
-			} catch (error) {
-				if (error instanceof Error) {
-					if (error.cause === 429) {
-						toast.warning("We are hitting NLB's API too hard. Please try again later.");
-					} else {
-						toast.warning('Bookmark request has failed. Please try again later.');
-					}
-				}
-				console.error('Bookmark/Unbookmark error:', error);
-				book.bookMarkLoading = false;
-			}
+			await bookmarkBook(data.client, book.brn);
+			book.bookMarkLoading = false;
 		}
 	});
 
@@ -77,7 +48,7 @@
 
 	// Compute bookmarked based on bookStore update
 	$effect(() => {
-		book.bookmarked = $bookStore.hasOwnProperty($page.params.brn);
+		book.bookmarked = $bookStore[brn]?.bookmarked ?? false;
 	});
 
 	$effect(() => {
