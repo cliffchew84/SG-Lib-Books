@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Book, LibraryBig, Search } from 'lucide-svelte';
-	import { toast } from 'svelte-sonner';
 
 	import { Button } from '$lib/components/ui/button';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import LibraryCarousel from '$lib/components/layout/LibraryCarousel.svelte';
 
-	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
 	import type { LibraryProp } from '$lib/models';
-	import { libraryStore, libraryAPIStore } from '$lib/stores';
+	import { libraryStore } from '$lib/stores';
+	import { toggleFavouriteLibrary } from '$lib/stores/library';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -19,45 +18,20 @@
 				...lib,
 				onFavourite: async () => {
 					try {
-						if (lib.favourite) {
-							await unfavouriteLibrary(data.client, lib.name);
-							toast.success(`${lib.name} is removed from your favourites`);
-						} else {
-							await favouriteLibrary(data.client, lib.name);
-							toast.success(`${lib.name} is added to your favourites`);
-						}
-						libraryAPIStore.update((s) => {
-							s[lib.name].favourite = !s[lib.name].favourite;
-							return s;
-						});
-					} catch (error) {
-						if (error instanceof Error) {
-							if (error.cause === 429) {
-								toast.warning("We are hitting NLB's API too hard. Please try again later.");
-							} else {
-								toast.warning('Library favourite request has failed. Please try again later.');
-							}
-						}
-						console.error('Favourite/unfavourite error:', error);
-					}
+						await toggleFavouriteLibrary(data.client, lib.name);
+					} catch (e) {}
 				}
 			};
 		})
 	);
-	let librariesFavourite: LibraryProp[] = $derived(
-		librariresProps.filter((lib) => {
-			return lib.favourite;
-		})
-	);
+	let librariesFavourite: LibraryProp[] = $derived(librariresProps.filter((lib) => lib.favourite));
 	let librariesAvail: LibraryProp[] = $derived(
-		librariresProps.filter((lib) => {
-			return lib.availBooks.length >= 1 && !lib.favourite;
-		})
+		librariresProps.filter((lib) => lib.availBooks.length >= 1 && !lib.favourite)
 	);
 	let librariesOnLoan: LibraryProp[] = $derived(
-		librariresProps.filter((lib) => {
-			return lib.onLoanBooks.length > 0 && lib.availBooks.length == 0 && !lib.favourite;
-		})
+		librariresProps.filter(
+			(lib) => lib.onLoanBooks.length > 0 && lib.availBooks.length == 0 && !lib.favourite
+		)
 	);
 </script>
 

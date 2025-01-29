@@ -1,100 +1,56 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
-	import { toast } from 'svelte-sonner';
-	import { likeBook, unlikeBook } from '$lib/api/book';
 	import { bookStore } from '$lib/stores';
+	import { toggleBookmarkBook } from '$lib/stores/book';
 	import { Button } from '$lib/components/ui/button';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 	import BookFilterBar from '$lib/components/layout/BookFilterBar.svelte';
-	import type { BookProp } from '$lib/models';
+	import type { Book, BookProp } from '$lib/models';
 	import type { PageData } from './$types';
 	const perPage = 25;
 
 	let { data }: { data: PageData } = $props();
 
-	let books: { [key: number]: BookProp } = $derived(
-		Object.fromEntries(
-			Object.entries($bookStore).map(([k, v]) => {
-				const brn = Number(k);
-				return [
-					brn,
-					{
-						...v,
-						bookMarkLoading: false,
-						onBookMarked: async () => {
-							books[brn].bookMarkLoading = true;
-							try {
-								if ($bookStore.hasOwnProperty(brn)) {
-									console.log('Unbookmark book', brn);
-									await unlikeBook(data.client, brn);
-									toast.success(`Book ${books[brn].title} is removed`);
-									bookStore.update((s) => {
-										delete s[brn];
-										return s;
-									});
-								} else {
-									console.log('bookmark book', k);
-									await likeBook(data.client, brn);
-									bookStore.update((s) => {
-										s[brn] = { ...v, bookmarked: true };
-										return s;
-									});
-									toast.success(`Book ${books[brn].title} is added`);
-									books[brn].bookMarkLoading = false;
-									books[brn].bookmarked = !books[brn].bookmarked;
-								}
-							} catch (error) {
-								if (error instanceof Error) {
-									if (error.cause === 429) {
-										toast.warning("We are hitting NLB's API too hard. Please try again later.");
-									} else {
-										toast.warning('Bookmark request has failed. Please try again later.');
-									}
-								}
-								console.error('Bookmark/Unbookmark error:', error);
-								books[brn].bookMarkLoading = false;
-							}
-						}
-					} as BookProp
-				];
-			})
-		)
-	);
 	let currentPage = $state(1);
 	let isLoading = $state(false);
 	let searchValue = $state('');
-	let filteredBooks: BookProp[] = $state([]);
-	let count = $derived(Object.values(books).length);
+	let bookmarking: { [key: number]: boolean } = $state({});
+	let books: BookProp[] = $derived(
+		filterBooks(Object.values($bookStore)).map((book) => ({
+			...book,
+			bookMarkLoading: bookmarking[book.brn] ?? false,
+			onBookMarked: async () => {
+				bookmarking[book.brn] = true;
+				try {
+					await toggleBookmarkBook(data.client, book.brn);
+				} catch (e) {}
+				bookmarking[book.brn] = false;
+			}
+		}))
+	);
+	let count = $derived(Object.values($bookStore).length);
 
-	// Effect to filter books
-	$effect(() => {
-		if (!searchValue) {
-			filteredBooks = Object.values(books);
-		} else {
-			// Normalize search value: trim and convert to lowercase
-			isLoading = true;
-			const normalizedSearch = searchValue.trim().toLowerCase();
+	function filterBooks(books: Book[]) {
+		if (!searchValue) return books;
+		// Normalize search value: trim and convert to lowercase
+		const normalizedSearch = searchValue.trim().toLowerCase();
 
-			const result = Object.values(books).filter((bk) => {
-				// Check against multiple fields: title, author, call number
-				const searchFields = [bk.title, bk.author, bk.callNumber];
+		return Object.values(books).filter((bk) => {
+			// Check against multiple fields: title, author, call number
+			const searchFields = [bk.title, bk.author, bk.callNumber];
 
-				// Convert each field to lowercase and remove extra spaces
-				return searchFields.some((field) =>
-					field
-						? field
-								.toLowerCase()
-								.replace(/\s+/g, ' ') // Normalize spaces
-								.includes(normalizedSearch)
-						: false
-				);
-			});
-
-			isLoading = false;
-			filteredBooks = result;
-		}
-	});
+			// Convert each field to lowercase and remove extra spaces
+			return searchFields.some((field) =>
+				field
+					? field
+							.toLowerCase()
+							.replace(/\s+/g, ' ') // Normalize spaces
+							.includes(normalizedSearch)
+					: false
+			);
+		});
+	}
 </script>
 
 <svelte:head>
@@ -105,7 +61,7 @@
 	{#if count > 0}
 		<BookFilterBar bind:searchValue />
 		<PaginatedCards
-			books={filteredBooks}
+			{books}
 			{perPage}
 			{count}
 			hidePagination={true}

@@ -1,116 +1,49 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
+	import type { PageData } from './$types';
+	import { page } from '$app/stores';
 
 	import { Button } from '$lib/components/ui/button';
 	import LibraryDetailsSection from '$lib/components/layout/LibraryDetailsSection.svelte';
 	import PaginatedCards from '$lib/components/layout/PaginatedCards.svelte';
 
-	import { unlikeBook } from '$lib/api/book';
-	import { favouriteLibrary, unfavouriteLibrary } from '$lib/api/library';
-	import { bookStore, libraryStore, libraryAPIStore } from '$lib/stores';
-	import type { BookProp, Library } from '$lib/models';
-	import type { PageData } from './$types';
-
-	import { page } from '$app/stores';
+	import type { Book, BookProp, Library } from '$lib/models';
+	import { libraryStore } from '$lib/stores';
+	import { toggleBookmarkBook } from '$lib/stores/book';
+	import { toggleFavouriteLibrary } from '$lib/stores/library';
 
 	let { data }: { data: PageData } = $props();
 
 	const lid = $page.params.lid;
+	const toBookProp = (book: Book) =>
+		({
+			...book,
+			branches: undefined, // Remove branches from book
+			bookMarkLoading: bookmarking[book.brn] ?? false,
+			onBookMarked: async () => {
+				bookmarking[book.brn] = true;
+				try {
+					await toggleBookmarkBook(data.client, book.brn);
+				} catch (e) {}
+				bookmarking[book.brn] = false;
+			}
+		}) as BookProp;
 
+	let bookmarking: { [key: number]: boolean } = $state({});
 	let library: Library | undefined = $state($libraryStore[lid]);
-	// Update library dynamically as libraryStore changes
-	$effect(() => {
-		library = $libraryStore[lid];
-	});
-	let availBooks: BookProp[] = $derived(
-		library?.availBooks.map((book) => {
-			return {
-				...book,
-				branches: undefined,
-				bookMarkLoading: false,
-				onBookMarked: async () => {
-					try {
-						console.log('Unbookmark book', book.brn);
-						await unlikeBook(data.client, book.brn);
-						bookStore.update((s) => {
-							delete s[book.brn];
-							return s;
-						});
-						toast.success(`Book ${book.title} is removed`);
-					} catch (error) {
-						if (error instanceof Error) {
-							if (error.cause === 429) {
-								toast.warning("We are hitting NLB's API too hard. Please try again later.");
-							} else {
-								toast.warning('Bookmark request has failed. Please try again later.');
-							}
-						}
-						console.error('Bookmark/Unbookmark error:', error);
-					}
-				}
-			};
-		}) ?? []
-	);
-	let onLoanBooks: BookProp[] = $derived(
-		library?.onLoanBooks.map((book) => {
-			return {
-				...book,
-				callNumber: undefined,
-				branches: undefined,
-				bookMarkLoading: false,
-				onBookMarked: async () => {
-					try {
-						console.log('Unbookmark book', book.brn);
-						await unlikeBook(data.client, book.brn);
-						bookStore.update((s) => {
-							delete s[book.brn];
-							return s;
-						});
-						toast.success(`Book ${book.title} is removed`);
-					} catch (error) {
-						if (error instanceof Error) {
-							if (error.cause === 429) {
-								toast.warning("We are hitting NLB's API too hard. Please try again later.");
-							} else {
-								toast.warning('Bookmark request has failed. Please try again later.');
-							}
-						}
-						console.error('Bookmark/Unbookmark error:', error);
-					}
-				}
-			};
-		}) ?? []
-	);
+	let availBooks: BookProp[] = $derived(library?.availBooks.map(toBookProp) ?? []);
+	let onLoanBooks: BookProp[] = $derived(library?.onLoanBooks.map(toBookProp) ?? []);
 	let onFavourite = $derived(async () => {
 		if (library === undefined) {
 			// Do nothing if library is undefined
 			return;
 		}
 		try {
-			if (library.favourite) {
-				await unfavouriteLibrary(data.client, library.name);
-				toast.success(`${library.name} is removed from your favourites`);
-			} else {
-				await favouriteLibrary(data.client, library.name);
-				toast.success(`${library.name} is added to your favourites`);
-			}
-			libraryAPIStore.update((s) => {
-				s[library!.name].favourite = !s[library!.name].favourite;
-				return s;
-			});
-		} catch (error) {
-			if (error instanceof Error) {
-				if (error.cause === 429) {
-					toast.warning("We are hitting NLB's API too hard. Please try again later.");
-				} else {
-					toast.warning('Library favourite request has failed. Please try again later.');
-				}
-			}
-			console.error('Favourite/unfavourite error:', error);
-		}
+			await toggleFavouriteLibrary(data.client, library.name);
+		} catch (e) {}
 	});
-
-	// TODO: Show loan till date in card
+	$effect(() => {
+		library = $libraryStore[lid];
+	});
 </script>
 
 <svelte:head>

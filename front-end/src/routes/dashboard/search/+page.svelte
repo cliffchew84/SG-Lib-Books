@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
 	import { bookStore } from '$lib/stores';
-	import { likeBook, unlikeBook } from '$lib/api/book';
+	import { toggleBookmarkBook } from '$lib/stores/book';
 	import { searchBook } from '$lib/api/search';
 	import BookSearchBar from '$lib/components/forms/book-search-bar.svelte';
 	import TitledPage from '$lib/components/layout/TitledPage.svelte';
@@ -50,48 +49,15 @@
 						author: book.Author,
 						imageLink: book.cover_url,
 						publishYear: book.PublishYear,
-						bookmarked: $bookStore.hasOwnProperty(book.BID),
+						bookmarked: $bookStore[book.BID]?.bookmarked ?? false,
 						bookMarkLoading: false,
 						onBookMarked: async () => {
 							books[book.BID].bookMarkLoading = true;
 							try {
-								if ($bookStore.hasOwnProperty(book.BID)) {
-									console.log('Unbookmark book', book.BID);
-									await unlikeBook(data.client, book.BID);
-									bookStore.update((s) => {
-										delete s[book.BID];
-										return s;
-									});
-									toast.success(`Book ${book.TitleName} is removed`);
-								} else {
-									console.log('bookmark book', book.BID);
-									const bookResponse = await likeBook(data.client, book.BID);
-									bookStore.update((s) => {
-										s[book.BID] = {
-											brn: book.BID,
-											title: book.TitleName,
-											author: book.Author,
-											imageLink: book.cover_url,
-											bookmarked: true,
-											items: bookResponse.avails ?? []
-										};
-										return s;
-									});
-									toast.success(`Book ${book.TitleName} is added`);
-								}
-								books[book.BID].bookMarkLoading = false;
+								await toggleBookmarkBook(data.client, book.BID);
 								books[book.BID].bookmarked = !books[book.BID].bookmarked;
-							} catch (error) {
-								if (error instanceof Error) {
-									if (error.cause === 429) {
-										toast.warning("We are hitting NLB's API too hard. Please try again later.");
-									} else {
-										toast.warning('Bookmark request has failed. Please try again later.');
-									}
-								}
-								console.error('Bookmark/Unbookmark error:', error);
-								books[book.BID].bookMarkLoading = false;
-							}
+							} catch (e) {}
+							books[book.BID].bookMarkLoading = false;
 						}
 					}
 				])

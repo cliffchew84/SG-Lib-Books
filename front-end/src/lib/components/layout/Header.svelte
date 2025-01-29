@@ -1,15 +1,38 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
 	import type { User } from '@supabase/supabase-js';
-
 	import { Book, LibraryBig, LogOut, LogIn, Search } from 'lucide-svelte';
-	import { Button } from '$lib/components/ui/button';
-	import * as Avatar from '$lib/components/ui/avatar';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { getInitials } from '$lib/utils';
 
-	let { user }: { user?: User | null } = $props();
+	import type BackendAPIClient from '$lib/api/client';
+	import * as Avatar from '$lib/components/ui/avatar';
+	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import NotificationDropdown from '$lib/components/layout/NotificationDropdown.svelte';
+	import { getInitials } from '$lib/utils';
+	import type { Notification } from '$lib/models';
+	import { fetchNotifications, notificationStore } from '$lib/stores/notification';
+
+	let { user, client }: { user?: User | null; client?: BackendAPIClient } = $props();
+	let isNotificationOpen: boolean = $state(false);
 	let isLoggedIn: boolean = $derived(user != null);
+	let isNotificationLoading: boolean = $state(false);
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
+	let notifications: Notification[] = $derived(Object.values($notificationStore) as Notification[]);
+
+	$effect(() => {
+		(async () => {
+			// Fetch notifications from API when menu is opened
+			if (isNotificationOpen && client && notifications.length === 0) {
+				isNotificationLoading = true;
+				try {
+					await fetchNotifications(client);
+				} catch (error) {
+					toast.warning('Failed to fetch new notifications');
+				}
+				isNotificationLoading = false;
+			}
+		})();
+	});
 </script>
 
 <header class="flex flex-row justify-between p-2 border shadow items-center min-h-14">
@@ -38,27 +61,34 @@
 			</Button>
 		</nav>
 
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				<Avatar.Root class="block">
-					<Avatar.Fallback>{username}</Avatar.Fallback>
-				</Avatar.Root>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Group>
-					<DropdownMenu.Label>My Account</DropdownMenu.Label>
-					<DropdownMenu.Separator />
-					<!-- <DropdownMenu.Item href="/dashboard/settings"> -->
-					<!-- 	<Settings class="mr-2 h-4 w-4" /> -->
-					<!-- 	<span>Settings</span> -->
-					<!-- </DropdownMenu.Item> -->
-					<DropdownMenu.Item href="/auth/sign-out">
-						<LogOut class="mr-2 h-4 w-4" />
-						<span>Log out</span>
-					</DropdownMenu.Item>
-				</DropdownMenu.Group>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+		<div class="flex gap-3">
+			<NotificationDropdown
+				bind:menuOpen={isNotificationOpen}
+				{notifications}
+				isLoading={isNotificationLoading}
+			/>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					<Avatar.Root class="block">
+						<Avatar.Fallback>{username}</Avatar.Fallback>
+					</Avatar.Root>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<DropdownMenu.Group>
+						<DropdownMenu.Label>My Account</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<!-- <DropdownMenu.Item href="/dashboard/settings"> -->
+						<!-- 	<Settings class="mr-2 h-4 w-4" /> -->
+						<!-- 	<span>Settings</span> -->
+						<!-- </DropdownMenu.Item> -->
+						<DropdownMenu.Item href="/auth/sign-out">
+							<LogOut class="mr-2 h-4 w-4" />
+							<span>Log out</span>
+						</DropdownMenu.Item>
+					</DropdownMenu.Group>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		</div>
 	{:else}
 		<!-- User is not logged in -->
 		<!-- <Button href="/auth/sign-in" class="ml-auto"> -->
