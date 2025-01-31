@@ -54,6 +54,7 @@ async def get_current_user(access_token: AccessTokenDep) -> User | None:
             status_code=401, detail="Invalid authentication credentials"
         )
 
+    print(access_token)
     if access_token == settings.SUPABASE_KEY:
         return None
     try:

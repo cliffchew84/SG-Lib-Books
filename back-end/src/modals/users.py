@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional
+from typing import ClassVar, Literal, Optional
 
 from pydantic import BaseModel
 
@@ -10,16 +10,10 @@ class UserBase(BaseModel):
 
     """Username"""
     UserName: str
-    email_address: str
-    HashedPassword: Optional[str] = None
-    latest_login: Optional[int] = None
-    preferred_lib: Optional[str] = (
-        None  # TODO: Create static modal after clarify naming requirement
-    )
-    pw_qn: Optional[str] = None
-    pw_ans: Optional[str] = None
-    books_updated: Optional[float] = None
-    registered_time: Optional[int] = None
+    email_address: str | None
+    channel_push: bool
+    channel_email: bool
+    notification_type: Literal["all_notif", "book_updates_only", "no_notif"]
 
 
 class User(ResponseBase, UserBase):
@@ -34,13 +28,11 @@ class UserCreate(CreateBase, User):
 class UserUpdateBase(BaseModel):
     UserName: str
     email_address: Optional[str] = None
-    HashedPassword: Optional[str] = None
-    latest_login: Optional[int] = None
-    preferred_lib: Optional[str] = None
-    pw_qn: Optional[str] = None
-    pw_ans: Optional[str] = None
-    books_updated: Optional[float] = None
-    registered_time: Optional[int] = None
+    channel_push: Optional[bool] = None
+    channel_email: Optional[bool] = None
+    notification_type: Optional[
+        Literal["all_notif", "book_updates_only", "no_notif"]
+    ] = None
 
 
 class UserUpdate(UpdateBase, UserUpdateBase):
