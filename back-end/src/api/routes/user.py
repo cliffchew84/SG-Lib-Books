@@ -18,7 +18,6 @@ async def read_user(db: SDBDep, user: CurrentUser) -> User:
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    user_model.email_address = user.email
     return user_model
 
 
@@ -31,10 +30,11 @@ async def update_user(
     if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
-    # Do not allow to update username and email
-    if user_update.UserName or user_update.email_address:
-        user_update.UserName = user.email
-        user_update.email_address = user.email
+    # Do not allow to update email
+    if user_update.email != user.email:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Email cannot be updated in this endpoint"
+        )
 
     try:
         updated_user = await user_crud.update(db, i=user.email, obj_in=user_update)

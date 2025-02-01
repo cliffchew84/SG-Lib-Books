@@ -7,10 +7,7 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const items = [
-		// 'Profile',  // HACK: Disable profile until UserName PK is fixed
-		'Notifications'
-	];
+	const items = ['Profile', 'Notifications'];
 	let selected = $state(items[0]);
 
 	const [send, receive] = crossfade({

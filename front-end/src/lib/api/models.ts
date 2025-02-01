@@ -1,14 +1,14 @@
 export interface User {
-	UserName: string;
-	email_address: string;
+	email: string;
+	username: string | undefined;
 	channel_push: boolean;
 	channel_email: boolean;
 	notification_type: 'all_notif' | 'book_updates_only' | 'no_notif';
 }
 
 export interface UserUpdate {
-	UserName?: string;
-	email_address?: string;
+	email: string;
+	username?: string;
 	channel_push?: boolean;
 	channel_email?: boolean;
 	notification_type?: 'all_notif' | 'book_updates_only' | 'no_notif';

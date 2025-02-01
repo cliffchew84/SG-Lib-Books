@@ -2,11 +2,12 @@
 	import { z } from 'zod';
 
 	export const profileFormSchema = z.object({
-		UserName: z
+		username: z
 			.string()
 			.min(2, 'Username must be at least 2 characters.')
-			.max(30, 'Username must not be longer than 30 characters'),
-		email_address: z.string({ required_error: 'Please select an email to display' }).email(),
+			.max(30, 'Username must not be longer than 30 characters')
+			.optional(),
+		email: z.string({ required_error: 'Please select an email to display' }).email(),
 		notification_type: z.enum(['all_notif', 'book_updates_only', 'no_notif']),
 		channel_push: z.boolean().default(true),
 		channel_email: z.boolean().default(true)
@@ -71,10 +72,10 @@
 				<h3 class="text-lg font-medium">Profile</h3>
 				<p class="text-muted-foreground text-sm">This is how others will see you on the site.</p>
 			</div>
-			<Form.Field {form} name="UserName">
+			<Form.Field {form} name="username">
 				<Form.Control let:attrs>
 					<Form.Label>Username</Form.Label>
-					<Input placeholder="Username" {...attrs} bind:value={$formData.UserName} disabled />
+					<Input placeholder="Username" {...attrs} bind:value={$formData.username} />
 				</Form.Control>
 				<Form.Description>
 					This is your public display name. It can be your real name or a pseudonym.
@@ -82,10 +83,10 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Form.Field {form} name="email_address">
+			<Form.Field {form} name="email">
 				<Form.Control let:attrs>
 					<Form.Label>Email</Form.Label>
-					<Input placeholder="@shadcn" {...attrs} bind:value={$formData.email_address} disabled />
+					<Input placeholder="@shadcn" {...attrs} bind:value={$formData.email} disabled />
 				</Form.Control>
 				<Form.Description>
 					Your email address is used for account recovery and notifications. Please <a
