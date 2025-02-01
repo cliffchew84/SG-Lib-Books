@@ -8,9 +8,9 @@ from src.modals.base import ResponseBase, CreateBase, UpdateBase
 class UserBase(BaseModel):
     """User Mapping Table"""
 
-    """Username"""
-    UserName: str
-    email_address: str | None
+    """Email"""
+    email: str
+    username: str | None
     channel_push: bool
     channel_email: bool
     notification_type: Literal["all_notif", "book_updates_only", "no_notif"]
@@ -18,7 +18,7 @@ class UserBase(BaseModel):
 
 class User(ResponseBase, UserBase):
     table_name: ClassVar[str] = "users"
-    pk: ClassVar[str] = "UserName"
+    pk: ClassVar[str] = "email"
 
 
 class UserCreate(CreateBase, User):
@@ -26,8 +26,8 @@ class UserCreate(CreateBase, User):
 
 
 class UserUpdateBase(BaseModel):
-    UserName: str
-    email_address: Optional[str] = None
+    email: str
+    username: str | None
     channel_push: Optional[bool] = None
     channel_email: Optional[bool] = None
     notification_type: Optional[
