@@ -53,19 +53,23 @@ The [Supabase CLI](https://supabase.io/docs/guides/cli) is required to manage
     supabase login
     ```
 
-1. Start the local Supabase instance:
+Now, you can either use a local Supabase instance (Option A), or use a managed Supabase instance at <https://supabase.com> (Option B). Pick Option B if you want to allow users to login using their Google Account (Google Auth).
 
-    ```bash
-    supabase start
-    ```
+##### Option A - Start a local Supabase instance
 
-##### Google Auth Setup
+Start Supabase local development setup with the following command:
 
-Only works on managed supabase instances at supabase.com
+```bash
+supabase start
+```
 
-1. Create a supabase project and go to `Authentication` -> `Providers`, and enable Google Auth. Copy the callback URL.
+##### Option B - Use a managed Supabase instance
 
-1. Go to `Project Settings` and note down your supabase project ID.
+You will need a [free Supabase account](https://supabase.com/dashboard/sign-up) and a [free Google Cloud account](https://cloud.google.com).
+
+1. Create a Supabase project and go to `Authentication` -> `Providers`, and enable Google Auth. Copy the callback URL.
+
+1. Go to `Project Settings` and note down your Supabase project ID.
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com) and create a new project.
 
@@ -86,8 +90,8 @@ Only works on managed supabase instances at supabase.com
     In the project root folder, run
 
     ```bash
-    supabase link --project-ref '<PROJECT_ID>' # From Supabase Project Settings page
-    supabase db push
+    supabase link --project-ref '<PROJECT_ID>' # From Supabase Project Settings page at supabase.com
+    supabase db push # Apply local database schema changes to the remote Supabase database.
     ```
 
 #### 1.2 Back-end FastAPI Server Setup
