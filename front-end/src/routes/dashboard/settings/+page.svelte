@@ -47,6 +47,6 @@
 				{/each}
 			</nav>
 		</aside>
-		<UserSettingForm form={data.form} {selected} client={data.client} />
+		<UserSettingForm form={data.form} {selected} client={data.client} supabase={data.supabase} />
 	</div>
 </TitledPage>

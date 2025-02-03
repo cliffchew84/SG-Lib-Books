@@ -28,6 +28,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 
+	import type { SupabaseClient } from '@supabase/supabase-js';
 	import type BackendAPIClient from '$lib/api/client';
 	import { updateUser } from '$lib/api/user';
 	import * as Form from '$lib/components/ui/form/index.js';
@@ -39,6 +40,7 @@
 		form: SuperValidated<Infer<ProfileFormSchema>>;
 		selected: String;
 		client: BackendAPIClient;
+		supabase: SupabaseClient;
 	} = $props();
 	let form: SuperForm<Infer<ProfileFormSchema>> | undefined = $state();
 	let {
@@ -55,6 +57,9 @@
 			if (!form.valid) return;
 			try {
 				await updateUser(data.client, form.data);
+				const { data: res, error } = await data.supabase.auth.updateUser({
+					data: { name: form.data.username }
+				});
 				setMessage(form, 'Profile updated.');
 			} catch (error) {
 				setMessage(form, 'Error updating profile. Please try again.');
