@@ -83,7 +83,7 @@
 					<Input placeholder="Username" {...attrs} bind:value={$formData.username} />
 				</Form.Control>
 				<Form.Description>
-					This is your public display name. It can be your real name or a pseudonym.
+					This is your public display name. You can use either your real name or any chosen name.
 				</Form.Description>
 				<Form.FieldErrors />
 			</Form.Field>
