@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
 	import { page } from '$app/stores';
 
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -8,6 +7,7 @@
 
 	import type { BookAvail } from '$lib/api/models';
 	import type { BookProp, Library, LibraryProp } from '$lib/models';
+	import type { BookSubscription } from '$lib/api/models';
 	import { bookStore, libraryAPIStore } from '$lib/stores';
 	import { toggleBookmarkBook } from '$lib/stores/book';
 	import { toggleFavouriteLibrary } from '$lib/stores/library';
@@ -30,7 +30,7 @@
 			book.bookMarkLoading = false;
 		}
 	});
-
+	let subscriptions: BookSubscription[] = $state([]);
 	let librariresProps: LibraryProp[] = $state([]);
 	let librariesFavourite: LibraryProp[] = $derived(librariresProps.filter((lib) => lib.favourite));
 	let librariesAvail: LibraryProp[] = $derived(
@@ -47,6 +47,7 @@
 		book.bookmarked = $bookStore[brn]?.bookmarked ?? false;
 	});
 
+	// Receives API response for book details and update frontend states
 	$effect(() => {
 		(async () => {
 			try {
@@ -71,6 +72,19 @@
 		})();
 	});
 
+	// Receives API response for subscription details and update frontend states
+	$effect(() => {
+		(async () => {
+			try {
+				subscriptions = await data.subscriptionResponse;
+			} catch (error) {
+				isError = true;
+			}
+		})();
+	});
+	$inspect(subscriptions);
+
+	// Compute library availability state
 	$effect(() => {
 		// Compute library availability state
 		const libraries: { [key: string]: Library } = $libraryAPIStore;
@@ -123,7 +137,13 @@
 
 <main class="container flex flex-col gap-8 p-8 min-h-[85vh]">
 	{#if !isError}
-		<BookDetailsSection {book} {isLoading} />
+		<BookDetailsSection
+			{book}
+			libraries={librariresProps}
+			{isLoading}
+			{subscriptions}
+			client={data.client}
+		/>
 		{#if librariesFavourite.length > 0}
 			<LibraryCarousel
 				title="Your Favourite"
