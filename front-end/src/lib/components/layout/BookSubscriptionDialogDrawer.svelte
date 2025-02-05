@@ -110,8 +110,7 @@
 			<Drawer.Header class="text-left">
 				<Drawer.Title>Subcribe to Book Loans Updates in the following Libraries</Drawer.Title>
 				<Drawer.Description>
-					>Get notified whenever <span class="underline">{book.title}</span> are available every morning
-					in your favourite libraries.
+					Get notified whenever your favourite book are available every morning.
 				</Drawer.Description>
 			</Drawer.Header>
 			<BookSubscriptionTabs
