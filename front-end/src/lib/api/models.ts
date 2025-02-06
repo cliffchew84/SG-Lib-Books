@@ -42,8 +42,6 @@ export interface BookResponse extends BookInfo {
 }
 
 export interface BookSubscriptionCreate {
-	status: string;
-	condition: string;
 	ItemNo: string;
 	email: string;
 }

@@ -6,8 +6,6 @@ from src.modals.base import ResponseBase, CreateBase, UpdateBase
 
 
 class BookSubscriptionBase(BaseModel):
-    status: str  # completed, pending, cancelled
-    condition: str  # condition to trigger subscription
     ItemNo: str  # FK to book_avail
     email: str  # FK to user_subscription
 
@@ -26,8 +24,6 @@ class BookSubscriptionCreate(CreateBase, BookSubscriptionBase):
 
 
 class BookSubscriptionUpdateBase(BaseModel):
-    status: str | None = None
-    condition: str | None = None
     ItemNo: str | None = None
     email: str | None = None
 
