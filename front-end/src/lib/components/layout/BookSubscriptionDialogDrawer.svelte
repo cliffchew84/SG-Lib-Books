@@ -61,7 +61,7 @@
 			</Button>
 		</Dialog.Trigger>
 
-		<Dialog.Content class="max-w-5xl">
+		<Dialog.Content class="max-w-4xl">
 			<Dialog.Header>
 				<Dialog.Title>Subcribe to Book Loans Updates in the following Libraries</Dialog.Title>
 				<Dialog.Description

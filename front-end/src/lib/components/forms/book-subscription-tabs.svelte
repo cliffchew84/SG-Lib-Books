@@ -1,13 +1,13 @@
 <script lang="ts">
+	import * as ToggleGroup from '$lib/components/ui/toggle-group';
 	import { Badge } from '$lib/components/ui/badge';
-	import * as Tabs from '$lib/components/ui/tabs';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import Selectable from '$lib/components/ui/selectable.svelte';
 	import LibraryCard from '$lib/components/layout/LibraryCard.svelte';
-	import { createSubscriptions, deleteSubscription } from '$lib/api/bookSubscription';
 	import type BackendAPIClient from '$lib/api/client';
-	import type { BookProp, LibraryProp } from '$lib/models.ts';
+	import { createSubscriptions, deleteSubscription } from '$lib/api/bookSubscription';
 	import type { BookSubscription, BookSubscriptionCreate } from '$lib/api/models.ts';
+	import type { BookProp, LibraryProp } from '$lib/models.ts';
 
 	let {
 		client,
@@ -40,7 +40,7 @@
 			.filter((library) => library.availBooks.length > 0 || library.onLoanBooks.length > 0)
 			.map((library) => ({
 				...library,
-				openingHoursDesc: '',
+				openingHoursDesc: '', // Remove opening hours from library card
 				selected: selectedLibraries.includes(library.name)
 			}))
 	);
@@ -62,9 +62,7 @@
 					// Add new subscription
 					newSubscriptions.push({
 						ItemNo: item.ItemNo,
-						status: 'pending',
-						condition: 'book_updates_only',
-						email: ''
+						email: '' // NOTE: will be filled by backend
 					});
 				} else if (!selected && inDefault) {
 					// Remove subscription
@@ -81,6 +79,23 @@
 		};
 	});
 
+	const selectAllLibraries = () => {
+		console.log('Hello');
+		if (selectedLibraries.length === relatedLibraries.length) {
+			selectedLibraries = [];
+			relatedLibraries = relatedLibraries.map((library) => ({
+				...library,
+				selected: false
+			}));
+		} else {
+			selectedLibraries = relatedLibraries.map((library) => library.name);
+			relatedLibraries = relatedLibraries.map((library) => ({
+				...library,
+				selected: true
+			}));
+		}
+	};
+
 	const onLibrarySelect = (library: LibraryProp & { selected: boolean }) => {
 		return () => {
 			if (library.selected) {
@@ -92,49 +107,31 @@
 	};
 </script>
 
-<Tabs.Root value="library" class="">
-	<div class="px-4 mb-3">
-		<ScrollArea class="h-24 md:h-full w-full">
-			{#if selectedLibraries.length === 0}
-				<span class="text-slate-500">Click on the library icon to select at least one library.</span
-				>
-			{/if}
-			{#each selectedLibraries as libraryName}
-				<Badge variant="outline" class="mx-1">{libraryName}</Badge>
-			{/each}
-		</ScrollArea>
+<div class="px-4 mb-3">
+	<ScrollArea class="h-24 md:h-full w-full">
+		{#if selectedLibraries.length === 0}
+			<span class="text-slate-500">Click on the library icon to select at least one library.</span>
+		{/if}
+		{#each selectedLibraries as libraryName}
+			<Badge variant="outline" class="mx-1">{libraryName}</Badge>
+		{/each}
+	</ScrollArea>
+</div>
+<ScrollArea class="h-[500px] w-full p-4">
+	<div class="flex justify-end mb-2">
+		<ToggleGroup.Root>
+			<ToggleGroup.Item value="select_all" variant="outline" onclick={selectAllLibraries}
+				>Select All</ToggleGroup.Item
+			>
+		</ToggleGroup.Root>
 	</div>
-	<Tabs.Content value="library">
-		<ScrollArea class="h-[500px] w-full p-4">
-			<div class="grid grid-cols-2 md:grid-cols-3 md:mx-6 gap-1 md:gap-3">
-				{#each relatedLibraries as library}
-					<div class="w-[150px] md:w-[250px] mx-auto">
-						<Selectable bind:selected={library.selected} onclick={onLibrarySelect(library)}>
-							<LibraryCard {...library} disableLink={true} />
-						</Selectable>
-					</div>
-				{/each}
+	<div class="grid grid-cols-2 md:grid-cols-3 gap-1 md:gap-3">
+		{#each relatedLibraries as library}
+			<div class="w-[150px] md:w-[250px] mx-auto">
+				<Selectable bind:selected={library.selected} onclick={onLibrarySelect(library)}>
+					<LibraryCard {...library} disableLink={true} />
+				</Selectable>
 			</div>
-		</ScrollArea>
-	</Tabs.Content>
-	<!-- <Tabs.Content value="changes"> -->
-	<!-- 	<div class="px-4"> -->
-	<!-- 		<h3 class="my-3">Notify me when...</h3> -->
-	<!-- 		<RadioGroup.Root bind:value={notificationType}> -->
-	<!-- 			<div class="flex items-center space-x-3"> -->
-	<!-- 				<RadioGroup.Item value="book_updates_only" /> -->
-	<!-- 				<p>Book has become available.</p> -->
-	<!-- 			</div> -->
-	<!-- 			<div class="flex items-center space-x-3"> -->
-	<!-- 				<RadioGroup.Item value="all_notif" /> -->
-	<!-- 				<p>Any book status changes.</p> -->
-	<!-- 			</div> -->
-	<!-- 			<div class="flex items-center space-x-3"> -->
-	<!-- 				<RadioGroup.Item value="no_notif" /> -->
-	<!-- 				<p>Nothing</p> -->
-	<!-- 			</div> -->
-	<!-- 			<RadioGroup.Input name="" /> -->
-	<!-- 		</RadioGroup.Root> -->
-	<!-- 	</div> -->
-	<!-- </Tabs.Content> -->
-</Tabs.Root>
+		{/each}
+	</div>
+</ScrollArea>
