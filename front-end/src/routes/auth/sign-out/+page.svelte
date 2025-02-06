@@ -1,21 +1,35 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import type { PageData } from './$types';
-
 	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
+
+	import { goto } from '$app/navigation';
+	import { deregisterToken } from '$lib/api/notification_tokens';
+	import { notificationToken } from '$lib/stores/notification';
+	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
+	// Deregistering notification token
+	$effect(() => {
+		if ($notificationToken !== null && data.client !== undefined) {
+			deregisterToken(data.client, $notificationToken).catch((error) => {
+				console.error(error);
+			});
+		}
+	});
+
 	// Signing-out using supabase
-	data.supabase.auth
-		.signOut()
-		.then(() => {
-			goto('/');
-		})
-		.catch((error) => {
-			console.error(error);
-			goto('/');
-		});
+
+	$effect(() => {
+		data.supabase.auth
+			.signOut()
+			.then(() => {
+				goto('/');
+			})
+			.catch((error) => {
+				console.error(error);
+				goto('/');
+			});
+	});
 </script>
 
 <svelte:head>

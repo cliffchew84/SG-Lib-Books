@@ -24,7 +24,7 @@ export async function registerToken(client: BackendAPIClient, token: string): Pr
 	}
 }
 
-export async function deregisterToken(client: BackendAPIClient, token: string): Promise<NotificationToken> {
+export async function deregisterToken(client: BackendAPIClient, token: string): Promise<undefined> {
 	try {
 		const response = await client.delete({ path: `/notification_tokens/${token}` });
 
@@ -34,9 +34,6 @@ export async function deregisterToken(client: BackendAPIClient, token: string): 
 			});
 		}
 
-		const data: NotificationToken = await response.json();
-
-		return data;
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error('Error querying api:', error.message);
