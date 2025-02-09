@@ -5,6 +5,7 @@ import type { Notification } from '$lib/models';
 import type BackendAPIClient from '$lib/api/client';
 import { getNotifications, readNotification } from '$lib/api/notification';
 
+export const notificationToken = writable<string | null>(null);
 export const refreshNotification = writable<boolean>(true);
 export const notificationStore = writable<Record<string, Notification>>({});
 

@@ -8,25 +8,26 @@ import { refreshNotification } from '$lib/stores/notification';
 
 // Get registration token. Initially this makes a network call, once retrieved
 // subsequent calls to getToken will return from cache
-Notification.requestPermission().then((permission) => {
-	if (permission === 'granted') {
-		getToken(messaging, {
-			vapidKey: PUBLIC_FIREBASE_VAPIDKEY
-		})
-			.then((currentToken) => {
-				if (currentToken) {
-					// TODO: Add token to database
-					console.log(currentToken);
-				} else {
-					// Show permission request UI
-					console.log('No registration token available. Request permission to generate one.');
-				}
+export default async function requestToken() {
+	return Notification.requestPermission().then((permission) => {
+		if (permission === 'granted') {
+			return getToken(messaging, {
+				vapidKey: PUBLIC_FIREBASE_VAPIDKEY
 			})
-			.catch((err) => {
-				console.log('An error occurred while retrieving token. ', err);
-			});
-	}
-});
+				.then((currentToken) => {
+					if (currentToken) {
+						return currentToken;
+					} else {
+						// Show permission request UI
+						console.log('No registration token available. Request permission to generate one.');
+					}
+				})
+				.catch((err) => {
+					console.log('An error occurred while retrieving token. ', err);
+				});
+		}
+	});
+}
 
 // Show notification as toast and update UI store
 onMessage(messaging, ({ notification, data }) => {

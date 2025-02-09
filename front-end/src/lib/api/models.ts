@@ -73,3 +73,10 @@ export interface Notification {
 	action: string;
 	isRead: boolean;
 }
+
+export interface NotificationToken {
+	id: number;
+	created_at: Date;
+	token: string;
+	email: string;
+}
