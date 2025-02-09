@@ -23,7 +23,7 @@
 			<div class="flex w-max space-x-4">
 				{#each libraries as library}
 					<div class="w-[250px]">
-						<LibraryCard {...library} />
+						<LibraryCard {...library} disableLink={false} />
 					</div>
 				{/each}
 			</div>
