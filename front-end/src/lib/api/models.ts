@@ -41,6 +41,16 @@ export interface BookResponse extends BookInfo {
 	avails: BookAvail[];
 }
 
+export interface BookSubscriptionCreate {
+	ItemNo: string;
+	email: string;
+}
+
+export interface BookSubscription extends BookSubscriptionCreate {
+	id: number;
+	created_at: Date;
+}
+
 export interface Library {
 	name: string;
 	opening_status: string;

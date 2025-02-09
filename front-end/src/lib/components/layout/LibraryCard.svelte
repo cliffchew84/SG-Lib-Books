@@ -9,8 +9,9 @@
 		openingHoursDesc = 'Unknown Opening Hours',
 		favourite = false,
 		onFavourite = () => {},
-		imageLink
-	}: LibraryProp = $props();
+		imageLink,
+		disableLink = false
+	}: LibraryProp & { disableLink: boolean } = $props();
 
 	let noAvail = $derived(availBooks.length);
 	let noOnLoan = $derived(onLoanBooks.length);
@@ -26,14 +27,17 @@
 
 <div class="relative rounded-lg shadow border-slate-400 w-full">
 	<a
-		class="bg-muted min-h-[140px] max-h-[200px] w-full block overflow-hidden"
-		href={`/dashboard/library/${name}`}
+		class="bg-muted md:min-h-[140px] max-h-[200px] w-full block overflow-hidden rounded-t-lg"
+		href={!disableLink ? `/dashboard/library/${name}` : ''}
 	>
 		{#if imageLink}
 			<img src={imageLink} alt={name} class="rounded-t-lg aspect-[3/2] h-fit w-fit object-cover" />
 		{/if}
 	</a>
-	<button onclick={onFavourite} class="absolute right-3 top-3 z-50 shadow">
+	<button
+		onclick={!disableLink ? onFavourite : () => {}}
+		class="absolute right-3 top-3 z-10 shadow"
+	>
 		{#if favourite}
 			<Star class="w-5 h-5 bg-muted" />
 		{:else}
@@ -43,7 +47,7 @@
 
 	<div class="py-4 px-3 flex flex-col gap-2 text-xs">
 		<h3
-			class="text-ellipsis overflow-hidden whitespace-nowrap text-slate-700 font-semibold text-sm"
+			class="text-ellipsis overflow-hidden whitespace-nowrap text-slate-700 font-semibold text-sm text-left"
 		>
 			{name}
 		</h3>
@@ -51,9 +55,11 @@
 			<BookCheck class="w-4 h-4 my-auto" />
 			<p class="">{availabilityStatus}</p>
 		</div>
-		<div class="flex gap-2 text-slate-500">
-			<Clock4 class="w-4 h-4 my-auto " />
-			<p class="">{openingHoursDesc}</p>
-		</div>
+		{#if openingHoursDesc}
+			<div class="flex gap-2 text-slate-500">
+				<Clock4 class="w-4 h-4 my-auto " />
+				<p class="">{openingHoursDesc}</p>
+			</div>
+		{/if}
 	</div>
 </div>
