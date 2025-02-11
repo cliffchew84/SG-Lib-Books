@@ -61,7 +61,7 @@
 	let librariresProps: LibraryProp[] = $state([]);
 	let librariesFavourite: LibraryProp[] = $derived(
 		librariresProps.filter((lib) => {
-			return lib.favourite;
+			return lib.favourite && (lib.onLoanBooks.length > 0 || lib.availBooks.length > 0);
 		})
 	);
 	let librariesAvail: LibraryProp[] = $derived(
