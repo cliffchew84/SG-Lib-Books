@@ -64,7 +64,8 @@ supabase start
 ```
 
 > [!NOTE]
-> When in local development, to access magic-link emails sent from Supabase Auth, visit the Inbucket dashboard. The default location is<http://127.0.0.1:54324>, actual location can be found via `supabase start` command under the field `Inbucket URL:`.
+> When in local development, to access magic-link emails sent from Supabase Auth, visit the Inbucket dashboard. The default location is <http://127.0.0.1:54324>, actual location can be found via `supabase start` command under the field `Inbucket URL:`.
+>
 > The relevant documentation can be found [here](https://supabase.com/docs/guides/local-development/cli/testing-and-linting#testing-auth-emails).
 
 ##### Option B - Use a managed Supabase instance
