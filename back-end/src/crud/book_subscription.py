@@ -37,6 +37,14 @@ class CRUDBookSubscription(
         )
         return [self.model(**item) for item in response.data]
 
+    async def get_all_by_item_nos(
+        self, db: Client, itemNos: list[str]
+    ) -> list[BookSubscription]:
+        response = (
+            db.table(self.model.table_name).select("*").in_("ItemNo", itemNos).execute()
+        )
+        return [self.model(**item) for item in response.data]
+
     async def get_all(self, db: Client) -> list[BookSubscription]:
         return await super().get_all(db)
 
