@@ -12,6 +12,7 @@ from nlb_catalogue_client import AuthenticatedClient
 from supabase import create_client, Client
 
 from src.config import settings
+from src.services.cloud_task import CloudTask
 
 
 super_client: Client | None = None
@@ -82,3 +83,14 @@ def get_nlb_api_client():
 
 
 NLBClientDep = Annotated[AuthenticatedClient, Depends(get_nlb_api_client)]
+def get_cloud_task():
+    """Return cloud task client"""
+    yield CloudTask(
+        project=settings.GC_PROJECT_ID,
+        location=settings.GC_LOCATION,
+        queue=settings.GC_QUEUE,
+        url=settings.GC_BACKEND_URI,
+    )
+
+
+CloudTaskDep = Annotated[CloudTask, Depends(get_cloud_task)]

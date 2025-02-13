@@ -12,14 +12,14 @@ from nlb_catalogue_client.models.get_title_details_response_v2 import (
     GetTitleDetailsResponseV2,
 )
 
-from src.api.deps import SDBDep, CurrentUser, NLBClientDep
+from src.api.deps import CloudTaskDep, SDBDep, CurrentUser, NLBClientDep
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
 from src.crud.book_outdated_bid import book_outdated_bid_crud
 from src.modals.book_avail import BookAvail, BookAvailCreate
 from src.modals.book_info import BookInfoCreate
 from src.modals.book_response import BookResponse
-from src.utils import create_http_task
+
 
 router = APIRouter()
 
@@ -249,6 +249,7 @@ async def update_books(
     db: SDBDep,
     nlb: NLBClientDep,
     user: CurrentUser,
+    task: CloudTaskDep,
     query_per_min: int = 15,
     recurse: bool = False,
 ):
@@ -262,8 +263,8 @@ async def update_books(
     outdated_books = await book_outdated_bid_crud.get_all(db)
     if outdated_books and recurse:
         # Schedule task for recursive update every 1 minute
-        create_http_task(
-            tasks_v2.HttpMethod.PUT,
+        task.create_task(
+            http_method=tasks_v2.HttpMethod.PUT,
             path="/books",
             body={},
             query=dict(query_per_min=query_per_min, recurse=recurse),
