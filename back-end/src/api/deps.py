@@ -13,6 +13,7 @@ from supabase import create_client, Client
 
 from src.config import settings
 from src.services.cloud_task import CloudTask
+from src.services.firebase_messaging import FirebaseMessaging
 
 
 super_client: Client | None = None
@@ -55,6 +56,7 @@ async def get_current_user(access_token: AccessTokenDep) -> User | None:
             status_code=401, detail="Invalid authentication credentials"
         )
 
+    print(access_token)  # HACK: remove before commit
     if access_token == settings.SUPABASE_KEY:
         return None
     try:
@@ -83,6 +85,9 @@ def get_nlb_api_client():
 
 
 NLBClientDep = Annotated[AuthenticatedClient, Depends(get_nlb_api_client)]
+
+
+# External Services
 def get_cloud_task():
     """Return cloud task client"""
     yield CloudTask(
@@ -94,3 +99,11 @@ def get_cloud_task():
 
 
 CloudTaskDep = Annotated[CloudTask, Depends(get_cloud_task)]
+
+
+def get_firebase_messaging():
+    """Return firebase messaging client"""
+    yield FirebaseMessaging(settings.GC_FIREBASE_SA_DICT)
+
+
+MessagingDep = Annotated[FirebaseMessaging, Depends(get_firebase_messaging)]
