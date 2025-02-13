@@ -1,5 +1,5 @@
 import { toast } from 'svelte-sonner';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 import { goto } from '$app/navigation';
 import type { Notification } from '$lib/models';
@@ -38,4 +38,25 @@ export async function fetchNotifications(client: BackendAPIClient) {
 		console.error('Failed to fetch notifications', error);
 		throw error;
 	}
+}
+
+export function readAllNotification(client: BackendAPIClient) {
+	return Promise.all(get(notificationStore).map(async (n) => {
+		if (n.isRead) {
+			return;
+		}
+		try {
+			await readNotification(client, n.id);
+			notificationStore.update((s) => {
+				const index = s.findIndex((a) => a.id === n.id);
+				if (index !== -1) {
+					s[index].isRead = true;
+				}
+				return s;
+			});
+		} catch (error) {
+			toast.warning('Failed to mark notification as read');
+			console.error('Failed to mark notification as read', error);
+		}
+	}));
 }

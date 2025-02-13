@@ -14,7 +14,8 @@
 		fetchNotifications,
 		notificationStore,
 		notificationToken,
-		refreshNotification
+		refreshNotification,
+		readAllNotification
 	} from '$lib/stores/notification';
 	import { getInitials } from '$lib/utils';
 
@@ -44,8 +45,8 @@
 
 	$effect(() => {
 		(async () => {
-			// Fetch notifications from API when menu is opened
-			if (isNotificationOpen && client && $refreshNotification) {
+			// Fetch notifications from API
+			if (client && $refreshNotification) {
 				isNotificationLoading = true;
 				try {
 					await fetchNotifications(client);
@@ -90,6 +91,11 @@
 				bind:menuOpen={isNotificationOpen}
 				notifications={$notificationStore}
 				isLoading={isNotificationLoading}
+				selectAll={client !== undefined
+					? async () => {
+							await readAllNotification(client);
+						}
+					: () => {}}
 			/>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
