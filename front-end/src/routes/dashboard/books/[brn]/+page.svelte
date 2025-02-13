@@ -82,7 +82,6 @@
 			}
 		})();
 	});
-	$inspect(subscriptions);
 
 	// Compute library availability state
 	$effect(() => {
