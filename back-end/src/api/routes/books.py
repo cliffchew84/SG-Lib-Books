@@ -12,14 +12,21 @@ from nlb_catalogue_client.models.get_title_details_response_v2 import (
     GetTitleDetailsResponseV2,
 )
 
-from src.api.deps import SDBDep, CurrentUser, NLBClientDep
+from src.api.deps import CloudTaskDep, SDBDep, CurrentUser, NLBClientDep, MessagingDep
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
 from src.crud.book_outdated_bid import book_outdated_bid_crud
+from src.crud.book_subscription import book_subscription_crud
+from src.crud.notifications import notification_crud
+from src.crud.users import user_crud
+from src.crud.notification_tokens import notification_token_crud
 from src.modals.book_avail import BookAvail, BookAvailCreate
 from src.modals.book_info import BookInfoCreate
 from src.modals.book_response import BookResponse
-from src.utils import create_http_task
+
+from src.modals.notifications import NotificationCreate
+from src.services.firebase_messaging import FirebaseMessaging
+from src.utils.book_avail import get_newly_available_books
 
 router = APIRouter()
 
@@ -195,16 +202,17 @@ async def like_book(
             db,
             obj_ins=all_avail_bks,
         )
+        return BookResponse(**book_info_result.model_dump(), avails=all_avail_bks)
     except Exception as e:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             "Error occured with database transaction.",
         ) from e
 
-    return BookResponse(**book_info_result.model_dump(), avails=all_avail_bks)
 
-
-async def update_book_avail(db, nlb, bid_no: int) -> list[BookAvail]:
+async def update_book_avail(
+    db, nlb, messaging: FirebaseMessaging, bid_no: int
+) -> list[BookAvail]:
     """
     - Takes in single BID to get avail info
     - Processes data for Supabase
@@ -229,14 +237,71 @@ async def update_book_avail(db, nlb, bid_no: int) -> list[BookAvail]:
 
     # Insert and Update if conflict on book availability
     try:
-        all_avail_bks = [
+        # Check if book info exists in database
+        book_info = await book_info_crud.get(db, i=str(bid_no))
+        if not book_info:
+            # Book infomation does not exist in database,
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Book information does not exist in database"
+            )
+
+        old_book_avails = await book_avail_crud.get_all_by_bid(db, bid=bid_no)
+        new_book_avails = [
             BookAvailCreate.from_nlb(item) for item in response.parsed.items or []
         ]
+        book_avail_changes = get_newly_available_books(old_book_avails, new_book_avails)
+
+        # Retrieve all subscriptions for the book that is now available
+        subscriptions = await book_subscription_crud.get_all_by_item_nos(
+            db, itemNos=[book_avail.ItemNo for book_avail in book_avail_changes]
+        )
+
+        # Create notification for each subscription
+        for subscription in subscriptions:
+            user = await user_crud.get(db, i=subscription.email)
+            # Skip if user does not exist
+            if not user:
+                continue
+
+            notification_create = NotificationCreate(
+                title=f"{book_info.TitleName or 'New Book'} is now On-Shelf.",
+                description=f"{book_info.TitleName or 'New Book'} is available in {', '.join([avail.BranchName for avail in book_avail_changes])}",
+                action=f"/dashboard/books/{bid_no}",
+                isRead=False,
+                email=subscription.email,
+            )
+
+            # Save notification to database
+            await notification_crud.create(db, obj_in=notification_create)
+
+            # Send notification via FCM if user has enabled push notification
+            fcm_tokens = await notification_token_crud.get_multi_by_owner(
+                db, email=subscription.email
+            )
+            if user.channel_push and fcm_tokens:
+                fcm_res = messaging.send_messages(
+                    tokens=[token.token for token in fcm_tokens],
+                    title=notification_create.title,
+                    body=notification_create.description or "",
+                    data={
+                        "action": notification_create.action,
+                    },
+                )
+                print(
+                    f"Sent FCM message. Success: {fcm_res.success_count}, Failure: {fcm_res.failure_count}"
+                )
+
+            # Send notification via email if user has enabled daily email notification
+            # TODO: Schedule task to send notification via email
+
         book_avails = await book_avail_crud.upsert(
             db,
-            obj_ins=all_avail_bks,
+            obj_ins=new_book_avails,
         )
     except Exception as e:
+        print(e)
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             "Error occured with database transaction.",
@@ -249,6 +314,8 @@ async def update_books(
     db: SDBDep,
     nlb: NLBClientDep,
     user: CurrentUser,
+    task: CloudTaskDep,
+    messaging: MessagingDep,
     query_per_min: int = 15,
     recurse: bool = False,
 ):
@@ -262,8 +329,8 @@ async def update_books(
     outdated_books = await book_outdated_bid_crud.get_all(db)
     if outdated_books and recurse:
         # Schedule task for recursive update every 1 minute
-        create_http_task(
-            tasks_v2.HttpMethod.PUT,
+        task.create_task(
+            http_method=tasks_v2.HttpMethod.PUT,
             path="/books",
             body={},
             query=dict(query_per_min=query_per_min, recurse=recurse),
@@ -275,7 +342,7 @@ async def update_books(
     # TODO: Do limiting on database side instead
     for book in outdated_books[:query_per_min]:
         try:
-            await update_book_avail(db, nlb, book.BID)
+            await update_book_avail(db, nlb, messaging, book.BID)
             print(f"Updated book BID: {book.BID}")
             await sleep(1)  # To comply 1 request per second rate-limit
         except Exception as e:
@@ -290,12 +357,12 @@ async def update_books(
 
 @router.put("/{bid}")
 async def update_book(
-    bid: int, db: SDBDep, nlb: NLBClientDep, user: CurrentUser
+    bid: int, db: SDBDep, nlb: NLBClientDep, user: CurrentUser, messaging: MessagingDep
 ) -> list[BookAvail]:
     if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
-    book_avail = await update_book_avail(db, nlb, bid)
+    book_avail = await update_book_avail(db, nlb, messaging, bid)
     return book_avail
 
 

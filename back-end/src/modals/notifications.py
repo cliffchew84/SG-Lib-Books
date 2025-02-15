@@ -9,7 +9,6 @@ from src.modals.base import ResponseBase, CreateBase, UpdateBase
 class NotificationBase(BaseModel):
     """Notification Table"""
 
-    id: int
     title: str
     description: str | None
     isRead: bool
@@ -19,10 +18,11 @@ class NotificationBase(BaseModel):
 
 class Notification(ResponseBase, NotificationBase):
     table_name: ClassVar[str] = "notifications"
+    id: int  # Auto incremented by database
     createdAt: datetime  # Auto populated by database
 
 
-class NotificationCreate(CreateBase, Notification):
+class NotificationCreate(CreateBase, NotificationBase):
     """Notification model for creating new user-notification relationship"""
 
 

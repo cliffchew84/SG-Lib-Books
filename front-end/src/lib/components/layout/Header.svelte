@@ -10,12 +10,12 @@
 	import type BackendAPIClient from '$lib/api/client';
 	import { registerToken } from '$lib/api/notification_tokens';
 	import requestToken from '$lib/notification'; // Firebase FCM to handle realtime notifications
-	import type { Notification } from '$lib/models';
 	import {
 		fetchNotifications,
 		notificationStore,
 		notificationToken,
-		refreshNotification
+		refreshNotification,
+		readAllNotification
 	} from '$lib/stores/notification';
 	import { getInitials } from '$lib/utils';
 
@@ -24,7 +24,6 @@
 	let isLoggedIn: boolean = $derived(user != null);
 	let isNotificationLoading: boolean = $state(false);
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
-	let notifications: Notification[] = $derived(Object.values($notificationStore) as Notification[]);
 
 	// Request permission for notifications
 	$effect(() => {
@@ -46,8 +45,8 @@
 
 	$effect(() => {
 		(async () => {
-			// Fetch notifications from API when menu is opened
-			if (isNotificationOpen && client && $refreshNotification) {
+			// Fetch notifications from API
+			if (client && $refreshNotification) {
 				isNotificationLoading = true;
 				try {
 					await fetchNotifications(client);
@@ -90,8 +89,13 @@
 		<div class="flex gap-3">
 			<NotificationDropdown
 				bind:menuOpen={isNotificationOpen}
-				{notifications}
+				notifications={$notificationStore}
 				isLoading={isNotificationLoading}
+				selectAll={client !== undefined
+					? async () => {
+							await readAllNotification(client);
+						}
+					: () => {}}
 			/>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>

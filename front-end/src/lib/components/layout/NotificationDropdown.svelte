@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { type MouseEventHandler } from 'svelte/elements';
 	import { Bell, LoaderCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -8,8 +9,16 @@
 	let {
 		notifications = [],
 		isLoading = false,
-		menuOpen = $bindable()
-	}: { notifications: Notification[]; isLoading: boolean; menuOpen: boolean } = $props();
+		menuOpen = $bindable(),
+		selectAll = () => {}
+	}: {
+		notifications: Notification[];
+		isLoading: boolean;
+		menuOpen: boolean;
+		selectAll: MouseEventHandler<HTMLButtonElement>;
+	} = $props();
+
+	let unreadCount = $derived(notifications.filter((notification) => !notification.isRead).length);
 </script>
 
 <DropdownMenu.Root>
@@ -20,13 +29,23 @@
 			onclick={() => {
 				menuOpen = !menuOpen;
 			}}
-			class="rounded-full p-0"
+			class="rounded-full p-0 relative"
 		>
 			<Bell class="h-5 w-5 mx-2" />
+			{#if unreadCount > 0}
+				<div
+					class="absolute -top-1 -right-1 w-5 h-5 z-20 rounded-full bg-red-500 text-xs text-white"
+				>
+					{unreadCount > 99 ? '99+' : unreadCount}
+				</div>
+			{/if}
 		</Button>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content>
-		<DropdownMenu.Label>Notifications</DropdownMenu.Label>
+		<DropdownMenu.Label class="flex justify-between items-center">
+			<p>Notifications</p>
+			<Button variant="ghost" onclick={selectAll} disabled={unreadCount == 0}>Read All</Button>
+		</DropdownMenu.Label>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Group>
 			<ScrollArea class="h-96 w-72 rounded-md ">

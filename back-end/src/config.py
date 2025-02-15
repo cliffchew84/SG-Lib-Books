@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     GC_LOCATION: str = "asia-southeast1"
     GC_QUEUE: str = ""
     GC_BACKEND_URI: str = ""
+    GC_FIREBASE_SA_DICT: dict = {}
 
     # Fill up setting properties using .env
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
