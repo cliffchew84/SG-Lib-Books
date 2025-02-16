@@ -14,10 +14,10 @@ def get_newly_available_books(
     # Create a dictionary for quick lookup of old book availabilities by ItemNo
     old_avail_dict = {book.ItemNo: book for book in old_book_avails}
 
-    newly_available_books = []
+    newly_available_books: list[BookAvailCreate] = []
 
     for new_book in new_book_avails:
-        old_book = old_avail_dict.get(new_book.ItemNo)
+        old_book = old_avail_dict.get(new_book.ItemNo, None)
         # Check if the book is newly available or doesn't exist in the old list
         if old_book is None or (
             old_book.StatusDesc != "Available" and new_book.StatusDesc == "Available"
