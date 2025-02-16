@@ -14,7 +14,7 @@ async def get_libraries(
     db: SDBDep,
 ) -> list[LibraryResponse]:
     """Get all libraries in the database and whether is library favourite"""
-    if not getattr(user, "email", None):
+    if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -42,7 +42,7 @@ async def get_library(
     user: CurrentUser,
     db: SDBDep,
 ) -> Library:
-    if not getattr(user, "email", None):
+    if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -71,7 +71,7 @@ async def favourite_library(
     db: SDBDep,
     user: CurrentUser,
 ) -> None:
-    if not getattr(user, "email", None):
+    if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -89,7 +89,7 @@ async def favourite_library(
 
 @router.delete("/{name}")
 async def unfavourite_library(name: str, db: SDBDep, user: CurrentUser):
-    if not getattr(user, "email", None):
+    if not user or not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
