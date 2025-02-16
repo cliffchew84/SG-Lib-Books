@@ -19,8 +19,10 @@ async def get_libraries(
 
     try:
         libraries = await library_crud.get_all(db)
-        libraries_fav = await library_crud.get_multi_by_owner(db, email=user.email)
-        favourite = {lib.name for lib in libraries_fav} if libraries_fav else {}
+        libraries_fav: list[Library] = await library_crud.get_multi_by_owner(
+            db, email=user.email
+        )
+        favourite = {lib.name for lib in libraries_fav}
         return [
             LibraryResponse(**lib.model_dump(), isFavourite=lib.name in favourite)
             for lib in libraries
