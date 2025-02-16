@@ -20,14 +20,9 @@ async def get_book_subscription(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
-        book_subscription = await book_subscription_crud.get_all_by_bid(
-            db, bid=bid, email=user.email
-        )
-        if book_subscription is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Book subscription not found",
-            )
+        book_subscription: list[
+            BookSubscription
+        ] = await book_subscription_crud.get_all_by_bid(db, bid=bid, email=user.email)
         return book_subscription
     except Exception as e:
         raise HTTPException(
