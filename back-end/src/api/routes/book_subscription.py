@@ -23,6 +23,11 @@ async def get_book_subscription(
         book_subscription: list[
             BookSubscription
         ] = await book_subscription_crud.get_all_by_bid(db, bid=bid, email=user.email)
+        if not book_subscription:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Book subscription not found",
+            )
         return book_subscription
     except Exception as e:
         raise HTTPException(
