@@ -15,7 +15,7 @@ async def register_token(
     user: CurrentUser,
 ) -> NotificationToken:
     """Register a new notification token, checking for duplicates."""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -42,7 +42,7 @@ async def cleanup_old_tokens(
     user: CurrentUser,
 ) -> None:
     """Remove notification tokens older than 30 days."""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -68,7 +68,7 @@ async def deregister_token(
     user: CurrentUser,
 ) -> None:
     """Deregister a notification token based on the given token."""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:

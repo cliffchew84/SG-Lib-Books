@@ -37,7 +37,7 @@ async def get_books(
     db: SDBDep,
 ) -> list[BookResponse]:
     """Get all books that user marked as favourite"""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -64,7 +64,7 @@ async def get_books(
 async def get_book(
     bid: int, user: CurrentUser, db: SDBDep, nlb: NLBClientDep, live: bool = False
 ) -> BookResponse:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     book_saved = True  # Book was saved before in database
@@ -106,11 +106,9 @@ async def get_book(
             response_avail = await get_get_availability_info.asyncio_detailed(
                 client=nlb, brn=bid
             )
-            if (
-                not isinstance(
-                    response_avail.parsed, GetAvailabilityInfoResponseV2
-                )  # ErrorResponse
-            ):
+            if not isinstance(
+                response_avail.parsed, GetAvailabilityInfoResponseV2
+            ):  # ErrorResponse
                 if response_avail.status_code == 429:
                     raise HTTPException(
                         status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
@@ -151,7 +149,7 @@ async def like_book(
     nlb: NLBClientDep,
     user: CurrentUser,
 ) -> BookResponse:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     # Makes API to bk info and bk avail
@@ -359,7 +357,7 @@ async def update_books(
 async def update_book(
     bid: int, db: SDBDep, nlb: NLBClientDep, user: CurrentUser, messaging: MessagingDep
 ) -> list[BookAvail]:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     book_avail = await update_book_avail(db, nlb, messaging, bid)
@@ -368,7 +366,7 @@ async def update_book(
 
 @router.delete("/{bid}")
 async def unlike_book(bid: int, db: SDBDep, user: CurrentUser):
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     bid_no = str(bid)

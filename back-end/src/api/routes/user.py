@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("")
 async def read_user(db: SDBDep, user: CurrentUser) -> User:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     user_model = await user_crud.get(db, i=user.email)
@@ -27,7 +27,7 @@ async def update_user(
     user: CurrentUser,
     user_update: UserUpdate,
 ) -> User:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     # Do not allow to update email
@@ -48,7 +48,7 @@ async def update_user(
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(db: SDBDep, user: CurrentUser, client: SDBDep):
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:

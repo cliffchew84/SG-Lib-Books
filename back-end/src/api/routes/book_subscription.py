@@ -16,7 +16,7 @@ async def get_book_subscription(
     bid: str, db: SDBDep, user: CurrentUser
 ) -> list[BookSubscription]:
     """Get all book_subscription belonged to bid"""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -41,7 +41,7 @@ async def create_book_subscriptions(
     book_subscriptions: list[BookSubscriptionCreate], db: SDBDep, user: CurrentUser
 ) -> list[BookSubscription]:
     """Create a new book_subscription"""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     subscriptions_created = []
@@ -64,7 +64,7 @@ async def update_book_subscription(
     id: str, book_subscription: BookSubscriptionUpdate, db: SDBDep, user: CurrentUser
 ) -> BookSubscription:
     """Update a book_subscription"""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
     try:
         return await book_subscription_crud.update(db, obj_in=book_subscription, i=id)
@@ -80,7 +80,7 @@ async def delete_book_subscription(
     id: int, db: SDBDep, user: CurrentUser
 ) -> BookSubscription:
     """Delete a book_subscription"""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     book_subscription = await book_subscription_crud.get(db, i=str(id))

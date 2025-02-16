@@ -13,7 +13,7 @@ async def get_notifications(
     db: SDBDep,
 ) -> list[Notification]:
     """Get all libraries in the database and whether is library favourite"""
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -33,7 +33,7 @@ async def read_notification(
     db: SDBDep,
     user: CurrentUser,
 ) -> None:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
@@ -69,7 +69,7 @@ async def unread_notification(
     db: SDBDep,
     user: CurrentUser,
 ) -> None:
-    if not user or not user.email:
+    if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
     try:
