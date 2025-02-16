@@ -39,7 +39,7 @@ async def create_book_subscriptions(
     if not getattr(user, "email", None):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email is not found for user")
 
-    subscriptions_created = []
+    subscriptions_created: list[BookSubscription] = []
     for book_subscription in book_subscriptions:
         # Ensure that the email is the same as the user's email
         book_subscription.email = user.email

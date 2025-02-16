@@ -336,7 +336,7 @@ async def update_books(
         )
         print("Created new google cloud task")
 
-    fail_bid = []
+    fail_bid: list[int] = []
     # TODO: Do limiting on database side instead
     for book in outdated_books[:query_per_min]:
         try:
