@@ -1,7 +1,6 @@
 import re
 import time
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status
 from nlb_catalogue_client.models.bad_request_error import BadRequestError
@@ -29,8 +28,8 @@ async def search_books(
     nlb: NLBClientDep,
     user: CurrentUser,
     keyword: str = "",
-    offset: Optional[int] = 0,
-    limit: Optional[int] = 25,
+    offset: int = 0,
+    limit: int = 25,
 ) -> SearchResponse:
     """Calls NLB API GetTitles Search and show results
     in search_table.html

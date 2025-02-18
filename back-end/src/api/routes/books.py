@@ -106,11 +106,9 @@ async def get_book(
             response_avail = await get_get_availability_info.asyncio_detailed(
                 client=nlb, brn=bid
             )
-            if (
-                not isinstance(
-                    response_avail.parsed, GetAvailabilityInfoResponseV2
-                )  # ErrorResponse
-            ):
+            if not isinstance(
+                response_avail.parsed, GetAvailabilityInfoResponseV2
+            ):  # ErrorResponse
                 if response_avail.status_code == 429:
                     raise HTTPException(
                         status.HTTP_429_TOO_MANY_REQUESTS, "Rate limited by NLB API"
@@ -338,7 +336,7 @@ async def update_books(
         )
         print("Created new google cloud task")
 
-    fail_bid = []
+    fail_bid: list[int] = []
     # TODO: Do limiting on database side instead
     for book in outdated_books[:query_per_min]:
         try:

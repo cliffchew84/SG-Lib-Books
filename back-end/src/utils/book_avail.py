@@ -14,7 +14,7 @@ def get_newly_available_books(
     # Create a dictionary for quick lookup of old book availabilities by ItemNo
     old_avail_dict = {book.ItemNo: book for book in old_book_avails}
 
-    newly_available_books = []
+    newly_available_books: list[BookAvailCreate] = []
 
     for new_book in new_book_avails:
         old_book = old_avail_dict.get(new_book.ItemNo)
