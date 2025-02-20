@@ -22,4 +22,15 @@ export default {
     shorthand: true,
   },
   prettify: true,
+  books: [
+    {
+      BID: "{BID}",
+      TitleName: '{TitleName}',
+      Author: '{Author}',
+      cover_url: '{cover_url}',
+      url: '{url}',
+      BranchName: ['{BranchName}'],
+    },
+  ],
+  email: "{email}"
 }
