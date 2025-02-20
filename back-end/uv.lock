@@ -877,6 +877,18 @@ wheels = [
 ]
 
 [[package]]
+name = "mailersend"
+version = "0.5.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d5/df/279929bfa8239799b16cdf39045d0ff5598cedcc4ff81d420b71cec4f069/mailersend-0.5.8.tar.gz", hash = "sha256:c96d196278d5771346563d56b54b83b9290ca32768a451aed8f3dabd6b0ae1b8", size = 22214 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/14/e9/2f1b8da6049569aa3b1fe4a0e1c4f250d197c9c55aba45adb641684ff087/mailersend-0.5.8-py3-none-any.whl", hash = "sha256:24292c10ad180570ed76e90b4e7daede5d9cd98713860206a540f1ff900258fe", size = 26370 },
+]
+
+[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1484,6 +1496,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "firebase-admin" },
     { name = "google-cloud-tasks" },
+    { name = "mailersend" },
     { name = "nlb-catalogue-client" },
     { name = "pydantic-settings" },
     { name = "supabase" },
@@ -1500,6 +1513,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.4" },
     { name = "firebase-admin", specifier = ">=6.6.0" },
     { name = "google-cloud-tasks", specifier = ">=2.18.0" },
+    { name = "mailersend", specifier = ">=0.5.8" },
     { name = "nlb-catalogue-client", specifier = ">=0.1.3" },
     { name = "pydantic-settings", specifier = ">=2.6.1" },
     { name = "supabase", specifier = ">=2.10.0" },
