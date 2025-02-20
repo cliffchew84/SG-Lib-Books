@@ -2,7 +2,7 @@
 FastAPI dependencies
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -46,7 +46,9 @@ reusable_oauth2 = OAuth2PasswordBearer(
 AccessTokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-async def get_current_user(access_token: AccessTokenDep) -> User | None:
+async def get_current_user(
+    access_token: AccessTokenDep,
+) -> User | Literal["super"] | None:
     """get current user from access_token and validate same time. Accept service_role token"""
     if not super_client:
         raise HTTPException(status_code=500, detail="Super client not initialized")
@@ -57,7 +59,7 @@ async def get_current_user(access_token: AccessTokenDep) -> User | None:
         )
 
     if access_token == settings.SUPABASE_KEY:
-        return None
+        return "super"
     try:
         user_rsp = super_client.auth.get_user(jwt=access_token)
     except AuthApiError as e:
