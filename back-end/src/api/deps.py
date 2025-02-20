@@ -14,6 +14,7 @@ from supabase import create_client, Client
 from src.config import settings
 from src.services.cloud_task import CloudTask
 from src.services.firebase_messaging import FirebaseMessaging
+from src.services.mailer import Mailer
 
 
 super_client: Client | None = None
@@ -108,3 +109,15 @@ def get_firebase_messaging():
 
 
 MessagingDep = Annotated[FirebaseMessaging, Depends(get_firebase_messaging)]
+
+
+def get_mailer():
+    """Return mailer client"""
+    yield Mailer(
+        api_key=settings.MAILERSEND_API_KEY,
+        sender_email=settings.MAILERSEND_EMAIL,
+        sender_name=settings.MAILERSEND_NAME,
+    )
+
+
+MailerDep = Annotated[Mailer, Depends(get_mailer)]
