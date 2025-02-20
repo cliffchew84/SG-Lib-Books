@@ -20,10 +20,16 @@
 
 ## Getting Started
 
-Run this command and follow the prompts:
+Run this command to start development workflow:
 
 ```bash
-npx create-maizzle
+npm run dev
+```
+
+To build for production, run:
+
+```bash
+npm run build
 ```
 
 ## Documentation
