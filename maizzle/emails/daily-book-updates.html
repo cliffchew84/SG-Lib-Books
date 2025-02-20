@@ -1,0 +1,68 @@
+---
+bodyClass: bg-slate-50
+preheader: Daily Book Updates
+---
+
+<x-main>
+  <div class="bg-slate-50 sm:px-4 font-inter">
+    <table align="center" class="m-0 mx-auto">
+      <tr>
+        <td class="w-[552px] max-w-full">
+          <x-spacer height="24px" />
+
+          <table class="w-full">
+            <tr>
+              <td class="py-6 px-9 sm:p-6 bg-white [border:1px_solid_theme(colors.slate.200)] rounded-lg">
+                <a href="https://sg-lib-books.web.app/" class="text-xl text-slate-900 no-underline tracking-tight">
+                  SG Lib Books
+                </a>
+
+                <x-spacer height="24px" />
+
+                <h1 class="m-0 mb-6 text-2xl/8 text-slate-800 font-semibold">
+                  Daily Book Arrivals
+                </h1>
+
+                <p class="m-0 mb-6 text-base/6 text-slate-600">
+                  The following books are now available to be borrowed! Do check them out before they are gone!
+                </p>
+
+                <table class="w-full">
+                  <each loop="book, index in page.books">
+                    <x-card TitleName="{{ book.TitleName }}" Author="{{ book.Author }}" cover_url="{{ book.cover_url }}" url="{{ book.url }}" BranchName="{{ book.BranchName }}" />
+                  </each>
+                </table>
+
+                <x-spacer height="24px" />
+
+                <x-button
+                  href="https://sg-lib-books.web.app/dashboard"
+                  class="bg-slate-950 hover:bg-slate-800 mx-auto"
+                  align="center"
+                >
+                  Checkout More Books
+                </x-button>
+
+                <x-divider />
+
+                <p class="m-0 text-xs/5 text-slate-600 mso-break-all">
+                  This message was sent to {{ page.email }}. Please remember you can always go to your <a href="https://sg-lib-books.web.app/dashboard/settings" class="text-slate-900">Account Settings</a> page to adjust your account and contact info, privacy controls and email preferences.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <table class="w-full">
+            <tr>
+              <td class="py-6 px-9 sm:px-6">
+                <p class="m-0 text-xs text-slate-500">
+                  &copy; {{ new Date().getFullYear() }} SG Lib Books . All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+</x-main>

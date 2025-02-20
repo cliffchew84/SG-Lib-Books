@@ -1,0 +1,35 @@
+<script props>
+  module.exports = {
+    TitleName: props.TitleName || 'Unknown Title',
+    Author: props.Author || 'Unknown Author',
+    cover_url: props.cover_url || 'https://placehold.co/150x200',
+    url: props.url || 'https://sg-lib-books.web.app/dashboard/',
+    BranchName: props.BranchName || ['No Available Branch'],
+  }
+</script>
+
+<tr class="rounded-lg shadow border-slate-400">
+  <td class="w-[150px] p-6">
+    <a href="{{ url }}">
+      <img src="{{ cover_url }}" alt="{{ TitleName }}" class="rounded-lg" />
+    </a>
+  </td>
+
+  <td class="py-6 pr-3 text-sm">
+    <a href="{{ url }}"
+			<h3
+				class="text-ellipsis overflow-hidden whitespace-nowrap text-slate-700 font-semibold text-lg mb-3"
+			>
+        {{ TitleName }}
+      </h3>
+    </a>
+    <p class="text-sm text-slate-500">By {{ Author }}</p>
+    <p class="text-sm text-slate-500">Available at:</p>
+    <ul class="space-y-1 text-slate-500">
+      <each loop="branchName, index in BranchName">
+        <li>{{ branchName }}</li>
+      </each>
+    </ul>
+  </td>
+</tr>
+
