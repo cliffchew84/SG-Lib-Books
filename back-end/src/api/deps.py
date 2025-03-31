@@ -77,33 +77,46 @@ async def get_current_user(
 CurrentUser = Annotated[User | None, Depends(get_current_user)]
 
 
-def get_nlb_api_client():
-    """Return an authenticated client to access NLB API using one of the non‐expired API keys."""
+def get_nlb_api_clients():
+    "Return list of authenticated clients to access NLB API using all the API keys."
     # Filter to only include API keys that haven’t expired.
     available_keys = [
         key
         for key in settings.nlb_api_keys
         if key.expires_at.replace(tzinfo=timezone.utc) > datetime.now(timezone.utc)
     ]
+
     if not available_keys:
         print("No available API keys at this time.")
         raise HTTPException(
             status_code=503, detail="No available API keys at this time."
         )
 
-    selected_key = random.choice(available_keys)
-    print(f"Using API key: {selected_key.app_id}")
+    yield [
+        AuthenticatedClient(
+            base_url="https://openweb.nlb.gov.sg/api/v2/Catalogue/",
+            auth_header_name="X-API-KEY",
+            token=key.api_key,
+            prefix="",
+            headers={"X-APP-Code": key.app_id},
+        )
+        for key in available_keys
+    ]
 
-    yield AuthenticatedClient(
-        base_url="https://openweb.nlb.gov.sg/api/v2/Catalogue/",
-        auth_header_name="X-API-KEY",
-        token=selected_key.api_key,
-        prefix="",
-        headers={"X-APP-Code": selected_key.app_id},
-    )
+
+NLBClientsDep = Annotated[list[AuthenticatedClient], Depends(get_nlb_api_clients)]
 
 
-NLBClientDep = Annotated[AuthenticatedClient, Depends(get_nlb_api_client)]
+def select_nlb_client(api_clients: NLBClientsDep):
+    """Randomly select an authenticated client to access NLB API"""
+
+    api_client = random.choice(api_clients)
+    print(f"Using API key: {api_client._headers.get('X-APP-Code')}")
+
+    yield api_client
+
+
+NLBClientDep = Annotated[AuthenticatedClient, Depends(select_nlb_client)]
 
 
 # External Services
