@@ -1,4 +1,3 @@
-from asyncio import sleep
 from fastapi import APIRouter, status, HTTPException
 from google.cloud import tasks_v2
 from nlb_catalogue_client.api.catalogue import (
@@ -12,7 +11,14 @@ from nlb_catalogue_client.models.get_title_details_response_v2 import (
     GetTitleDetailsResponseV2,
 )
 
-from src.api.deps import CloudTaskDep, SDBDep, CurrentUser, NLBClientDep, MessagingDep
+from src.api.deps import (
+    CloudTaskDep,
+    SDBDep,
+    CurrentUser,
+    NLBClientDep,
+    NLBClientsDep,
+    MessagingDep,
+)
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
 from src.crud.book_outdated_bid import book_outdated_bid_crud
@@ -332,47 +338,49 @@ async def update_book_avail(
 @router.put("", status_code=status.HTTP_204_NO_CONTENT)
 async def update_books(
     db: SDBDep,
-    nlb: NLBClientDep,
+    nlbs: NLBClientsDep,
     user: CurrentUser,
     task: CloudTaskDep,
     messaging: MessagingDep,
-    query_per_min: int = 15,
+    query_per_key: int = 15,
     recurse: bool = False,
 ):
     """Updates availability of all saved books"""
+
     if user != "super" and user is not None:
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
-            "Only service account can trigger this endpoint",
+            "Only service account can Update all books",
         )
 
     outdated_books = await book_outdated_bid_crud.get_all(db)
-    if outdated_books and recurse:
+
+    fail_bid: list[int] = []
+    for i, nlb in enumerate(nlbs):
+        for book in outdated_books[i * query_per_key : (i + 1) * query_per_key]:
+            try:
+                await update_book_avail(db, nlb, messaging, book.BID)
+                print(f"Updated book BID: {book.BID}")
+            except Exception as e:
+                if isinstance(e, HTTPException):
+                    if e.status_code == 404:
+                        # delete book avail from DB if no records was found on book
+                        await book_avail_crud.delete_by_bid(db, bid=book.BID)
+
+                print(f"Update fail for BID:{book.BID}: Error {e}")
+                fail_bid.append(book.BID)
+    print(f"Failed to update {len(fail_bid)} books")
+
+    if outdated_books[len(nlbs) * query_per_key :] and recurse:
         # Schedule task for recursive update every 1 minute
         task.create_task(
             http_method=tasks_v2.HttpMethod.PUT,
             path="/books",
             body={},
-            query=dict(query_per_min=query_per_min, recurse=recurse),
-            scheduled_seconds_from_now=40,
+            query=dict(query_per_key=query_per_key, recurse=recurse),
+            scheduled_seconds_from_now=0,
         )
         print("Created new google cloud task")
-
-    fail_bid: list[int] = []
-    # TODO: Do limiting on database side instead
-    for book in outdated_books[:query_per_min]:
-        try:
-            await update_book_avail(db, nlb, messaging, book.BID)
-            print(f"Updated book BID: {book.BID}")
-            await sleep(1)  # To comply 1 request per second rate-limit
-        except Exception as e:
-            if isinstance(e, HTTPException):
-                if e.status_code == 404:
-                    # delete book avail from DB if no records was found on book
-                    await book_avail_crud.delete_by_bid(db, bid=book.BID)
-
-            print(f"Update fail for BID:{book.BID}: Error {e}")
-            fail_bid.append(book.BID)
 
 
 @router.put("/{bid}")
