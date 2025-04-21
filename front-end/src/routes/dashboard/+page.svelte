@@ -22,9 +22,9 @@
 		<h1 class="text-4xl font-bold text-slate-700 text-center">Welcome to SG Lib Books</h1>
 		<p class="text-base text-slate-600 text-center max-w-xl">
 			Thank you for your patience!<br />
-			<span class="font-semibold">Our server is starting up</span> due to inactivity.<br />
-			This may take a few seconds as our backend "wakes up" from sleep.<br />
-			Once ready, you'll be redirected to your library dashboard.
+			<span class="font-semibold">We're getting things ready for you.</span><br />
+			Sometimes it takes a little longer for our service to start, especially if it hasn't been used in a while.<br />
+			You'll be redirected to your library dashboard as soon as everything is ready.
 		</p>
 		<div class="flex flex-col items-center justify-center mt-6">
 			<LoaderCircle class="m-4 h-10 w-10 animate-spin text-blue-500" />
