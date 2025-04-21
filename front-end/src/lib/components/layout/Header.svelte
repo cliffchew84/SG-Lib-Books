@@ -61,7 +61,7 @@
 </script>
 
 <header class="flex flex-row justify-between p-2 border shadow items-center min-h-14">
-	<a href="/"
+	<a href="/" class="min-w-32"
 		>SG Lib Books
 		<span class="text-[0.5em]">BETA</span>
 	</a>
@@ -86,7 +86,7 @@
 			</Button>
 		</nav>
 
-		<div class="flex gap-3">
+		<div class="flex gap-3 min-w-32 justify-end">
 			<NotificationDropdown
 				bind:menuOpen={isNotificationOpen}
 				notifications={$notificationStore}
