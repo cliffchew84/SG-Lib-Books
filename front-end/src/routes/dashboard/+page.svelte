@@ -21,10 +21,8 @@
 	<div class="flex flex-col gap-3 items-center">
 		<h1 class="text-4xl font-bold text-slate-700 text-center">Welcome to SG Lib Books</h1>
 		<p class="text-base text-slate-600 text-center max-w-xl">
-			Thank you for your patience!<br />
-			<span class="font-semibold">We're getting things ready for you.</span><br />
-			Sometimes it takes a little longer for our service to start, especially if it hasn't been used in a while.<br />
-			You'll be redirected to your library dashboard as soon as everything is ready.
+			<span class="font-semibold">Just a moment…</span><br />
+			Our service is starting up and you'll be redirected soon.
 		</p>
 		<div class="flex flex-col items-center justify-center mt-6">
 			<LoaderCircle class="m-4 h-10 w-10 animate-spin text-blue-500" />
