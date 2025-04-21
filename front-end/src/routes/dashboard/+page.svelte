@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { isLoading } from '$lib/stores';
 
+	// Redirect to library page after page load is completed
 	$effect(() => {
 		if (!$isLoading) {
 			goto('/dashboard/library');
