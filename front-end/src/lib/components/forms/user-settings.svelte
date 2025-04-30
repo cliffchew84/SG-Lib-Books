@@ -4,9 +4,13 @@
 	export const profileFormSchema = z.object({
 		username: z
 			.string()
-			.min(2, 'Username must be at least 2 characters.')
-			.max(30, 'Username must not be longer than 30 characters')
-			.optional(),
+			.refine((username) => username.length !== 1, {
+				message: 'Username must be at least 2 characters.'
+			})
+			.refine((username) => username.length <= 30, {
+				message: 'Username must not be longer than 30 characters.'
+			})
+			.nullish(),
 		email: z.string({ required_error: 'Please select an email to display' }).email(),
 		notification_type: z.enum(['all_notif', 'book_updates_only', 'no_notif']),
 		channel_push: z.boolean().default(true),

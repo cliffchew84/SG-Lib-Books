@@ -8,7 +8,7 @@ export interface User {
 
 export interface UserUpdate {
 	email: string;
-	username?: string;
+	username?: string | null;
 	channel_push?: boolean;
 	channel_email?: boolean;
 	notification_type?: 'all_notif' | 'book_updates_only' | 'no_notif';
