@@ -8,12 +8,12 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import NotificationDropdown from '$lib/components/layout/NotificationDropdown.svelte';
 	import type BackendAPIClient from '$lib/api/client';
-	import { registerToken } from '$lib/api/notification_tokens';
-	import requestToken from '$lib/notification'; // Firebase FCM to handle realtime notifications
+	// import { registerToken } from '$lib/api/notification_tokens';
+	// import requestToken from '$lib/notification'; // Firebase FCM to handle realtime notifications
 	import {
 		fetchNotifications,
 		notificationStore,
-		notificationToken,
+		// notificationToken,
 		refreshNotification,
 		readAllNotification
 	} from '$lib/stores/notification';
@@ -26,22 +26,22 @@
 	let username: string = $derived(getInitials(user?.user_metadata.name || 'User'));
 
 	// Request permission for notifications
-	$effect(() => {
-		(async () => {
-			if (isLoggedIn) {
-				const token = await requestToken();
-				notificationToken.set(typeof token === 'string' ? token : null);
-				if (token !== undefined && client !== undefined) {
-					try {
-						await registerToken(client, token);
-					} catch (error) {
-						console.error(error);
-						toast.warning('Failed to register notification token');
-					}
-				}
-			}
-		})();
-	});
+	// $effect(() => {
+	// 	(async () => {
+	// 		if (isLoggedIn) {
+	// 			const token = await requestToken();
+	// 			notificationToken.set(typeof token === 'string' ? token : null);
+	// 			if (token !== undefined && client !== undefined) {
+	// 				try {
+	// 					await registerToken(client, token);
+	// 				} catch (error) {
+	// 					console.error(error);
+	// 					toast.warning('Failed to register notification token');
+	// 				}
+	// 			}
+	// 		}
+	// 	})();
+	// });
 
 	$effect(() => {
 		(async () => {
