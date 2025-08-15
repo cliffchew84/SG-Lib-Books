@@ -1,8 +1,6 @@
-from collections import defaultdict
-
 import asyncio
+
 from fastapi import APIRouter, status, HTTPException
-from google.cloud import tasks_v2
 from nlb_catalogue_client.api.catalogue import (
     get_get_availability_info,
     get_get_title_details,
@@ -15,7 +13,6 @@ from nlb_catalogue_client.models.get_title_details_response_v2 import (
 )
 
 from src.api.deps import (
-    CloudTaskDep,
     SDBDep,
     CurrentUser,
     NLBClientDep,
