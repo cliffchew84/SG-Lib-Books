@@ -344,7 +344,6 @@ async def update_books(
     db: SDBDep,
     nlbs: NLBClientsDep,
     user: CurrentUser,
-    task: CloudTaskDep,
     messaging: MessagingDep,
 ):
     """Updates availability of all saved books"""
