@@ -393,7 +393,7 @@ async def update_books(
     for i, book in enumerate(outdated_books):
         nlb = nlbs[i % num_nlbs]
         print(
-            f"Updating book BID: {book.BID} with NLB {nlb._headers.get('X-APP-Code')})"
+            f"Updating book BID: {book.BID} with NLB ({nlb._headers.get('X-APP-Code')})"
         )
         update_tasks.append(update_with_retries(book.BID, nlb))
 
