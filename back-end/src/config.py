@@ -59,6 +59,8 @@ class Settings(BaseSettings):
     MAILERSEND_EMAIL: str = ""
     MAILERSEND_NAME: str = "SG Lib Books"
 
+    MAX_UPDATE_ATTEMPTS: int = 3
+
     # Fill up setting properties using .env
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
