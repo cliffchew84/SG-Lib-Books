@@ -1,5 +1,6 @@
+import asyncio
+
 from fastapi import APIRouter, status, HTTPException
-from google.cloud import tasks_v2
 from nlb_catalogue_client.api.catalogue import (
     get_get_availability_info,
     get_get_title_details,
@@ -12,13 +13,13 @@ from nlb_catalogue_client.models.get_title_details_response_v2 import (
 )
 
 from src.api.deps import (
-    CloudTaskDep,
     SDBDep,
     CurrentUser,
     NLBClientDep,
     NLBClientsDep,
     MessagingDep,
 )
+from src.config import settings
 from src.crud.book_avail import book_avail_crud
 from src.crud.book_info import book_info_crud
 from src.crud.book_outdated_bid import book_outdated_bid_crud
@@ -340,10 +341,7 @@ async def update_books(
     db: SDBDep,
     nlbs: NLBClientsDep,
     user: CurrentUser,
-    task: CloudTaskDep,
     messaging: MessagingDep,
-    query_per_key: int = 15,
-    recurse: bool = False,
 ):
     """Updates availability of all saved books"""
 
@@ -353,34 +351,70 @@ async def update_books(
             "Only service account can Update all books",
         )
 
+    # Get all outdated books
     outdated_books = await book_outdated_bid_crud.get_all(db)
+    num_nlbs = len(nlbs)
+    failed_bids = []
 
-    fail_bid: list[int] = []
-    for i, nlb in enumerate(nlbs):
-        for book in outdated_books[i * query_per_key : (i + 1) * query_per_key]:
-            try:
-                await update_book_avail(db, nlb, messaging, book.BID)
-                print(f"Updated book BID: {book.BID}")
-            except Exception as e:
-                if isinstance(e, HTTPException):
+    async def update_with_retries(
+        semaphore: asyncio.Semaphore,
+        bid: int,
+        nlb,
+        max_attempts=settings.MAX_UPDATE_ATTEMPTS,
+    ):
+        """Update book availability with retries."""
+        async with semaphore:
+            attempt = 0
+            while attempt < max_attempts:
+                try:
+                    await update_book_avail(db, nlb, messaging, bid)
+                    print(f"Updated book BID: {bid} (attempt {attempt + 1})")
+                    return True
+                except HTTPException as e:
                     if e.status_code == 404:
-                        # delete book avail from DB if no records was found on book
-                        await book_avail_crud.delete_by_bid(db, bid=book.BID)
+                        # No book record found at upstream, remove from ours
+                        await book_avail_crud.delete_by_bid(db, bid=bid)
+                        print(f"Deleted local BID: {bid} due to 404 at source.")
+                        return True
+                    if e.status_code == 429:
+                        print(f"Rate limited for BID:{bid}, retrying...")
+                    else:
+                        print(
+                            f"Update fail for BID:{bid} HTTPException {e.status_code} (attempt {attempt + 1})"
+                        )
+                except Exception as e:
+                    print(
+                        f"Update fail for BID:{bid}: Error {repr(e)} (attempt {attempt + 1})"
+                    )
+                attempt += 1
+                if attempt < max_attempts:
+                    # Sleep before retrying
+                    await asyncio.sleep(0.5)
+            return False  # Failed after all attempts
 
-                print(f"Update fail for BID:{book.BID}: Error {e}")
-                fail_bid.append(book.BID)
-    print(f"Failed to update {len(fail_bid)} books")
-
-    if outdated_books[len(nlbs) * query_per_key :] and recurse:
-        # Schedule task for recursive update every 1 minute
-        task.create_task(
-            http_method=tasks_v2.HttpMethod.PUT,
-            path="/books",
-            body={},
-            query=dict(query_per_key=query_per_key, recurse=recurse),
-            scheduled_seconds_from_now=0,
+    # Allocate each book to a different NLB client using round-robin
+    update_tasks = []
+    semaphore = asyncio.Semaphore(
+        settings.MAX_CONCURRENT_REQUESTS
+    )  # Prevent rate limiting by NLB
+    for i, book in enumerate(outdated_books):
+        nlb = nlbs[i % num_nlbs]
+        print(
+            f"Updating book BID: {book.BID} with NLB ({nlb._headers.get('X-APP-Code')})"
         )
-        print("Created new google cloud task")
+        update_tasks.append(update_with_retries(semaphore, book.BID, nlb))
+
+    # Run all update tasks concurrently
+    results = await asyncio.gather(*update_tasks)
+
+    # Collect failed bids (where result is False)
+    failed_bids = [
+        book.BID for book, success in zip(outdated_books, results) if not success
+    ]
+    if failed_bids:
+        print(f"Failed to update {len(failed_bids)} books: {failed_bids}")
+    else:
+        print("All books updated successfully.")
 
 
 @router.put("/{bid}")
