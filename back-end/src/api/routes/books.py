@@ -394,7 +394,9 @@ async def update_books(
 
     # Allocate each book to a different NLB client using round-robin
     update_tasks = []
-    semaphore = asyncio.Semaphore(16)  # Prevent rate limiting by NLB
+    semaphore = asyncio.Semaphore(
+        settings.MAX_CONCURRENT_REQUESTS
+    )  # Prevent rate limiting by NLB
     for i, book in enumerate(outdated_books):
         nlb = nlbs[i % num_nlbs]
         print(
